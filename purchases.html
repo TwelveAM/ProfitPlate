@@ -339,41 +339,10 @@
                   <th style="padding: 10px 12px;">Actions</th>
                 </tr>
               </thead>
-              <tbody>
-                <tr>
-                  <td style="padding: 9px 12px;">Butter 82%</td>
-                  <td style="padding: 9px 12px;">Dairy &amp; Eggs</td>
-                  <td style="padding: 9px 12px;">Butter</td>
-                  <td style="padding: 9px 12px;">kg</td>
-                  <td style="padding: 9px 12px;">6.40 €/kg</td>
-                  <td style="padding: 9px 12px;">2 hours ago</td>
-                  <td style="padding: 9px 12px;">
-                    <button class="btn-secondary">Edit</button>
-                  </td>
-                </tr>
-                <tr>
-                  <td style="padding: 9px 12px;">Pancetta cubetti</td>
-                  <td style="padding: 9px 12px;">Meat &amp; Fish</td>
-                  <td style="padding: 9px 12px;">Smoked</td>
-                  <td style="padding: 9px 12px;">kg</td>
-                  <td style="padding: 9px 12px;">10.20 €/kg</td>
-                  <td style="padding: 9px 12px;">3 days ago</td>
-                  <td style="padding: 9px 12px;">
-                    <button class="btn-secondary">Edit</button>
-                  </td>
-                </tr>
-                <tr>
-                  <td style="padding: 9px 12px;">Frozen fries</td>
-                  <td style="padding: 9px 12px;">Vegetables &amp; Fruit</td>
-                  <td style="padding: 9px 12px;">Frozen</td>
-                  <td style="padding: 9px 12px;">2.5kg bag</td>
-                  <td style="padding: 9px 12px;">4.20 €/bag</td>
-                  <td style="padding: 9px 12px;">5 days ago</td>
-                  <td style="padding: 9px 12px;">
-                    <button class="btn-secondary">Edit</button>
-                  </td>
-                </tr>
-              </tbody>
+              <tbody id="purchases-tbody">
+  <!-- JS will render purchases here -->
+</tbody>
+
             </table>
           </div>
         </section>
@@ -384,8 +353,10 @@
         not store data yet — the next step is wiring it to real storage.
       </div>
     </div>
+    
+    <script src="assets/app.js"></script>
 
-        <!-- Tiny brain: filters + form helpers -->
+    <!-- Purchases page logic -->
     <script>
       // Category -> sub-types for filters AND form
       const categorySubtypes = {
@@ -404,10 +375,59 @@
       const addFormSubtype = document.getElementById("item-subtype");
       const purchaseForm = document.getElementById("purchase-form");
       const addItemFormSection = document.getElementById("add-item-form");
+      const tbody = document.getElementById("purchases-tbody");
 
       let currentCategory = null;
       let addFormVisible = false;
+      let editingId = null; // null = add mode, set = edit mode
 
+      function formatDateShort(iso) {
+        if (!iso) return "";
+        try {
+          return iso.slice(0, 10);
+        } catch {
+          return "";
+        }
+      }
+
+      function renderPurchasesTable() {
+        tbody.innerHTML = "";
+
+        if (!ppData.purchases.length) {
+          tbody.innerHTML = `
+            <tr>
+              <td colspan="7" style="padding: 10px 12px; color:#666;">
+                No purchases yet. Use "Add item manually" to add your first ingredient.
+              </td>
+            </tr>
+          `;
+          return;
+        }
+
+        ppData.purchases.forEach((p) => {
+          const tr = document.createElement("tr");
+          const priceLabel =
+            (p.pricePerUnit ?? 0).toFixed(2) + " €/" + (p.unit || "unit");
+
+          tr.innerHTML = `
+            <td style="padding: 9px 12px;">${p.name}</td>
+            <td style="padding: 9px 12px;">${p.category || ""}</td>
+            <td style="padding: 9px 12px;">${p.subtype || ""}</td>
+            <td style="padding: 9px 12px;">${p.unit || ""}</td>
+            <td style="padding: 9px 12px;">${priceLabel}</td>
+            <td style="padding: 9px 12px;">${formatDateShort(p.updatedAt)}</td>
+            <td style="padding: 9px 12px;">
+              <button class="btn-secondary" type="button"
+                onclick="startEditPurchase('${p.id}')">
+                Edit
+              </button>
+            </td>
+          `;
+          tbody.appendChild(tr);
+        });
+      }
+
+      // Category chips behaviour
       function renderSubtypes(categoryKey) {
         const subtypes = categorySubtypes[categoryKey] || [];
 
@@ -429,7 +449,6 @@
         });
       }
 
-      // handle category chips (filters) with toggle behaviour
       categoryRow.addEventListener("click", (event) => {
         const btn = event.target.closest(".filter-pill");
         if (!btn) return;
@@ -458,17 +477,22 @@
         renderSubtypes(categoryKey);
       });
 
-      // toggle Add item form visibility (no auto-scroll)
+      // Toggle Add item form (no auto-scroll)
       function toggleAddForm() {
         addFormVisible = !addFormVisible;
-        if (addFormVisible) {
-          addItemFormSection.style.display = "block";
-        } else {
-          addItemFormSection.style.display = "none";
+        addItemFormSection.style.display = addFormVisible ? "block" : "none";
+
+        if (!addFormVisible) {
+          // Reset editing state when closing
+          editingId = null;
+          purchaseForm.reset();
         }
       }
 
-      // populate sub-type select in form when category changes
+      // Expose toggle for the button onclick
+      window.toggleAddForm = toggleAddForm;
+
+      // Populate sub-type select in form when category changes
       addFormCategory.addEventListener("change", (e) => {
         const value = e.target.value;
         const subtypes = categorySubtypes[value] || [];
@@ -497,16 +521,100 @@
         });
       });
 
-      // prevent real submit for now (prototype only)
+      // Start editing an existing purchase
+      function startEditPurchase(id) {
+        const item = getPurchaseById(id);
+        if (!item) return;
+
+        editingId = id;
+        if (!addFormVisible) {
+          toggleAddForm();
+        }
+
+        document.getElementById("item-name").value = item.name || "";
+        document.getElementById("item-supplier").value = item.supplier || "";
+        document.getElementById("item-category").value = item.category || "";
+
+        // Trigger subtype population
+        const event = new Event("change");
+        addFormCategory.dispatchEvent(event);
+
+        document.getElementById("item-subtype").value = item.subtype || "";
+        document.getElementById("item-unit").value = item.unit || "";
+        document.getElementById("item-price").value =
+          item.pricePerUnit != null ? item.pricePerUnit : "";
+        document.getElementById("item-notes").value = item.notes || "";
+      }
+
+      // Expose to global so inline onclick can use it
+      window.startEditPurchase = startEditPurchase;
+
+      // Handle form submit (add or edit)
       purchaseForm.addEventListener("submit", (e) => {
         e.preventDefault();
-        alert(
-          "In the real app this would save the item.\nRight now it's just a visual prototype."
-        );
-      });
-            </script>
 
-    <script src="assets/app.js"></script>
+        const name = document.getElementById("item-name").value.trim();
+        const supplier = document.getElementById("item-supplier").value.trim();
+        const category = document.getElementById("item-category").value;
+        const subtype = document.getElementById("item-subtype").value;
+        const unit = document.getElementById("item-unit").value;
+        const price = parseFloat(
+          document.getElementById("item-price").value.replace(",", ".")
+        );
+        const notes = document.getElementById("item-notes").value.trim();
+
+        if (!name || !category || !unit || isNaN(price)) {
+          alert("Please fill name, category, unit and a valid price.");
+          return;
+        }
+
+        const now = new Date().toISOString();
+
+        if (editingId) {
+          // Update existing
+          const item = getPurchaseById(editingId);
+          if (item) {
+            item.name = name;
+            item.supplier = supplier;
+            item.category = category;
+            item.subtype = subtype;
+            item.unit = unit;
+            item.pricePerUnit = price;
+            item.notes = notes;
+            item.updatedAt = now;
+          }
+        } else {
+          // New item
+          const newId = "pur_" + Date.now();
+          const newItem = {
+            id: newId,
+            name,
+            category,
+            subtype,
+            unit,
+            pricePerUnit: price,
+            currency: ppData.settings?.currency || "EUR",
+            supplier,
+            notes,
+            updatedAt: now
+          };
+          addPurchaseItem(newItem);
+        }
+
+        // Make sure data is saved
+        saveData(ppData);
+        // Refresh table
+        renderPurchasesTable();
+
+        // Reset form and editing state
+        editingId = null;
+        purchaseForm.reset();
+        alert("Item saved (locally). Recipes will use the new price.");
+      });
+
+      // Initial render from stored data
+      renderPurchasesTable();
+    </script>
 
   </body>
 </html>
