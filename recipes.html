@@ -143,5 +143,88 @@
       </div>
     </div>
     <script src="assets/app.js"></script>
+    <script>
+  const container = document.getElementById("recipes-container");
+  const detailCard = document.getElementById("recipe-detail");
+  const detailName = document.getElementById("detail-name");
+  const detailIngredients = document.getElementById("detail-ingredients");
+  const summaryBox = document.getElementById("summary-box");
+
+  function renderRecipes() {
+    container.innerHTML = "";
+
+    if (!ppData.recipes.length) {
+      container.innerHTML = `<p style="color:#666;">No recipes yet.</p>`;
+      return;
+    }
+
+    ppData.recipes.forEach((recipe) => {
+      const costPerPortion = calculateCostPerPortion(recipe).toFixed(2);
+      const row = document.createElement("div");
+      row.className = "recipe-row";
+
+      row.innerHTML = `
+        <div>
+          <div class="recipe-name">${recipe.name}</div>
+          <div class="recipe-meta">
+            ${recipe.portions} portions per batch
+          </div>
+        </div>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span class="recipe-cost-badge">${costPerPortion} €/portion</span>
+          <button class="btn-secondary" type="button"
+            onclick="openRecipeDetail('${recipe.id}')">
+            View details
+          </button>
+        </div>
+      `;
+
+      container.appendChild(row);
+    });
+  }
+
+  function openRecipeDetail(id) {
+    const r = getRecipeById(id);
+    if (!r) return;
+
+    detailCard.style.display = "block";
+    detailName.textContent = r.name;
+
+    // Summary
+    const batchCost = calculateBatchCost(r).toFixed(2);
+    const cpp = calculateCostPerPortion(r).toFixed(2);
+
+    summaryBox.innerHTML = `
+      <span><strong>Batch size:</strong> ${r.portions} portions</span>
+      <span><strong>Total batch cost:</strong> ${batchCost} €</span>
+      <span><strong>Cost per portion:</strong> ${cpp} €</span>
+    `;
+
+    // Ingredients table
+    detailIngredients.innerHTML = "";
+
+    r.ingredients.forEach((ing) => {
+      const purchase = getPurchaseById(ing.purchaseId);
+      if (!purchase) return;
+
+      const cost = calculateIngredientCost(ing).toFixed(2);
+
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td style="padding:7px 10px;">${purchase.name}</td>
+        <td style="padding:7px 10px;">${purchase.category}</td>
+        <td style="padding:7px 10px;">${purchase.subtype}</td>
+        <td style="padding:7px 10px;">${ing.quantity}</td>
+        <td style="padding:7px 10px;">${ing.unit}</td>
+        <td style="padding:7px 10px;">${purchase.pricePerUnit} €/unit</td>
+        <td style="padding:7px 10px;">${cost} €</td>
+      `;
+      detailIngredients.appendChild(row);
+    });
+  }
+
+  // Load on page open
+  renderRecipes();
+</script>
   </body>
 </html>
