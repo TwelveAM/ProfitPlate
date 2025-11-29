@@ -60,12 +60,155 @@
         </section>
 
         <!-- Primary actions -->
-        <section class="hero-actions" style="margin-bottom: 20px;">
-          <button class="btn-primary">Add item manually</button>
-          <button class="btn-secondary">Upload invoice (AI, coming soon)</button>
+        <section class="hero-actions" style="margin-bottom: 16px;">
+          <button
+            class="btn-primary"
+            type="button"
+            onclick="scrollToAddForm()"
+          >
+            Add item manually
+          </button>
+          <button class="btn-secondary" type="button">
+            Upload invoice (AI, coming soon)
+          </button>
         </section>
 
-        <!-- Category filters (no 'All' button) -->
+        <!-- Add item form -->
+        <section id="add-item-form" class="form-card">
+          <div class="form-title-row">
+            <div class="form-title">Add a new purchase item</div>
+            <div class="form-hint">
+              Example: Butter 82% 1kg, Pancetta cubetti 1kg, Frozen fries 2.5kg.
+            </div>
+          </div>
+
+          <form id="purchase-form">
+            <div class="form-row">
+              <div class="form-field" style="flex: 2;">
+                <label class="form-label" for="item-name">Name</label>
+                <input
+                  class="form-input"
+                  id="item-name"
+                  name="name"
+                  type="text"
+                  placeholder="e.g. Pancetta cubetti 1kg"
+                  required
+                />
+              </div>
+              <div class="form-field">
+                <label class="form-label" for="item-supplier">Supplier</label>
+                <input
+                  class="form-input"
+                  id="item-supplier"
+                  name="supplier"
+                  type="text"
+                  placeholder="e.g. Metro, Carrefour"
+                />
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-field">
+                <label class="form-label" for="item-category">Category</label>
+                <select
+                  class="form-select"
+                  id="item-category"
+                  name="category"
+                  required
+                >
+                  <option value="">Select...</option>
+                  <option value="Meat & Fish">Meat &amp; Fish</option>
+                  <option value="Dairy & Eggs">Dairy &amp; Eggs</option>
+                  <option value="Vegetables & Fruit">
+                    Vegetables &amp; Fruit
+                  </option>
+                  <option value="Dry Goods">Dry Goods</option>
+                  <option value="Spices & Condiments">
+                    Spices &amp; Condiments
+                  </option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+
+              <div class="form-field">
+                <label class="form-label" for="item-subtype">Sub-type</label>
+                <select
+                  class="form-select"
+                  id="item-subtype"
+                  name="subtype"
+                  disabled
+                >
+                  <option value="">Select category first</option>
+                </select>
+              </div>
+
+              <div class="form-field">
+                <label class="form-label" for="item-unit">Unit</label>
+                <select
+                  class="form-select"
+                  id="item-unit"
+                  name="unit"
+                  required
+                >
+                  <option value="">Select...</option>
+                  <option value="kg">kg</option>
+                  <option value="g">g</option>
+                  <option value="L">L</option>
+                  <option value="ml">ml</option>
+                  <option value="pcs">pcs</option>
+                  <option value="tray">tray</option>
+                  <option value="bag">bag</option>
+                  <option value="box">box</option>
+                  <option value="other">other</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-field">
+                <label class="form-label" for="item-price">Purchase price</label>
+                <div style="display: flex; align-items: center; gap: 6px;">
+                  <input
+                    class="form-input"
+                    id="item-price"
+                    name="price"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    placeholder="e.g. 9.90"
+                    required
+                  />
+                  <span style="font-size: 13px; color: #555;">€/unit</span>
+                </div>
+              </div>
+              <div class="form-field">
+                <label class="form-label" for="item-notes">Notes (optional)</label>
+                <input
+                  class="form-input"
+                  id="item-notes"
+                  name="notes"
+                  type="text"
+                  placeholder="e.g. brand, fat %, packaging"
+                />
+              </div>
+            </div>
+
+            <div class="form-footer">
+              <button
+                type="button"
+                class="btn-ghost"
+                onclick="document.getElementById('purchase-form').reset();"
+              >
+                Clear
+              </button>
+              <button type="submit" class="btn-primary">
+                Save item (prototype)
+              </button>
+            </div>
+          </form>
+        </section>
+
+        <!-- Category filters -->
         <section class="filter-section">
           <div class="filter-label">Categories</div>
           <div class="filter-row" id="category-row">
@@ -233,15 +376,14 @@
       </main>
 
       <div class="bottom-strip" style="margin-top: 22px;">
-        This is a static prototype of the Purchases page. Next step: make
-        &ldquo;Add item&rdquo; and &ldquo;Edit&rdquo; open real forms and connect
-        to saved data.
+        This is a static prototype of the Purchases page. The form above does
+        not store data yet — the next step is wiring it to real storage.
       </div>
     </div>
 
-    <!-- Tiny brain: category -> sub-type behaviour with toggle -->
+    <!-- Tiny brain: filters + form helpers -->
     <script>
-      // Mapping from category -> sub-types
+      // Category -> sub-types for filters AND form
       const categorySubtypes = {
         "Meat & Fish": ["Fresh", "Frozen", "Smoked", "Raw", "Cured", "Seafood"],
         "Dairy & Eggs": ["Milk / Cream", "Butter", "Cheese", "Eggs"],
@@ -254,6 +396,9 @@
       const categoryRow = document.getElementById("category-row");
       const subtypeSection = document.getElementById("subtype-section");
       const subtypeRow = document.getElementById("subtype-row");
+      const addFormCategory = document.getElementById("item-category");
+      const addFormSubtype = document.getElementById("item-subtype");
+      const purchaseForm = document.getElementById("purchase-form");
 
       let currentCategory = null;
 
@@ -278,7 +423,7 @@
         });
       }
 
-      // handle category clicks with toggle behaviour
+      // handle category chips (filters) with toggle behaviour
       categoryRow.addEventListener("click", (event) => {
         const btn = event.target.closest(".filter-pill");
         if (!btn) return;
@@ -308,6 +453,51 @@
 
         // Show appropriate sub-types
         renderSubtypes(categoryKey);
+      });
+
+      // helper: scroll to form when clicking main button
+      function scrollToAddForm() {
+        const el = document.getElementById("add-item-form");
+        if (el) {
+          el.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+      }
+
+      // populate sub-type select in form when category changes
+      addFormCategory.addEventListener("change", (e) => {
+        const value = e.target.value;
+        const subtypes = categorySubtypes[value] || [];
+        addFormSubtype.innerHTML = "";
+
+        if (!subtypes.length) {
+          addFormSubtype.disabled = true;
+          const opt = document.createElement("option");
+          opt.value = "";
+          opt.textContent = "No sub-type";
+          addFormSubtype.appendChild(opt);
+          return;
+        }
+
+        addFormSubtype.disabled = false;
+        const placeholder = document.createElement("option");
+        placeholder.value = "";
+        placeholder.textContent = "Select...";
+        addFormSubtype.appendChild(placeholder);
+
+        subtypes.forEach((st) => {
+          const opt = document.createElement("option");
+          opt.value = st;
+          opt.textContent = st;
+          addFormSubtype.appendChild(opt);
+        });
+      });
+
+      // prevent real submit for now (prototype only)
+      purchaseForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+        alert(
+          "In the real app this would save the item.\nRight now it's just a visual prototype."
+        );
       });
     </script>
   </body>
