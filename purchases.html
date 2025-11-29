@@ -69,10 +69,7 @@
         <section class="filter-section">
           <div class="filter-label">Categories</div>
           <div class="filter-row" id="category-row">
-            <button
-              class="btn-secondary filter-pill filter-pill-active"
-              data-category="all"
-            >
+            <button class="btn-secondary filter-pill" data-category="all">
               All
             </button>
             <button
@@ -245,11 +242,11 @@
       </div>
     </div>
 
-    <!-- Tiny brain: category -> sub-type behaviour -->
+    <!-- Tiny brain: category -> sub-type behaviour with toggle -->
     <script>
       // Mapping from category -> sub-types
       const categorySubtypes = {
-        all: [],
+        all: ["All"],
         "Meat & Fish": ["All", "Fresh", "Frozen", "Smoked", "Raw", "Cured", "Seafood"],
         "Dairy & Eggs": ["All", "Milk / Cream", "Butter", "Cheese", "Eggs"],
         "Vegetables & Fruit": ["All", "Fresh", "Frozen", "Dried", "Canned"],
@@ -262,17 +259,17 @@
       const subtypeSection = document.getElementById("subtype-section");
       const subtypeRow = document.getElementById("subtype-row");
 
+      let currentCategory = null;
+
       function renderSubtypes(categoryKey) {
         const subtypes = categorySubtypes[categoryKey] || [];
 
         if (!subtypes.length) {
-          // no sub-types for this category -> hide section
           subtypeSection.style.display = "none";
           subtypeRow.innerHTML = "";
           return;
         }
 
-        // show section and fill with buttons
         subtypeSection.style.display = "block";
         subtypeRow.innerHTML = "";
 
@@ -287,20 +284,32 @@
         });
       }
 
-      // handle category clicks
+      // handle category clicks with toggle behaviour
       categoryRow.addEventListener("click", (event) => {
         const btn = event.target.closest(".filter-pill");
         if (!btn) return;
 
         const categoryKey = btn.dataset.category;
 
-        // update active state
-        categoryRow.querySelectorAll(".filter-pill").forEach((b) => {
-          b.classList.remove("filter-pill-active");
-        });
+        // if clicking the same active category -> toggle off subtypes
+        if (currentCategory === categoryKey && subtypeSection.style.display === "block") {
+          currentCategory = null;
+          subtypeSection.style.display = "none";
+          subtypeRow.innerHTML = "";
+          categoryRow
+            .querySelectorAll(".filter-pill")
+            .forEach((b) => b.classList.remove("filter-pill-active"));
+          return;
+        }
+
+        // set new active category
+        currentCategory = categoryKey;
+        categoryRow
+          .querySelectorAll(".filter-pill")
+          .forEach((b) => b.classList.remove("filter-pill-active"));
         btn.classList.add("filter-pill-active");
 
-        // render sub-types for that category
+        // show appropriate sub-types
         renderSubtypes(categoryKey);
       });
     </script>
