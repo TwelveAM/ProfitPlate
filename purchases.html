@@ -386,7 +386,7 @@
       </div>
     </div>
 
-    <!-- Tiny brain: filters + form helpers -->
+        <!-- Tiny brain: filters + form helpers -->
     <script>
       // Category -> sub-types for filters AND form
       const categorySubtypes = {
@@ -405,7 +405,6 @@
       const addFormSubtype = document.getElementById("item-subtype");
       const purchaseForm = document.getElementById("purchase-form");
       const addItemFormSection = document.getElementById("add-item-form");
-      const addItemToggleBtn = document.getElementById("add-item-toggle");
 
       let currentCategory = null;
       let addFormVisible = false;
@@ -460,12 +459,11 @@
         renderSubtypes(categoryKey);
       });
 
-      // toggle Add item form visibility
+      // toggle Add item form visibility (no auto-scroll)
       function toggleAddForm() {
         addFormVisible = !addFormVisible;
         if (addFormVisible) {
           addItemFormSection.style.display = "block";
-          addItemFormSection.scrollIntoView({ behavior: "smooth", block: "start" });
         } else {
           addItemFormSection.style.display = "none";
         }
@@ -508,5 +506,3 @@
         );
       });
     </script>
-  </body>
-</html>
