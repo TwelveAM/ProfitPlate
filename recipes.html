@@ -59,172 +59,472 @@
 
         <!-- Top actions -->
         <section class="hero-actions" style="margin-bottom: 18px;">
-          <button class="btn-primary" type="button">
-            Add recipe (prototype)
+          <button class="btn-primary" type="button" onclick="toggleAddRecipeForm()">
+            Add recipe
           </button>
-          <button class="btn-secondary" type="button">
+          <button class="btn-secondary" type="button" disabled>
             Export all to PDF (future)
           </button>
         </section>
-<!-- Dynamic Recipe List -->
-<section class="recipe-list" id="recipe-list">
-  <div
-    style="
-      font-size: 13px;
-      margin-bottom: 6px;
-      color: #555;
-      font-weight: 600;
-    "
-  >
-    Menu overview
-  </div>
 
-  <div id="recipes-container">
-    <!-- JS will insert recipes here -->
-  </div>
-</section>
-
-<!-- Recipe Detail Prototype (hidden initially) -->
-<section class="recipe-card" id="recipe-detail" style="display: none;">
-  <div class="recipe-card-title" id="detail-name"></div>
-  <div class="recipe-card-subtitle">
-    Cost automatically updates if ingredient prices change in Purchases.
-  </div>
-
-  <div class="recipe-summary" id="summary-box">
-    <!-- JS will fill batch size, cost, margin -->
-  </div>
-
-  <div
-    style="
-      overflow-x: auto;
-      border-radius: 10px;
-      border: 1px solid #e0e3ea;
-      background: #f9fafb;
-    "
-  >
-    <table
-      style="
-        width: 100%;
-        border-collapse: collapse;
-        font-size: 13px;
-      "
-    >
-      <thead>
-        <tr
-          style="
-            text-align: left;
-            background: #f4f5f9;
-            border-bottom: 1px solid #e0e3ea;
-          "
+        <!-- Add recipe form -->
+        <section
+          class="recipe-card"
+          id="add-recipe-card"
+          style="display: none; margin-bottom: 20px;"
         >
-          <th style="padding: 8px 10px;">Ingredient</th>
-          <th style="padding: 8px 10px;">Category</th>
-          <th style="padding: 8px 10px;">Sub-type</th>
-          <th style="padding: 8px 10px;">Quantity</th>
-          <th style="padding: 8px 10px;">Unit</th>
-          <th style="padding: 8px 10px;">Price/unit</th>
-          <th style="padding: 8px 10px;">Cost in recipe</th>
-        </tr>
-      </thead>
-      <tbody id="detail-ingredients">
-        <!-- JS inserts rows -->
-      </tbody>
-    </table>
-  </div>
-</section>
+          <div class="recipe-card-title">Add a new recipe</div>
+          <div class="recipe-card-subtitle">
+            Give the recipe a name, set how many portions it makes, then add
+            ingredients from your Purchases. ProfitPlate will calculate cost per
+            portion automatically.
+          </div>
 
+          <form id="recipe-form">
+            <div class="form-row" style="margin-bottom: 10px;">
+              <div class="form-field" style="flex: 2;">
+                <label class="form-label" for="recipe-name">Recipe name</label>
+                <input
+                  class="form-input"
+                  id="recipe-name"
+                  type="text"
+                  placeholder="e.g. Pasta Carbonara"
+                  required
+                />
+              </div>
+              <div class="form-field">
+                <label class="form-label" for="recipe-portions">Portions per batch</label>
+                <input
+                  class="form-input"
+                  id="recipe-portions"
+                  type="number"
+                  min="1"
+                  step="1"
+                  placeholder="e.g. 5"
+                  required
+                />
+              </div>
+              <div class="form-field">
+                <label class="form-label" for="recipe-selling-price">
+                  Selling price per portion (optional)
+                </label>
+                <input
+                  class="form-input"
+                  id="recipe-selling-price"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  placeholder="e.g. 9.50"
+                />
+              </div>
+            </div>
+
+            <div style="font-size: 13px; font-weight: 600; margin-bottom: 6px;">
+              Ingredients
+            </div>
+            <div
+              style="
+                overflow-x: auto;
+                border-radius: 10px;
+                border: 1px solid #e0e3ea;
+                background: #f9fafb;
+                margin-bottom: 8px;
+              "
+            >
+              <table
+                style="
+                  width: 100%;
+                  border-collapse: collapse;
+                  font-size: 13px;
+                "
+              >
+                <thead>
+                  <tr
+                    style="
+                      text-align: left;
+                      background: #f4f5f9;
+                      border-bottom: 1px solid #e0e3ea;
+                    "
+                  >
+                    <th style="padding: 7px 8px;">Purchase item</th>
+                    <th style="padding: 7px 8px;">Quantity</th>
+                    <th style="padding: 7px 8px;">Unit</th>
+                    <th style="padding: 7px 8px;">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="recipe-ingredients-body">
+                  <!-- JS will add rows -->
+                </tbody>
+              </table>
+            </div>
+
+            <button
+              type="button"
+              class="btn-secondary"
+              onclick="addIngredientRow()"
+              style="margin-bottom: 10px;"
+            >
+              + Add ingredient
+            </button>
+
+            <div class="form-footer">
+              <button
+                type="button"
+                class="btn-ghost"
+                onclick="resetRecipeForm()"
+              >
+                Clear
+              </button>
+              <button type="submit" class="btn-primary">
+                Save recipe
+              </button>
+            </div>
+          </form>
+        </section>
+
+        <!-- Dynamic Recipe List -->
+        <section class="recipe-list" id="recipe-list">
+          <div
+            style="
+              font-size: 13px;
+              margin-bottom: 6px;
+              color: #555;
+              font-weight: 600;
+            "
+          >
+            Menu overview
+          </div>
+
+          <div id="recipes-container">
+            <!-- JS will insert recipes here -->
+          </div>
+        </section>
+
+        <!-- Recipe Detail -->
+        <section class="recipe-card" id="recipe-detail" style="display: none;">
+          <div class="recipe-card-title" id="detail-name"></div>
+          <div class="recipe-card-subtitle">
+            Cost automatically updates when ingredient prices change in
+            Purchases.
+          </div>
+
+          <div class="recipe-summary" id="summary-box">
+            <!-- JS will fill batch size, cost, margin -->
+          </div>
+
+          <div
+            style="
+              overflow-x: auto;
+              border-radius: 10px;
+              border: 1px solid #e0e3ea;
+              background: #f9fafb;
+            "
+          >
+            <table
+              style="
+                width: 100%;
+                border-collapse: collapse;
+                font-size: 13px;
+              "
+            >
+              <thead>
+                <tr
+                  style="
+                    text-align: left;
+                    background: #f4f5f9;
+                    border-bottom: 1px solid #e0e3ea;
+                  "
+                >
+                  <th style="padding: 8px 10px;">Ingredient</th>
+                  <th style="padding: 8px 10px;">Category</th>
+                  <th style="padding: 8px 10px;">Sub-type</th>
+                  <th style="padding: 8px 10px;">Quantity</th>
+                  <th style="padding: 8px 10px;">Unit</th>
+                  <th style="padding: 8px 10px;">Price/unit</th>
+                  <th style="padding: 8px 10px;">Cost in recipe</th>
+                </tr>
+              </thead>
+              <tbody id="detail-ingredients">
+                <!-- JS inserts rows -->
+              </tbody>
+            </table>
+          </div>
+
+          <div style="font-size: 12px; color: #777; margin-top: 10px;">
+            In the future this table will be fully editable in place. For now,
+            edit ingredients by adjusting the recipe or purchases and the costs
+            will recalculate.
+          </div>
+        </section>
       </main>
 
       <div class="bottom-strip" style="margin-top: 22px;">
-        This page is a static prototype of the Recipes view. Next steps: make
-        recipes editable, connect them to real ingredients, and allow exporting
-        PDFs for the boss.
+        Recipe data is stored locally in your browser using ProfitPlate's tiny
+        brain. Changing ingredient prices in Purchases will change costs here
+        next time you open the page.
       </div>
     </div>
+
+    <!-- Tiny brain -->
     <script src="assets/app.js"></script>
+
+    <!-- Recipes page logic -->
     <script>
-  const container = document.getElementById("recipes-container");
-  const detailCard = document.getElementById("recipe-detail");
-  const detailName = document.getElementById("detail-name");
-  const detailIngredients = document.getElementById("detail-ingredients");
-  const summaryBox = document.getElementById("summary-box");
+      const recipesContainer = document.getElementById("recipes-container");
+      const detailCard = document.getElementById("recipe-detail");
+      const detailName = document.getElementById("detail-name");
+      const detailIngredients = document.getElementById("detail-ingredients");
+      const summaryBox = document.getElementById("summary-box");
 
-  function renderRecipes() {
-    container.innerHTML = "";
+      const addRecipeCard = document.getElementById("add-recipe-card");
+      const recipeForm = document.getElementById("recipe-form");
+      const ingredientsBody = document.getElementById(
+        "recipe-ingredients-body"
+      );
 
-    if (!ppData.recipes.length) {
-      container.innerHTML = `<p style="color:#666;">No recipes yet.</p>`;
-      return;
-    }
+      let addRecipeVisible = false;
 
-    ppData.recipes.forEach((recipe) => {
-      const costPerPortion = calculateCostPerPortion(recipe).toFixed(2);
-      const row = document.createElement("div");
-      row.className = "recipe-row";
+      function formatCurrency(val) {
+        const num = Number(val) || 0;
+        return num.toFixed(2) + " €";
+      }
 
-      row.innerHTML = `
-        <div>
-          <div class="recipe-name">${recipe.name}</div>
-          <div class="recipe-meta">
-            ${recipe.portions} portions per batch
-          </div>
-        </div>
-        <div style="display:flex; align-items:center; gap:8px;">
-          <span class="recipe-cost-badge">${costPerPortion} €/portion</span>
-          <button class="btn-secondary" type="button"
-            onclick="openRecipeDetail('${recipe.id}')">
-            View details
-          </button>
-        </div>
-      `;
+      function renderRecipes() {
+        recipesContainer.innerHTML = "";
 
-      container.appendChild(row);
-    });
-  }
+        if (!ppData.recipes.length) {
+          recipesContainer.innerHTML =
+            '<p style="color:#666;">No recipes yet. Use "Add recipe" to create your first one.</p>';
+          return;
+        }
 
-  function openRecipeDetail(id) {
-    const r = getRecipeById(id);
-    if (!r) return;
+        ppData.recipes.forEach((recipe) => {
+          const costPerPortion = calculateCostPerPortion(recipe);
+          const cppLabel = isNaN(costPerPortion)
+            ? "-"
+            : costPerPortion.toFixed(2) + " €/portion";
 
-    detailCard.style.display = "block";
-    detailName.textContent = r.name;
+          const row = document.createElement("div");
+          row.className = "recipe-row";
 
-    // Summary
-    const batchCost = calculateBatchCost(r).toFixed(2);
-    const cpp = calculateCostPerPortion(r).toFixed(2);
+          row.innerHTML = `
+            <div>
+              <div class="recipe-name">${recipe.name}</div>
+              <div class="recipe-meta">
+                ${recipe.portions} portions per batch
+              </div>
+            </div>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span class="recipe-cost-badge">${cppLabel}</span>
+              <button class="btn-secondary" type="button"
+                onclick="openRecipeDetail('${recipe.id}')">
+                View details
+              </button>
+            </div>
+          `;
 
-    summaryBox.innerHTML = `
-      <span><strong>Batch size:</strong> ${r.portions} portions</span>
-      <span><strong>Total batch cost:</strong> ${batchCost} €</span>
-      <span><strong>Cost per portion:</strong> ${cpp} €</span>
-    `;
+          recipesContainer.appendChild(row);
+        });
+      }
 
-    // Ingredients table
-    detailIngredients.innerHTML = "";
+      function openRecipeDetail(id) {
+        const r = getRecipeById(id);
+        if (!r) return;
 
-    r.ingredients.forEach((ing) => {
-      const purchase = getPurchaseById(ing.purchaseId);
-      if (!purchase) return;
+        detailCard.style.display = "block";
+        detailName.textContent = r.name;
 
-      const cost = calculateIngredientCost(ing).toFixed(2);
+        const batchCost = calculateBatchCost(r);
+        const cpp = calculateCostPerPortion(r);
+        const margin = calculateMargin(r);
 
-      const row = document.createElement("tr");
-      row.innerHTML = `
-        <td style="padding:7px 10px;">${purchase.name}</td>
-        <td style="padding:7px 10px;">${purchase.category}</td>
-        <td style="padding:7px 10px;">${purchase.subtype}</td>
-        <td style="padding:7px 10px;">${ing.quantity}</td>
-        <td style="padding:7px 10px;">${ing.unit}</td>
-        <td style="padding:7px 10px;">${purchase.pricePerUnit} €/unit</td>
-        <td style="padding:7px 10px;">${cost} €</td>
-      `;
-      detailIngredients.appendChild(row);
-    });
-  }
+        const summaryParts = [
+          \`<span><strong>Batch size:</strong> \${r.portions} portions</span>\`,
+          \`<span><strong>Total batch cost:</strong> \${formatCurrency(
+            batchCost
+          )}</span>\`,
+          \`<span><strong>Cost per portion:</strong> \${formatCurrency(cpp)}</span>\`
+        ];
 
-  // Load on page open
-  renderRecipes();
-</script>
+        if (r.sellingPricePerPortion && r.sellingPricePerPortion > 0) {
+          summaryParts.push(
+            \`<span><strong>Selling price:</strong> \${formatCurrency(
+              r.sellingPricePerPortion
+            )} /portion</span>\`
+          );
+          summaryParts.push(
+            \`<span><strong>Margin:</strong> \${formatCurrency(
+              margin.euro
+            )}/portion (\${(margin.percent * 100).toFixed(0)}%)</span>\`
+          );
+        }
+
+        summaryBox.innerHTML = summaryParts.join(" ");
+
+        detailIngredients.innerHTML = "";
+
+        r.ingredients.forEach((ing) => {
+          const purchase = getPurchaseById(ing.purchaseId);
+          if (!purchase) return;
+
+          const cost = calculateIngredientCost(ing);
+          const row = document.createElement("tr");
+          row.innerHTML = `
+            <td style="padding:7px 10px;">${purchase.name}</td>
+            <td style="padding:7px 10px;">${purchase.category || ""}</td>
+            <td style="padding:7px 10px;">${purchase.subtype || ""}</td>
+            <td style="padding:7px 10px;">${ing.quantity}</td>
+            <td style="padding:7px 10px;">${ing.unit}</td>
+            <td style="padding:7px 10px;">${(purchase.pricePerUnit ?? 0).toFixed(
+              2
+            )} €/unit</td>
+            <td style="padding:7px 10px;">${formatCurrency(cost)}</td>
+          `;
+          detailIngredients.appendChild(row);
+        });
+      }
+
+      function toggleAddRecipeForm() {
+        addRecipeVisible = !addRecipeVisible;
+        addRecipeCard.style.display = addRecipeVisible ? "block" : "none";
+
+        if (addRecipeVisible && !ingredientsBody.children.length) {
+          addIngredientRow();
+        }
+        if (!addRecipeVisible) {
+          resetRecipeForm();
+        }
+      }
+      window.toggleAddRecipeForm = toggleAddRecipeForm;
+
+      function buildPurchaseOptions(selectedId) {
+        if (!ppData.purchases.length) {
+          return '<option value="">No purchases yet</option>';
+        }
+        return ppData.purchases
+          .map((p) => {
+            const sel = p.id === selectedId ? "selected" : "";
+            return \`<option value="\${p.id}" \${sel}>\${p.name}</option>\`;
+          })
+          .join("");
+      }
+
+      function addIngredientRow() {
+        const tr = document.createElement("tr");
+
+        const firstPurchase = ppData.purchases[0];
+        const unit = firstPurchase?.unit || "";
+
+        tr.innerHTML = `
+          <td style="padding:6px 8px;">
+            <select class="form-select ing-purchase">
+              ${buildPurchaseOptions(firstPurchase?.id)}
+            </select>
+          </td>
+          <td style="padding:6px 8px;">
+            <input class="form-input ing-quantity" type="number" min="0" step="0.01" placeholder="e.g. 0.2" />
+          </td>
+          <td style="padding:6px 8px;">
+            <input class="form-input ing-unit" type="text" placeholder="${unit}" />
+          </td>
+          <td style="padding:6px 8px;">
+            <button type="button" class="btn-ghost" onclick="removeIngredientRow(this)">
+              Remove
+            </button>
+          </td>
+        `;
+        ingredientsBody.appendChild(tr);
+      }
+      window.addIngredientRow = addIngredientRow;
+
+      function removeIngredientRow(btn) {
+        const tr = btn.closest("tr");
+        if (!tr) return;
+        // keep at least one row
+        if (ingredientsBody.children.length <= 1) {
+          tr.querySelector(".ing-quantity").value = "";
+          tr.querySelector(".ing-unit").value = "";
+          return;
+        }
+        tr.remove();
+      }
+      window.removeIngredientRow = removeIngredientRow;
+
+      function resetRecipeForm() {
+        recipeForm.reset();
+        ingredientsBody.innerHTML = "";
+        addIngredientRow();
+      }
+      window.resetRecipeForm = resetRecipeForm;
+
+      recipeForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+
+        const name = document.getElementById("recipe-name").value.trim();
+        const portionsVal = parseFloat(
+          document.getElementById("recipe-portions").value
+        );
+        const sellingVal = parseFloat(
+          document.getElementById("recipe-selling-price").value.replace(",", ".")
+            || "0"
+        );
+
+        if (!name || isNaN(portionsVal) || portionsVal <= 0) {
+          alert("Please provide a name and a valid number of portions.");
+          return;
+        }
+
+        const ingredients = [];
+        ingredientsBody.querySelectorAll("tr").forEach((row) => {
+          const purchaseId = row.querySelector(".ing-purchase").value;
+          const quantityVal = parseFloat(
+            row.querySelector(".ing-quantity").value.replace(",", ".")
+          );
+          const unitInput = row.querySelector(".ing-unit").value.trim();
+
+          if (!purchaseId || isNaN(quantityVal) || quantityVal <= 0) {
+            return;
+          }
+
+          const purchase = getPurchaseById(purchaseId);
+          const unit = unitInput || purchase?.unit || "unit";
+
+          ingredients.push({
+            purchaseId,
+            quantity: quantityVal,
+            unit
+          });
+        });
+
+        if (!ingredients.length) {
+          alert("Please add at least one ingredient with quantity.");
+          return;
+        }
+
+        const newRecipe = {
+          id: "rec_" + Date.now(),
+          name,
+          portions: Math.round(portionsVal),
+          sellingPricePerPortion: isNaN(sellingVal) ? 0 : sellingVal,
+          currency: ppData.settings?.currency || "EUR",
+          ingredients,
+          updatedAt: new Date().toISOString()
+        };
+
+        ppData.recipes.push(newRecipe);
+        saveData(ppData);
+        renderRecipes();
+        openRecipeDetail(newRecipe.id);
+        alert("Recipe saved locally.");
+
+        resetRecipeForm();
+      });
+
+      // Initial render
+      if (!ingredientsBody.children.length) {
+        addIngredientRow();
+      }
+      renderRecipes();
+    </script>
   </body>
 </html>
