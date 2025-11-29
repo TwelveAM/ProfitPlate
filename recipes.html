@@ -268,9 +268,9 @@
     <!-- Tiny brain -->
     <script src="assets/app.js"></script>
 
-        <!-- Recipes page logic -->
+           <!-- Recipes page logic -->
     <script>
-      // Fallbacks in case app.js didn't load for some reason
+      // Fallbacks if app.js fails for some reason
       if (typeof ppData === "undefined") {
         window.ppData = { purchases: [], recipes: [], settings: {} };
       }
@@ -287,13 +287,86 @@
       var addRecipeCard = document.getElementById("add-recipe-card");
       var recipeForm = document.getElementById("recipe-form");
       var ingredientsBody = document.getElementById("recipe-ingredients-body");
+      var recipeFormTitle = document.getElementById("recipe-form-title");
 
       var addRecipeVisible = false;
+      var editingRecipeId = null;
 
       function formatCurrency(val) {
         var num = Number(val) || 0;
         return num.toFixed(2) + " €";
       }
+
+      // ---- UNIT NORMALISATION + COST CALC ----
+
+      function normalizeUnit(u) {
+        u = (u || "").toLowerCase();
+        // treat "gr" as grams
+        if (u === "gr") u = "g";
+        return u;
+      }
+
+      function normalizeQuantityLocal(quantity, ingUnit, purchaseUnit) {
+        var q = Number(quantity) || 0;
+        var from = normalizeUnit(ingUnit);
+        var to = normalizeUnit(purchaseUnit);
+
+        if (!from || from === to) return q;
+
+        // kg <-> g
+        if (from === "g" && to === "kg") return q / 1000;
+        if (from === "kg" && to === "g") return q * 1000;
+
+        // L <-> ml
+        if (from === "ml" && to === "l") return q / 1000;
+        if (from === "l" && to === "ml") return q * 1000;
+
+        // anything else = no conversion
+        return q;
+      }
+
+      function calculateIngredientCostLocal(ing) {
+        var purchase = getPurchaseById(ing.purchaseId);
+        if (!purchase) return 0;
+
+        var baseUnit = purchase.unit || "unit";
+        var ingUnit = ing.unit || baseUnit;
+
+        var qtyNorm = normalizeQuantityLocal(
+          ing.quantity,
+          ingUnit,
+          baseUnit
+        );
+        var price = purchase.pricePerUnit != null ? purchase.pricePerUnit : 0;
+
+        return qtyNorm * price;
+      }
+
+      function calculateBatchCostLocal(recipe) {
+        if (!recipe || !recipe.ingredients) return 0;
+        var total = 0;
+        recipe.ingredients.forEach(function (ing) {
+          total += calculateIngredientCostLocal(ing);
+        });
+        return total;
+      }
+
+      function calculateCostPerPortionLocal(recipe) {
+        var batchCost = calculateBatchCostLocal(recipe);
+        return recipe && recipe.portions > 0 ? batchCost / recipe.portions : 0;
+      }
+
+      function calculateMarginLocal(recipe) {
+        var cpp = calculateCostPerPortionLocal(recipe);
+        var sell = recipe && recipe.sellingPricePerPortion;
+        if (!sell || sell <= 0) return { euro: 0, percent: 0 };
+
+        var euro = sell - cpp;
+        var percent = euro / sell;
+        return { euro: euro, percent: percent };
+      }
+
+      // ---- RENDER RECIPES LIST ----
 
       function renderRecipes() {
         recipesContainer.innerHTML = "";
@@ -305,7 +378,7 @@
         }
 
         ppData.recipes.forEach(function (recipe) {
-          var costPerPortion = calculateCostPerPortion(recipe);
+          var costPerPortion = calculateCostPerPortionLocal(recipe);
           var cppLabel = isNaN(costPerPortion)
             ? "-"
             : costPerPortion.toFixed(2) + " €/portion";
@@ -329,6 +402,9 @@
             '<button class="btn-secondary" type="button" onclick="openRecipeDetail(\'' +
             recipe.id +
             "')\">View details</button>" +
+            '<button class="btn-secondary" type="button" onclick="startEditRecipe(\'' +
+            recipe.id +
+            "')\">Edit</button>" +
             "</div>";
 
           recipesContainer.appendChild(row);
@@ -342,13 +418,13 @@
         detailCard.style.display = "block";
         detailName.textContent = r.name;
 
-        var batchCost = calculateBatchCost(r);
-        var cpp = calculateCostPerPortion(r);
-        var margin = calculateMargin(r);
+        var batchCost = calculateBatchCostLocal(r);
+        var cpp = calculateCostPerPortionLocal(r);
+        var margin = calculateMarginLocal(r);
 
         var summaryParts = [];
         summaryParts.push(
-          '<span><strong>Batch size:</strong> ' +
+          "<span><strong>Batch size:</strong> " +
             r.portions +
             " portions</span>"
         );
@@ -388,7 +464,7 @@
 
           var price =
             purchase.pricePerUnit != null ? purchase.pricePerUnit : 0;
-          var cost = calculateIngredientCost(ing);
+          var cost = calculateIngredientCostLocal(ing);
 
           var row = document.createElement("tr");
           row.innerHTML =
@@ -419,6 +495,8 @@
       }
       window.openRecipeDetail = openRecipeDetail;
 
+      // ---- ADD / EDIT FORM ----
+
       function toggleAddRecipeForm() {
         addRecipeVisible = !addRecipeVisible;
         addRecipeCard.style.display = addRecipeVisible ? "block" : "none";
@@ -431,6 +509,34 @@
         }
       }
       window.toggleAddRecipeForm = toggleAddRecipeForm;
+
+      function buildUnitSelectHtml(purchaseUnit, currentUnit) {
+        var base = normalizeUnit(purchaseUnit || "unit"); // internal base
+        var displayBase = base;
+        if (displayBase === "g") displayBase = "gr"; // show "gr" in UI
+
+        var selected = normalizeUnit(currentUnit || displayBase);
+
+        var units = ["kg", "gr", "l", "ml", "pcs"];
+        if (units.indexOf(displayBase) === -1) units.unshift(displayBase);
+
+        var html = "";
+        units.forEach(function (u) {
+          var val = u; // stored value
+          var display = u; // label
+          var sel = normalizeUnit(val) === selected ? "selected" : "";
+          html +=
+            '<option value="' +
+            val +
+            '" ' +
+            sel +
+            ">" +
+            display +
+            "</option>";
+        });
+
+        return html;
+      }
 
       function buildPurchaseOptions(selectedId) {
         if (!ppData.purchases || !ppData.purchases.length) {
@@ -446,27 +552,40 @@
           .join("");
       }
 
-      function addIngredientRow() {
+      function addIngredientRow(existing) {
         var tr = document.createElement("tr");
-        var firstPurchase =
-          ppData.purchases && ppData.purchases.length
+        var purchase =
+          existing && existing.purchaseId
+            ? getPurchaseById(existing.purchaseId)
+            : ppData.purchases && ppData.purchases.length
             ? ppData.purchases[0]
             : null;
-        var unit = firstPurchase && firstPurchase.unit ? firstPurchase.unit : "";
+
+        var purchaseId = existing
+          ? existing.purchaseId
+          : purchase && purchase.id;
+        var qty = existing ? existing.quantity : "";
+        var unit = existing
+          ? existing.unit
+          : purchase && purchase.unit
+          ? purchase.unit
+          : "";
 
         tr.innerHTML =
           '<td style="padding:6px 8px;">' +
           '<select class="form-select ing-purchase">' +
-          buildPurchaseOptions(firstPurchase ? firstPurchase.id : "") +
+          buildPurchaseOptions(purchaseId) +
           "</select>" +
           "</td>" +
           '<td style="padding:6px 8px;">' +
-          '<input class="form-input ing-quantity" type="number" min="0" step="0.01" placeholder="e.g. 0.2" />' +
+          '<input class="form-input ing-quantity" type="number" min="0" step="0.01" placeholder="e.g. 0.2" value="' +
+          (qty !== undefined ? qty : "") +
+          '" />' +
           "</td>" +
           '<td style="padding:6px 8px;">' +
-          '<input class="form-input ing-unit" type="text" placeholder="' +
-          unit +
-          '" />' +
+          '<select class="form-select ing-unit">' +
+          buildUnitSelectHtml(purchase ? purchase.unit : "unit", unit) +
+          "</select>" +
           "</td>" +
           '<td style="padding:6px 8px;">' +
           '<button type="button" class="btn-ghost" onclick="removeIngredientRow(this)">Remove</button>' +
@@ -481,11 +600,8 @@
         if (!tr) return;
 
         if (ingredientsBody.children.length <= 1) {
-          // don't delete last row, just clear it
           var q = tr.querySelector(".ing-quantity");
-          var u = tr.querySelector(".ing-unit");
           if (q) q.value = "";
-          if (u) u.value = "";
           return;
         }
         tr.remove();
@@ -495,9 +611,34 @@
       function resetRecipeForm() {
         recipeForm.reset();
         ingredientsBody.innerHTML = "";
+        recipeFormTitle.textContent = "Add a new recipe";
+        editingRecipeId = null;
         addIngredientRow();
       }
       window.resetRecipeForm = resetRecipeForm;
+
+      function startEditRecipe(id) {
+        var r = getRecipeById(id);
+        if (!r) return;
+
+        editingRecipeId = id;
+        recipeFormTitle.textContent = "Edit recipe";
+
+        if (!addRecipeVisible) {
+          toggleAddRecipeForm();
+        }
+
+        document.getElementById("recipe-name").value = r.name || "";
+        document.getElementById("recipe-portions").value = r.portions || "";
+        document.getElementById("recipe-selling-price").value =
+          r.sellingPricePerPortion || "";
+
+        ingredientsBody.innerHTML = "";
+        (r.ingredients || []).forEach(function (ing) {
+          addIngredientRow(ing);
+        });
+      }
+      window.startEditRecipe = startEditRecipe;
 
       recipeForm.addEventListener("submit", function (e) {
         e.preventDefault();
@@ -517,24 +658,22 @@
 
         var ingredients = [];
         var rows = ingredientsBody.querySelectorAll("tr");
+
         rows.forEach(function (row) {
           var select = row.querySelector(".ing-purchase");
           var qtyInput = row.querySelector(".ing-quantity");
-          var unitInputEl = row.querySelector(".ing-unit");
+          var unitSelect = row.querySelector(".ing-unit");
 
-          if (!select || !qtyInput || !unitInputEl) return;
+          if (!select || !qtyInput || !unitSelect) return;
 
           var purchaseId = select.value;
           var qtyRaw = qtyInput.value || "0";
           var quantityVal = parseFloat(qtyRaw.replace(",", "."));
-          var unitInput = unitInputEl.value.trim();
+          var unit = unitSelect.value;
 
           if (!purchaseId || isNaN(quantityVal) || quantityVal <= 0) {
             return;
           }
-
-          var purchase = getPurchaseById(purchaseId);
-          var unit = unitInput || (purchase && purchase.unit) || "unit";
 
           ingredients.push({
             purchaseId: purchaseId,
@@ -548,8 +687,7 @@
           return;
         }
 
-        var newRecipe = {
-          id: "rec_" + Date.now(),
+        var data = {
           name: name,
           portions: Math.round(portionsVal),
           sellingPricePerPortion: isNaN(sellingVal) ? 0 : sellingVal,
@@ -558,10 +696,23 @@
           updatedAt: new Date().toISOString()
         };
 
-        ppData.recipes.push(newRecipe);
+        if (editingRecipeId) {
+          var existing = getRecipeById(editingRecipeId);
+          if (existing) {
+            existing.name = data.name;
+            existing.portions = data.portions;
+            existing.sellingPricePerPortion = data.sellingPricePerPortion;
+            existing.ingredients = data.ingredients;
+            existing.updatedAt = data.updatedAt;
+          }
+        } else {
+          data.id = "rec_" + Date.now();
+          ppData.recipes.push(data);
+        }
+
         saveData(ppData);
         renderRecipes();
-        openRecipeDetail(newRecipe.id);
+        openRecipeDetail(editingRecipeId || data.id);
         alert("Recipe saved locally.");
 
         resetRecipeForm();
@@ -573,5 +724,6 @@
       }
       renderRecipes();
     </script>
+
   </body>
 </html>
