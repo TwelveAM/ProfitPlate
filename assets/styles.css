@@ -324,6 +324,74 @@ body {
   cursor: pointer;
   color: #555;
 }
+/* ===== Recipes ===== */
+.recipe-list {
+  margin-bottom: 24px;
+}
+
+.recipe-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #ffffff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03);
+  margin-bottom: 8px;
+}
+
+.recipe-name {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.recipe-meta {
+  font-size: 12px;
+  color: #777;
+}
+
+.recipe-cost-badge {
+  font-size: 12px;
+  padding: 4px 9px;
+  border-radius: 999px;
+  background: #ecf8f1;
+  color: #0b6b3a;
+  border: 1px solid #b7e1c8;
+  margin-right: 10px;
+}
+
+.recipe-card {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 18px 18px 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  margin-bottom: 24px;
+}
+
+.recipe-card-title {
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.recipe-card-subtitle {
+  font-size: 12px;
+  color: #777;
+  margin-bottom: 12px;
+}
+
+.recipe-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  font-size: 12px;
+  margin-bottom: 10px;
+  color: #555;
+}
+
+.recipe-summary span strong {
+  font-weight: 600;
+}
 
 .btn-ghost:hover {
   background: #f1f2f6;
