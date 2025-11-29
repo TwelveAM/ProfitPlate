@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>ProfitPlate – Purchases</title>
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <meta
+      name="description"
+      content="Manage your ingredients, categories, and supplier prices in ProfitPlate."
+    />
+    <link rel="stylesheet" href="assets/styles.css" />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="32x32"
+      href="assets/favicon-plate-32.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="64x64"
+      href="assets/favicon-plate-64.png"
+    />
+  </head>
+  <body>
+    <div class="page">
+      <!-- Header with nav -->
+      <header class="header">
+        <div class="logo-block">
+          <div class="logo-plate">
+            <span>PP</span>
+          </div>
+          <div class="brand-text">
+            <div class="name">ProfitPlate</div>
+            <div class="tagline">Know your profit per plate.</div>
+          </div>
+        </div>
+
+        <nav class="nav">
+          <a href="index.html" class="nav-link">Home</a>
+          <a href="purchases.html" class="nav-link nav-link-active">Purchases</a>
+          <a href="#" class="nav-link nav-link-disabled" title="Coming soon"
+            >Recipes</a
+          >
+        </nav>
+      </header>
+
+      <main>
+        <!-- Page title -->
+        <section class="hero">
+          <h1 class="hero-title">Purchases</h1>
+          <p class="hero-subtitle">
+            This is your ingredient base. Add items you buy, organize them by
+            category, and keep supplier prices up to date. Recipes will use
+            everything you add here.
+          </p>
+        </section>
+
+        <!-- Primary actions -->
+        <section class="hero-actions" style="margin-bottom: 20px;">
+          <button class="btn-primary">Add item manually</button>
+          <button class="btn-secondary">Upload invoice (AI, coming soon)</button>
+        </section>
+
+        <!-- Category filters -->
+        <section style="margin-bottom: 18px;">
+          <div
+            style="
+              font-size: 13px;
+              margin-bottom: 6px;
+              color: #555;
+              font-weight: 600;
+            "
+          >
+            Categories
+          </div>
+          <div
+            style="
+              display: flex;
+              flex-wrap: wrap;
+              gap: 8px;
+              font-size: 12px;
+            "
+          >
+            <button class="btn-secondary">All</button>
+            <button class="btn-secondary">Meat &amp; Fish</button>
+            <button class="btn-secondary">Dairy &amp; Eggs</button>
+            <button class="btn-secondary">Vegetables &amp; Fruit</button>
+            <button class="btn-secondary">Dry Goods</button>
+            <button class="btn-secondary">Spices &amp; Condiments</button>
+            <button class="btn-secondary">Other</button>
+          </div>
+        </section>
+
+        <!-- Sub-category placeholder (will change based on main category) -->
+        <section style="margin-bottom: 18px;">
+          <div
+            style="
+              font-size: 13px;
+              margin-bottom: 6px;
+              color: #555;
+              font-weight: 600;
+            "
+          >
+            Sub-type (example for Meat &amp; Fish)
+          </div>
+          <div
+            style="
+              display: flex;
+              flex-wrap: wrap;
+              gap: 8px;
+              font-size: 12px;
+            "
+          >
+            <button class="btn-secondary">All</button>
+            <button class="btn-secondary">Fresh</button>
+            <button class="btn-secondary">Frozen</button>
+            <button class="btn-secondary">Smoked</button>
+            <button class="btn-secondary">Raw</button>
+            <button class="btn-secondary">Cured</button>
+            <button class="btn-secondary">Seafood</button>
+          </div>
+        </section>
+
+        <!-- Recently updated -->
+        <section style="margin-bottom: 18px;">
+          <div
+            style="
+              font-size: 13px;
+              margin-bottom: 6px;
+              color: #555;
+              font-weight: 600;
+            "
+          >
+            Recently updated
+          </div>
+          <div class="features">
+            <article class="feature-card">
+              <div class="feature-title">Butter 82% – 6.40 €/kg</div>
+              <p class="feature-text">Updated 2 hours ago • Dairy &amp; Eggs</p>
+            </article>
+            <article class="feature-card">
+              <div class="feature-title">Pancetta cubetti – 10.20 €/kg</div>
+              <p class="feature-text">
+                Updated 3 days ago • Meat &amp; Fish (Smoked)
+              </p>
+            </article>
+            <article class="feature-card">
+              <div class="feature-title">Frozen fries – 4.20 €/2.5kg</div>
+              <p class="feature-text">
+                Updated 5 days ago • Vegetables &amp; Fruit (Frozen)
+              </p>
+            </article>
+          </div>
+        </section>
+
+        <!-- Search + table placeholder -->
+        <section>
+          <div style="margin-bottom: 10px;">
+            <input
+              type="text"
+              placeholder="Search by ingredient, supplier, or category..."
+              style="
+                width: 100%;
+                padding: 10px 12px;
+                border-radius: 999px;
+                border: 1px solid #c3c7cf;
+                font-size: 13px;
+              "
+            />
+          </div>
+
+          <div
+            style="
+              overflow-x: auto;
+              border-radius: 12px;
+              background: #ffffff;
+              box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            "
+          >
+            <table
+              style="
+                width: 100%;
+                border-collapse: collapse;
+                font-size: 13px;
+              "
+            >
+              <thead>
+                <tr
+                  style="
+                    text-align: left;
+                    background: #f4f5f9;
+                    border-bottom: 1px solid #e0e3ea;
+                  "
+                >
+                  <th style="padding: 10px 12px;">Ingredient</th>
+                  <th style="padding: 10px 12px;">Category</th>
+                  <th style="padding: 10px 12px;">Sub-type</th>
+                  <th style="padding: 10px 12px;">Unit</th>
+                  <th style="padding: 10px 12px;">Latest price</th>
+                  <th style="padding: 10px 12px;">Last updated</th>
+                  <th style="padding: 10px 12px;">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="padding: 9px 12px;">Butter 82%</td>
+                  <td style="padding: 9px 12px;">Dairy &amp; Eggs</td>
+                  <td style="padding: 9px 12px;">Butter</td>
+                  <td style="padding: 9px 12px;">kg</td>
+                  <td style="padding: 9px 12px;">6.40 €/kg</td>
+                  <td style="padding: 9px 12px;">2 hours ago</td>
+                  <td style="padding: 9px 12px;">
+                    <button class="btn-secondary">Edit</button>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding: 9px 12px;">Pancetta cubetti</td>
+                  <td style="padding: 9px 12px;">Meat &amp; Fish</td>
+                  <td style="padding: 9px 12px;">Smoked</td>
+                  <td style="padding: 9px 12px;">kg</td>
+                  <td style="padding: 9px 12px;">10.20 €/kg</td>
+                  <td style="padding: 9px 12px;">3 days ago</td>
+                  <td style="padding: 9px 12px;">
+                    <button class="btn-secondary">Edit</button>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding: 9px 12px;">Frozen fries</td>
+                  <td style="padding: 9px 12px;">Vegetables &amp; Fruit</td>
+                  <td style="padding: 9px 12px;">Frozen</td>
+                  <td style="padding: 9px 12px;">2.5kg bag</td>
+                  <td style="padding: 9px 12px;">4.20 €/bag</td>
+                  <td style="padding: 9px 12px;">5 days ago</td>
+                  <td style="padding: 9px 12px;">
+                    <button class="btn-secondary">Edit</button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </main>
+
+      <div class="bottom-strip" style="margin-top: 22px;">
+        This is a static prototype of the Purchases page. Next step: make
+        &ldquo;Add item&rdquo; and &ldquo;Edit&rdquo; open real forms and connect
+        to saved data.
+      </div>
+    </div>
+  </body>
+</html>
