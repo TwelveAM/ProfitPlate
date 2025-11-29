@@ -64,7 +64,8 @@
           <button
             class="btn-primary"
             type="button"
-            onclick="scrollToAddForm()"
+            id="add-item-toggle"
+            onclick="toggleAddForm()"
           >
             Add item manually
           </button>
@@ -73,8 +74,12 @@
           </button>
         </section>
 
-        <!-- Add item form -->
-        <section id="add-item-form" class="form-card">
+        <!-- Add item form (hidden by default) -->
+        <section
+          id="add-item-form"
+          class="form-card"
+          style="display: none; margin-bottom: 24px;"
+        >
           <div class="form-title-row">
             <div class="form-title">Add a new purchase item</div>
             <div class="form-hint">
@@ -91,7 +96,7 @@
                   id="item-name"
                   name="name"
                   type="text"
-                  placeholder="e.g. Pancetta cubetti 1kg"
+                  placeholder="e.g. Salmon fillet 3.2kg"
                   required
                 />
               </div>
@@ -175,7 +180,7 @@
                     type="number"
                     min="0"
                     step="0.01"
-                    placeholder="e.g. 9.90"
+                    placeholder="e.g. 59"
                     required
                   />
                   <span style="font-size: 13px; color: #555;">€/unit</span>
@@ -188,7 +193,7 @@
                   id="item-notes"
                   name="notes"
                   type="text"
-                  placeholder="e.g. brand, fat %, packaging"
+                  placeholder="e.g. vacuum packed, brand, fat %"
                 />
               </div>
             </div>
@@ -399,8 +404,11 @@
       const addFormCategory = document.getElementById("item-category");
       const addFormSubtype = document.getElementById("item-subtype");
       const purchaseForm = document.getElementById("purchase-form");
+      const addItemFormSection = document.getElementById("add-item-form");
+      const addItemToggleBtn = document.getElementById("add-item-toggle");
 
       let currentCategory = null;
+      let addFormVisible = false;
 
       function renderSubtypes(categoryKey) {
         const subtypes = categorySubtypes[categoryKey] || [];
@@ -430,7 +438,6 @@
 
         const categoryKey = btn.dataset.category;
 
-        // If clicking the same active category -> toggle off subtypes
         if (
           currentCategory === categoryKey &&
           subtypeSection.style.display === "block"
@@ -444,22 +451,23 @@
           return;
         }
 
-        // Set new active category
         currentCategory = categoryKey;
         categoryRow
           .querySelectorAll(".filter-pill")
           .forEach((b) => b.classList.remove("filter-pill-active"));
         btn.classList.add("filter-pill-active");
 
-        // Show appropriate sub-types
         renderSubtypes(categoryKey);
       });
 
-      // helper: scroll to form when clicking main button
-      function scrollToAddForm() {
-        const el = document.getElementById("add-item-form");
-        if (el) {
-          el.scrollIntoView({ behavior: "smooth", block: "start" });
+      // toggle Add item form visibility
+      function toggleAddForm() {
+        addFormVisible = !addFormVisible;
+        if (addFormVisible) {
+          addItemFormSection.style.display = "block";
+          addItemFormSection.scrollIntoView({ behavior: "smooth", block: "start" });
+        } else {
+          addItemFormSection.style.display = "none";
         }
       }
 
