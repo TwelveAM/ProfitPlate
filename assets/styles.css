@@ -247,3 +247,84 @@ body {
   cursor: default;
   pointer-events: none;
 }
+/* ===== Forms / Cards ===== */
+.form-card {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 18px 18px 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  margin-bottom: 24px;
+}
+
+.form-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.form-title {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.form-hint {
+  font-size: 12px;
+  color: #777;
+}
+
+.form-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.form-field {
+  flex: 1;
+  min-width: 150px;
+}
+
+.form-label {
+  font-size: 12px;
+  margin-bottom: 4px;
+  color: #555;
+  display: block;
+}
+
+.form-input,
+.form-select,
+.form-textarea {
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid #c3c7cf;
+  font-size: 13px;
+  font-family: inherit;
+}
+
+.form-textarea {
+  min-height: 60px;
+  resize: vertical;
+}
+
+.form-footer {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 8px;
+}
+
+.btn-ghost {
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  background: transparent;
+  font-size: 13px;
+  cursor: pointer;
+  color: #555;
+}
+
+.btn-ghost:hover {
+  background: #f1f2f6;
+}
