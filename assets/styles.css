@@ -1,0 +1,186 @@
+/* ===== Global ===== */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+  background-color: #f6f7fb;
+  color: #222;
+  line-height: 1.5;
+}
+
+/* ===== Layout ===== */
+.page {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 32px 16px 48px;
+}
+
+/* ===== Header / Logo ===== */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 32px;
+}
+
+.logo-block {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logo-plate {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 3px solid #0b6b3a; /* deep green */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+.logo-plate span {
+  font-weight: 800;
+  font-size: 18px;
+  color: #0b6b3a;
+}
+
+.brand-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.brand-text .name {
+  font-size: 24px;
+  font-weight: 700;
+  color: #0b6b3a;
+}
+
+.brand-text .tagline {
+  font-size: 13px;
+  color: #555;
+}
+
+.header-link {
+  font-size: 13px;
+  color: #666;
+  text-decoration: none;
+}
+
+.header-link:hover {
+  text-decoration: underline;
+}
+
+/* ===== Hero ===== */
+.hero {
+  margin-top: 12px;
+  margin-bottom: 32px;
+}
+
+.hero-title {
+  font-size: 32px;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.hero-subtitle {
+  font-size: 16px;
+  color: #444;
+  max-width: 520px;
+  margin-bottom: 20px;
+}
+
+.hero-highlight {
+  color: #0b6b3a;
+  font-weight: 600;
+}
+
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 26px;
+}
+
+.btn-primary {
+  padding: 10px 20px;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+  background: #0b6b3a;
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.btn-primary:hover {
+  filter: brightness(1.05);
+}
+
+.btn-secondary {
+  padding: 10px 18px;
+  border-radius: 999px;
+  border: 1px solid #c3c7cf;
+  background: #ffffff;
+  color: #333;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.btn-secondary:hover {
+  background: #f1f2f6;
+}
+
+/* ===== Feature cards ===== */
+.features {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.feature-card {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 16px 18px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.feature-title {
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: #0b6b3a;
+}
+
+.feature-text {
+  font-size: 13px;
+  color: #555;
+}
+
+/* ===== Bottom strip ===== */
+.bottom-strip {
+  margin-top: 10px;
+  font-size: 12px;
+  color: #777;
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 600px) {
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .hero-title {
+    font-size: 26px;
+  }
+}
