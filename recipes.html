@@ -268,94 +268,113 @@
     <!-- Tiny brain -->
     <script src="assets/app.js"></script>
 
-    <!-- Recipes page logic -->
+        <!-- Recipes page logic -->
     <script>
-      const recipesContainer = document.getElementById("recipes-container");
-      const detailCard = document.getElementById("recipe-detail");
-      const detailName = document.getElementById("detail-name");
-      const detailIngredients = document.getElementById("detail-ingredients");
-      const summaryBox = document.getElementById("summary-box");
+      // Fallbacks in case app.js didn't load for some reason
+      if (typeof ppData === "undefined") {
+        window.ppData = { purchases: [], recipes: [], settings: {} };
+      }
+      if (typeof saveData === "undefined") {
+        window.saveData = function () {};
+      }
 
-      const addRecipeCard = document.getElementById("add-recipe-card");
-      const recipeForm = document.getElementById("recipe-form");
-      const ingredientsBody = document.getElementById(
-        "recipe-ingredients-body"
-      );
+      var recipesContainer = document.getElementById("recipes-container");
+      var detailCard = document.getElementById("recipe-detail");
+      var detailName = document.getElementById("detail-name");
+      var detailIngredients = document.getElementById("detail-ingredients");
+      var summaryBox = document.getElementById("summary-box");
 
-      let addRecipeVisible = false;
+      var addRecipeCard = document.getElementById("add-recipe-card");
+      var recipeForm = document.getElementById("recipe-form");
+      var ingredientsBody = document.getElementById("recipe-ingredients-body");
+
+      var addRecipeVisible = false;
 
       function formatCurrency(val) {
-        const num = Number(val) || 0;
+        var num = Number(val) || 0;
         return num.toFixed(2) + " €";
       }
 
       function renderRecipes() {
         recipesContainer.innerHTML = "";
 
-        if (!ppData.recipes.length) {
+        if (!ppData.recipes || !ppData.recipes.length) {
           recipesContainer.innerHTML =
             '<p style="color:#666;">No recipes yet. Use "Add recipe" to create your first one.</p>';
           return;
         }
 
-        ppData.recipes.forEach((recipe) => {
-          const costPerPortion = calculateCostPerPortion(recipe);
-          const cppLabel = isNaN(costPerPortion)
+        ppData.recipes.forEach(function (recipe) {
+          var costPerPortion = calculateCostPerPortion(recipe);
+          var cppLabel = isNaN(costPerPortion)
             ? "-"
             : costPerPortion.toFixed(2) + " €/portion";
 
-          const row = document.createElement("div");
+          var row = document.createElement("div");
           row.className = "recipe-row";
 
-          row.innerHTML = `
-            <div>
-              <div class="recipe-name">${recipe.name}</div>
-              <div class="recipe-meta">
-                ${recipe.portions} portions per batch
-              </div>
-            </div>
-            <div style="display:flex; align-items:center; gap:8px;">
-              <span class="recipe-cost-badge">${cppLabel}</span>
-              <button class="btn-secondary" type="button"
-                onclick="openRecipeDetail('${recipe.id}')">
-                View details
-              </button>
-            </div>
-          `;
+          row.innerHTML =
+            '<div>' +
+            '<div class="recipe-name">' +
+            recipe.name +
+            "</div>" +
+            '<div class="recipe-meta">' +
+            recipe.portions +
+            " portions per batch</div>" +
+            "</div>" +
+            '<div style="display:flex; align-items:center; gap:8px;">' +
+            '<span class="recipe-cost-badge">' +
+            cppLabel +
+            "</span>" +
+            '<button class="btn-secondary" type="button" onclick="openRecipeDetail(\'' +
+            recipe.id +
+            "')\">View details</button>" +
+            "</div>";
 
           recipesContainer.appendChild(row);
         });
       }
 
       function openRecipeDetail(id) {
-        const r = getRecipeById(id);
+        var r = getRecipeById(id);
         if (!r) return;
 
         detailCard.style.display = "block";
         detailName.textContent = r.name;
 
-        const batchCost = calculateBatchCost(r);
-        const cpp = calculateCostPerPortion(r);
-        const margin = calculateMargin(r);
+        var batchCost = calculateBatchCost(r);
+        var cpp = calculateCostPerPortion(r);
+        var margin = calculateMargin(r);
 
-        const summaryParts = [
-          \`<span><strong>Batch size:</strong> \${r.portions} portions</span>\`,
-          \`<span><strong>Total batch cost:</strong> \${formatCurrency(
-            batchCost
-          )}</span>\`,
-          \`<span><strong>Cost per portion:</strong> \${formatCurrency(cpp)}</span>\`
-        ];
+        var summaryParts = [];
+        summaryParts.push(
+          '<span><strong>Batch size:</strong> ' +
+            r.portions +
+            " portions</span>"
+        );
+        summaryParts.push(
+          "<span><strong>Total batch cost:</strong> " +
+            formatCurrency(batchCost) +
+            "</span>"
+        );
+        summaryParts.push(
+          "<span><strong>Cost per portion:</strong> " +
+            formatCurrency(cpp) +
+            "</span>"
+        );
 
         if (r.sellingPricePerPortion && r.sellingPricePerPortion > 0) {
           summaryParts.push(
-            \`<span><strong>Selling price:</strong> \${formatCurrency(
-              r.sellingPricePerPortion
-            )} /portion</span>\`
+            "<span><strong>Selling price:</strong> " +
+              formatCurrency(r.sellingPricePerPortion) +
+              " /portion</span>"
           );
           summaryParts.push(
-            \`<span><strong>Margin:</strong> \${formatCurrency(
-              margin.euro
-            )}/portion (\${(margin.percent * 100).toFixed(0)}%)</span>\`
+            "<span><strong>Margin:</strong> " +
+              formatCurrency(margin.euro) +
+              "/portion (" +
+              (margin.percent * 100).toFixed(0) +
+              "%)</span>"
           );
         }
 
@@ -363,26 +382,42 @@
 
         detailIngredients.innerHTML = "";
 
-        r.ingredients.forEach((ing) => {
-          const purchase = getPurchaseById(ing.purchaseId);
+        r.ingredients.forEach(function (ing) {
+          var purchase = getPurchaseById(ing.purchaseId);
           if (!purchase) return;
 
-          const cost = calculateIngredientCost(ing);
-          const row = document.createElement("tr");
-          row.innerHTML = `
-            <td style="padding:7px 10px;">${purchase.name}</td>
-            <td style="padding:7px 10px;">${purchase.category || ""}</td>
-            <td style="padding:7px 10px;">${purchase.subtype || ""}</td>
-            <td style="padding:7px 10px;">${ing.quantity}</td>
-            <td style="padding:7px 10px;">${ing.unit}</td>
-            <td style="padding:7px 10px;">${(purchase.pricePerUnit ?? 0).toFixed(
-              2
-            )} €/unit</td>
-            <td style="padding:7px 10px;">${formatCurrency(cost)}</td>
-          `;
+          var price =
+            purchase.pricePerUnit != null ? purchase.pricePerUnit : 0;
+          var cost = calculateIngredientCost(ing);
+
+          var row = document.createElement("tr");
+          row.innerHTML =
+            '<td style="padding:7px 10px;">' +
+            (purchase.name || "") +
+            "</td>" +
+            '<td style="padding:7px 10px;">' +
+            (purchase.category || "") +
+            "</td>" +
+            '<td style="padding:7px 10px;">' +
+            (purchase.subtype || "") +
+            "</td>" +
+            '<td style="padding:7px 10px;">' +
+            ing.quantity +
+            "</td>" +
+            '<td style="padding:7px 10px;">' +
+            ing.unit +
+            "</td>" +
+            '<td style="padding:7px 10px;">' +
+            price.toFixed(2) +
+            " €/unit</td>" +
+            '<td style="padding:7px 10px;">' +
+            formatCurrency(cost) +
+            "</td>";
+
           detailIngredients.appendChild(row);
         });
       }
+      window.openRecipeDetail = openRecipeDetail;
 
       function toggleAddRecipeForm() {
         addRecipeVisible = !addRecipeVisible;
@@ -398,52 +433,59 @@
       window.toggleAddRecipeForm = toggleAddRecipeForm;
 
       function buildPurchaseOptions(selectedId) {
-        if (!ppData.purchases.length) {
+        if (!ppData.purchases || !ppData.purchases.length) {
           return '<option value="">No purchases yet</option>';
         }
         return ppData.purchases
-          .map((p) => {
-            const sel = p.id === selectedId ? "selected" : "";
-            return \`<option value="\${p.id}" \${sel}>\${p.name}</option>\`;
+          .map(function (p) {
+            var sel = p.id === selectedId ? "selected" : "";
+            return (
+              '<option value="' + p.id + '" ' + sel + ">" + p.name + "</option>"
+            );
           })
           .join("");
       }
 
       function addIngredientRow() {
-        const tr = document.createElement("tr");
+        var tr = document.createElement("tr");
+        var firstPurchase =
+          ppData.purchases && ppData.purchases.length
+            ? ppData.purchases[0]
+            : null;
+        var unit = firstPurchase && firstPurchase.unit ? firstPurchase.unit : "";
 
-        const firstPurchase = ppData.purchases[0];
-        const unit = firstPurchase?.unit || "";
+        tr.innerHTML =
+          '<td style="padding:6px 8px;">' +
+          '<select class="form-select ing-purchase">' +
+          buildPurchaseOptions(firstPurchase ? firstPurchase.id : "") +
+          "</select>" +
+          "</td>" +
+          '<td style="padding:6px 8px;">' +
+          '<input class="form-input ing-quantity" type="number" min="0" step="0.01" placeholder="e.g. 0.2" />' +
+          "</td>" +
+          '<td style="padding:6px 8px;">' +
+          '<input class="form-input ing-unit" type="text" placeholder="' +
+          unit +
+          '" />' +
+          "</td>" +
+          '<td style="padding:6px 8px;">' +
+          '<button type="button" class="btn-ghost" onclick="removeIngredientRow(this)">Remove</button>' +
+          "</td>";
 
-        tr.innerHTML = `
-          <td style="padding:6px 8px;">
-            <select class="form-select ing-purchase">
-              ${buildPurchaseOptions(firstPurchase?.id)}
-            </select>
-          </td>
-          <td style="padding:6px 8px;">
-            <input class="form-input ing-quantity" type="number" min="0" step="0.01" placeholder="e.g. 0.2" />
-          </td>
-          <td style="padding:6px 8px;">
-            <input class="form-input ing-unit" type="text" placeholder="${unit}" />
-          </td>
-          <td style="padding:6px 8px;">
-            <button type="button" class="btn-ghost" onclick="removeIngredientRow(this)">
-              Remove
-            </button>
-          </td>
-        `;
         ingredientsBody.appendChild(tr);
       }
       window.addIngredientRow = addIngredientRow;
 
       function removeIngredientRow(btn) {
-        const tr = btn.closest("tr");
+        var tr = btn.closest("tr");
         if (!tr) return;
-        // keep at least one row
+
         if (ingredientsBody.children.length <= 1) {
-          tr.querySelector(".ing-quantity").value = "";
-          tr.querySelector(".ing-unit").value = "";
+          // don't delete last row, just clear it
+          var q = tr.querySelector(".ing-quantity");
+          var u = tr.querySelector(".ing-unit");
+          if (q) q.value = "";
+          if (u) u.value = "";
           return;
         }
         tr.remove();
@@ -457,42 +499,47 @@
       }
       window.resetRecipeForm = resetRecipeForm;
 
-      recipeForm.addEventListener("submit", (e) => {
+      recipeForm.addEventListener("submit", function (e) {
         e.preventDefault();
 
-        const name = document.getElementById("recipe-name").value.trim();
-        const portionsVal = parseFloat(
+        var name = document.getElementById("recipe-name").value.trim();
+        var portionsVal = parseFloat(
           document.getElementById("recipe-portions").value
         );
-        const sellingVal = parseFloat(
-          document.getElementById("recipe-selling-price").value.replace(",", ".")
-            || "0"
-        );
+        var sellingRaw =
+          document.getElementById("recipe-selling-price").value || "0";
+        var sellingVal = parseFloat(sellingRaw.replace(",", "."));
 
         if (!name || isNaN(portionsVal) || portionsVal <= 0) {
           alert("Please provide a name and a valid number of portions.");
           return;
         }
 
-        const ingredients = [];
-        ingredientsBody.querySelectorAll("tr").forEach((row) => {
-          const purchaseId = row.querySelector(".ing-purchase").value;
-          const quantityVal = parseFloat(
-            row.querySelector(".ing-quantity").value.replace(",", ".")
-          );
-          const unitInput = row.querySelector(".ing-unit").value.trim();
+        var ingredients = [];
+        var rows = ingredientsBody.querySelectorAll("tr");
+        rows.forEach(function (row) {
+          var select = row.querySelector(".ing-purchase");
+          var qtyInput = row.querySelector(".ing-quantity");
+          var unitInputEl = row.querySelector(".ing-unit");
+
+          if (!select || !qtyInput || !unitInputEl) return;
+
+          var purchaseId = select.value;
+          var qtyRaw = qtyInput.value || "0";
+          var quantityVal = parseFloat(qtyRaw.replace(",", "."));
+          var unitInput = unitInputEl.value.trim();
 
           if (!purchaseId || isNaN(quantityVal) || quantityVal <= 0) {
             return;
           }
 
-          const purchase = getPurchaseById(purchaseId);
-          const unit = unitInput || purchase?.unit || "unit";
+          var purchase = getPurchaseById(purchaseId);
+          var unit = unitInput || (purchase && purchase.unit) || "unit";
 
           ingredients.push({
-            purchaseId,
+            purchaseId: purchaseId,
             quantity: quantityVal,
-            unit
+            unit: unit
           });
         });
 
@@ -501,13 +548,13 @@
           return;
         }
 
-        const newRecipe = {
+        var newRecipe = {
           id: "rec_" + Date.now(),
-          name,
+          name: name,
           portions: Math.round(portionsVal),
           sellingPricePerPortion: isNaN(sellingVal) ? 0 : sellingVal,
-          currency: ppData.settings?.currency || "EUR",
-          ingredients,
+          currency: (ppData.settings && ppData.settings.currency) || "EUR",
+          ingredients: ingredients,
           updatedAt: new Date().toISOString()
         };
 
@@ -520,7 +567,7 @@
         resetRecipeForm();
       });
 
-      // Initial render
+      // Initial setup
       if (!ingredientsBody.children.length) {
         addIngredientRow();
       }
