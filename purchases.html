@@ -65,13 +65,10 @@
           <button class="btn-secondary">Upload invoice (AI, coming soon)</button>
         </section>
 
-        <!-- Category filters -->
+        <!-- Category filters (no 'All' button) -->
         <section class="filter-section">
           <div class="filter-label">Categories</div>
           <div class="filter-row" id="category-row">
-            <button class="btn-secondary filter-pill" data-category="all">
-              All
-            </button>
             <button
               class="btn-secondary filter-pill"
               data-category="Meat & Fish"
@@ -111,7 +108,7 @@
           id="subtype-section"
           style="display: none;"
         >
-          <div class="filter-label" id="subtype-label">Sub-type</div>
+          <div class="filter-label">Sub-type</div>
           <div class="filter-row" id="subtype-row"></div>
         </section>
 
@@ -242,9 +239,9 @@
       </div>
     </div>
 
-    <!-- Tiny brain: category -> sub-type behaviour with toggle, no 'All' subchips -->
+    <!-- Tiny brain: category -> sub-type behaviour with toggle -->
     <script>
-      // Mapping from category -> sub-types (no 'All' chips)
+      // Mapping from category -> sub-types
       const categorySubtypes = {
         "Meat & Fish": ["Fresh", "Frozen", "Smoked", "Raw", "Cured", "Seafood"],
         "Dairy & Eggs": ["Milk / Cream", "Butter", "Cheese", "Eggs"],
@@ -287,18 +284,6 @@
         if (!btn) return;
 
         const categoryKey = btn.dataset.category;
-
-        // If 'All' is clicked: just clear sub-types and highlight All
-        if (categoryKey === "all") {
-          currentCategory = "all";
-          subtypeSection.style.display = "none";
-          subtypeRow.innerHTML = "";
-          categoryRow
-            .querySelectorAll(".filter-pill")
-            .forEach((b) => b.classList.remove("filter-pill-active"));
-          btn.classList.add("filter-pill-active");
-          return;
-        }
 
         // If clicking the same active category -> toggle off subtypes
         if (
