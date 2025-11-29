@@ -66,63 +66,56 @@
         </section>
 
         <!-- Category filters -->
-        <section style="margin-bottom: 18px;">
-          <div
-            style="
-              font-size: 13px;
-              margin-bottom: 6px;
-              color: #555;
-              font-weight: 600;
-            "
-          >
-            Categories
-          </div>
-          <div
-            style="
-              display: flex;
-              flex-wrap: wrap;
-              gap: 8px;
-              font-size: 12px;
-            "
-          >
-            <button class="btn-secondary">All</button>
-            <button class="btn-secondary">Meat &amp; Fish</button>
-            <button class="btn-secondary">Dairy &amp; Eggs</button>
-            <button class="btn-secondary">Vegetables &amp; Fruit</button>
-            <button class="btn-secondary">Dry Goods</button>
-            <button class="btn-secondary">Spices &amp; Condiments</button>
-            <button class="btn-secondary">Other</button>
+        <section class="filter-section">
+          <div class="filter-label">Categories</div>
+          <div class="filter-row" id="category-row">
+            <button
+              class="btn-secondary filter-pill filter-pill-active"
+              data-category="all"
+            >
+              All
+            </button>
+            <button
+              class="btn-secondary filter-pill"
+              data-category="Meat & Fish"
+            >
+              Meat &amp; Fish
+            </button>
+            <button
+              class="btn-secondary filter-pill"
+              data-category="Dairy & Eggs"
+            >
+              Dairy &amp; Eggs
+            </button>
+            <button
+              class="btn-secondary filter-pill"
+              data-category="Vegetables & Fruit"
+            >
+              Vegetables &amp; Fruit
+            </button>
+            <button class="btn-secondary filter-pill" data-category="Dry Goods">
+              Dry Goods
+            </button>
+            <button
+              class="btn-secondary filter-pill"
+              data-category="Spices & Condiments"
+            >
+              Spices &amp; Condiments
+            </button>
+            <button class="btn-secondary filter-pill" data-category="Other">
+              Other
+            </button>
           </div>
         </section>
 
-        <!-- Sub-category placeholder (will change based on main category) -->
-        <section style="margin-bottom: 18px;">
-          <div
-            style="
-              font-size: 13px;
-              margin-bottom: 6px;
-              color: #555;
-              font-weight: 600;
-            "
-          >
-            Sub-type (example for Meat &amp; Fish)
-          </div>
-          <div
-            style="
-              display: flex;
-              flex-wrap: wrap;
-              gap: 8px;
-              font-size: 12px;
-            "
-          >
-            <button class="btn-secondary">All</button>
-            <button class="btn-secondary">Fresh</button>
-            <button class="btn-secondary">Frozen</button>
-            <button class="btn-secondary">Smoked</button>
-            <button class="btn-secondary">Raw</button>
-            <button class="btn-secondary">Cured</button>
-            <button class="btn-secondary">Seafood</button>
-          </div>
+        <!-- Sub-type: appears only when a category with sub-types is selected -->
+        <section
+          class="filter-section"
+          id="subtype-section"
+          style="display: none;"
+        >
+          <div class="filter-label" id="subtype-label">Sub-type</div>
+          <div class="filter-row" id="subtype-row"></div>
         </section>
 
         <!-- Recently updated -->
@@ -251,5 +244,65 @@
         to saved data.
       </div>
     </div>
+
+    <!-- Tiny brain: category -> sub-type behaviour -->
+    <script>
+      // Mapping from category -> sub-types
+      const categorySubtypes = {
+        all: [],
+        "Meat & Fish": ["All", "Fresh", "Frozen", "Smoked", "Raw", "Cured", "Seafood"],
+        "Dairy & Eggs": ["All", "Milk / Cream", "Butter", "Cheese", "Eggs"],
+        "Vegetables & Fruit": ["All", "Fresh", "Frozen", "Dried", "Canned"],
+        "Dry Goods": ["All", "Pasta", "Flour", "Sugar", "Rice", "Legumes"],
+        "Spices & Condiments": ["All", "Spices", "Oils", "Vinegars", "Sauces"],
+        Other: ["All"]
+      };
+
+      const categoryRow = document.getElementById("category-row");
+      const subtypeSection = document.getElementById("subtype-section");
+      const subtypeRow = document.getElementById("subtype-row");
+
+      function renderSubtypes(categoryKey) {
+        const subtypes = categorySubtypes[categoryKey] || [];
+
+        if (!subtypes.length) {
+          // no sub-types for this category -> hide section
+          subtypeSection.style.display = "none";
+          subtypeRow.innerHTML = "";
+          return;
+        }
+
+        // show section and fill with buttons
+        subtypeSection.style.display = "block";
+        subtypeRow.innerHTML = "";
+
+        subtypes.forEach((name, index) => {
+          const btn = document.createElement("button");
+          btn.className =
+            "btn-secondary filter-pill" +
+            (index === 0 ? " filter-pill-active" : "");
+          btn.textContent = name;
+          btn.dataset.subtype = name;
+          subtypeRow.appendChild(btn);
+        });
+      }
+
+      // handle category clicks
+      categoryRow.addEventListener("click", (event) => {
+        const btn = event.target.closest(".filter-pill");
+        if (!btn) return;
+
+        const categoryKey = btn.dataset.category;
+
+        // update active state
+        categoryRow.querySelectorAll(".filter-pill").forEach((b) => {
+          b.classList.remove("filter-pill-active");
+        });
+        btn.classList.add("filter-pill-active");
+
+        // render sub-types for that category
+        renderSubtypes(categoryKey);
+      });
+    </script>
   </body>
 </html>
