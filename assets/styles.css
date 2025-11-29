@@ -184,3 +184,37 @@ body {
     font-size: 26px;
   }
 }
+
+/* ===== Nav ===== */
+.nav {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 13px;
+}
+
+.nav-link {
+  text-decoration: none;
+  color: #555;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+}
+
+.nav-link:hover {
+  background: #f1f2f6;
+  border-color: #d6d9e0;
+}
+
+.nav-link-active {
+  background: #0b6b3a;
+  color: #ffffff;
+  border-color: #0b6b3a;
+  font-weight: 600;
+}
+
+.nav-link-disabled {
+  opacity: 0.45;
+  cursor: default;
+  pointer-events: none;
+}
