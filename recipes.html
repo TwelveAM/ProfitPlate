@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>ProfitPlate – Recipes</title>
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <meta
+      name="description"
+      content="See recipe costs per portion and margins for your menu."
+    />
+    <link rel="stylesheet" href="assets/styles.css" />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="32x32"
+      href="assets/favicon-plate-32.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="64x64"
+      href="assets/favicon-plate-64.png"
+    />
+  </head>
+  <body>
+    <div class="page">
+      <!-- Header with nav -->
+      <header class="header">
+        <div class="logo-block">
+          <div class="logo-plate">
+            <span>PP</span>
+          </div>
+          <div class="brand-text">
+            <div class="name">ProfitPlate</div>
+            <div class="tagline">Know your profit per plate.</div>
+          </div>
+        </div>
+
+        <nav class="nav">
+          <a href="index.html" class="nav-link">Home</a>
+          <a href="purchases.html" class="nav-link">Purchases</a>
+          <a href="recipes.html" class="nav-link nav-link-active">Recipes</a>
+        </nav>
+      </header>
+
+      <main>
+        <!-- Hero -->
+        <section class="hero">
+          <h1 class="hero-title">Recipes</h1>
+          <p class="hero-subtitle">
+            See cost per portion and profit margin for each dish on your menu.
+            Adjust selling price and keep an eye on how ingredient changes
+            affect your bottom line.
+          </p>
+        </section>
+
+        <!-- Top actions -->
+        <section class="hero-actions" style="margin-bottom: 18px;">
+          <button class="btn-primary" type="button">
+            Add recipe (prototype)
+          </button>
+          <button class="btn-secondary" type="button">
+            Export all to PDF (future)
+          </button>
+        </section>
+
+        <!-- Recipe list with cost per portion -->
+        <section class="recipe-list">
+          <div
+            style="
+              font-size: 13px;
+              margin-bottom: 6px;
+              color: #555;
+              font-weight: 600;
+            "
+          >
+            Menu overview
+          </div>
+
+          <div class="recipe-row">
+            <div>
+              <div class="recipe-name">Pasta Carbonara</div>
+              <div class="recipe-meta">
+                5 portions per batch • last updated 2 days ago
+              </div>
+            </div>
+            <div style="display: flex; align-items: center;">
+              <span class="recipe-cost-badge">1.34 €/portion</span>
+              <button class="btn-secondary" type="button">View details</button>
+            </div>
+          </div>
+
+          <div class="recipe-row">
+            <div>
+              <div class="recipe-name">Tarte Tatin</div>
+              <div class="recipe-meta">
+                8 portions per batch • last updated 5 days ago
+              </div>
+            </div>
+            <div style="display: flex; align-items: center;">
+              <span class="recipe-cost-badge">0.91 €/portion</span>
+              <button class="btn-secondary" type="button">View details</button>
+            </div>
+          </div>
+
+          <div class="recipe-row">
+            <div>
+              <div class="recipe-name">Grilled Salmon</div>
+              <div class="recipe-meta">
+                4 portions per batch • last updated 1 day ago
+              </div>
+            </div>
+            <div style="display: flex; align-items: center;">
+              <span class="recipe-cost-badge">4.20 €/portion</span>
+              <button class="btn-secondary" type="button">View details</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- One detailed recipe prototype: table layout (Option B) -->
+        <section class="recipe-card">
+          <div class="recipe-card-title">Pasta Carbonara (example)</div>
+          <div class="recipe-card-subtitle">
+            This is a static prototype of how a single recipe will look with
+            ingredients, cost per portion, and margin. Later this will be loaded
+            from your real data.
+          </div>
+
+          <div class="recipe-summary">
+            <span><strong>Batch size:</strong> 5 portions</span>
+            <span><strong>Total batch cost:</strong> 6.70 €</span>
+            <span><strong>Cost per portion:</strong> 1.34 €</span>
+            <span><strong>Selling price (example):</strong> 9.50 €/portion</span>
+            <span><strong>Margin:</strong> 8.16 €/portion (86%)</span>
+          </div>
+
+          <div
+            style="
+              overflow-x: auto;
+              border-radius: 10px;
+              border: 1px solid #e0e3ea;
+              background: #f9fafb;
+            "
+          >
+            <table
+              style="
+                width: 100%;
+                border-collapse: collapse;
+                font-size: 13px;
+              "
+            >
+              <thead>
+                <tr
+                  style="
+                    text-align: left;
+                    background: #f4f5f9;
+                    border-bottom: 1px solid #e0e3ea;
+                  "
+                >
+                  <th style="padding: 8px 10px;">Ingredient</th>
+                  <th style="padding: 8px 10px;">Category</th>
+                  <th style="padding: 8px 10px;">Sub-type</th>
+                  <th style="padding: 8px 10px;">Quantity</th>
+                  <th style="padding: 8px 10px;">Unit</th>
+                  <th style="padding: 8px 10px;">Price/unit</th>
+                  <th style="padding: 8px 10px;">Cost in recipe</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="padding: 7px 10px;">Spaghetti</td>
+                  <td style="padding: 7px 10px;">Dry Goods</td>
+                  <td style="padding: 7px 10px;">Pasta</td>
+                  <td style="padding: 7px 10px;">500</td>
+                  <td style="padding: 7px 10px;">g</td>
+                  <td style="padding: 7px 10px;">1.40 €/kg</td>
+                  <td style="padding: 7px 10px;">0.70 €</td>
+                </tr>
+                <tr>
+                  <td style="padding: 7px 10px;">Pancetta cubetti</td>
+                  <td style="padding: 7px 10px;">Meat &amp; Fish</td>
+                  <td style="padding: 7px 10px;">Smoked</td>
+                  <td style="padding: 7px 10px;">200</td>
+                  <td style="padding: 7px 10px;">g</td>
+                  <td style="padding: 7px 10px;">10.20 €/kg</td>
+                  <td style="padding: 7px 10px;">2.04 €</td>
+                </tr>
+                <tr>
+                  <td style="padding: 7px 10px;">Eggs</td>
+                  <td style="padding: 7px 10px;">Dairy &amp; Eggs</td>
+                  <td style="padding: 7px 10px;">Eggs</td>
+                  <td style="padding: 7px 10px;">5</td>
+                  <td style="padding: 7px 10px;">pcs</td>
+                  <td style="padding: 7px 10px;">0.25 €/pc</td>
+                  <td style="padding: 7px 10px;">1.25 €</td>
+                </tr>
+                <tr>
+                  <td style="padding: 7px 10px;">Parmesan</td>
+                  <td style="padding: 7px 10px;">Dairy &amp; Eggs</td>
+                  <td style="padding: 7px 10px;">Cheese</td>
+                  <td style="padding: 7px 10px;">100</td>
+                  <td style="padding: 7px 10px;">g</td>
+                  <td style="padding: 7px 10px;">14.00 €/kg</td>
+                  <td style="padding: 7px 10px;">1.40 €</td>
+                </tr>
+                <tr>
+                  <td style="padding: 7px 10px;">Butter</td>
+                  <td style="padding: 7px 10px;">Dairy &amp; Eggs</td>
+                  <td style="padding: 7px 10px;">Butter</td>
+                  <td style="padding: 7px 10px;">50</td>
+                  <td style="padding: 7px 10px;">g</td>
+                  <td style="padding: 7px 10px;">6.40 €/kg</td>
+                  <td style="padding: 7px 10px;">0.32 €</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div style="font-size: 12px; color: #777; margin-top: 10px;">
+            In the real app, this table will be editable. Ingredients and prices
+            will come directly from your Purchases. When you change a price
+            there, all recipes using that ingredient will recalculate
+            automatically.
+          </div>
+        </section>
+      </main>
+
+      <div class="bottom-strip" style="margin-top: 22px;">
+        This page is a static prototype of the Recipes view. Next steps: make
+        recipes editable, connect them to real ingredients, and allow exporting
+        PDFs for the boss.
+      </div>
+    </div>
+  </body>
+</html>
