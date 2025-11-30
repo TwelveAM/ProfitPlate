@@ -644,5 +644,68 @@
         renderRecent();
       })();
     </script>
+    <script>
+// Sub-categories per main category
+const categorySubtypes = {
+  "Meat & Fish": ["Fresh", "Frozen", "Smoked", "Raw", "Cured", "Seafood"],
+  "Dairy & Eggs": ["Milk / Cream", "Butter", "Cheese", "Eggs"],
+  "Vegetables & Fruit": ["Fresh", "Frozen", "Dried", "Canned"],
+  "Dry Goods": ["Pasta", "Flour", "Sugar", "Rice", "Legumes"],
+  "Spices & Condiments": ["Spices", "Oils", "Vinegars", "Sauces"],
+  "Other": []
+};
+
+// UI elements
+const categoryRow = document.getElementById("category-row");
+const subtypeSection = document.getElementById("subtype-section");
+const subtypeRow = document.getElementById("subtype-row");
+
+let currentCategory = null;
+
+// Render subtypes
+function renderSubtypes(category) {
+  const list = categorySubtypes[category] || [];
+  subtypeRow.innerHTML = "";
+
+  if (list.length === 0) {
+    subtypeSection.style.display = "none";
+    return;
+  }
+
+  subtypeSection.style.display = "block";
+
+  list.forEach(st => {
+    const btn = document.createElement("button");
+    btn.className = "btn-secondary filter-pill";
+    btn.textContent = st;
+    btn.dataset.subtype = st;
+    subtypeRow.appendChild(btn);
+  });
+}
+
+// Category click
+categoryRow.addEventListener("click", e => {
+  const btn = e.target.closest(".filter-pill");
+  if (!btn) return;
+
+  const category = btn.dataset.category;
+
+  // Toggle behavior
+  if (currentCategory === category) {
+    currentCategory = null;
+    subtypeSection.style.display = "none";
+    subtypeRow.innerHTML = "";
+    categoryRow.querySelectorAll(".filter-pill").forEach(b => b.classList.remove("filter-pill-active"));
+    return;
+  }
+
+  currentCategory = category;
+
+  categoryRow.querySelectorAll(".filter-pill").forEach(b => b.classList.remove("filter-pill-active"));
+  btn.classList.add("filter-pill-active");
+
+  renderSubtypes(category);
+});
+</script>
   </body>
 </html>
