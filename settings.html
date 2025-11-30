@@ -9,7 +9,7 @@
     />
     <meta
       name="description"
-      content="Settings for ProfitPlate – currency, behaviour and data options."
+      content="Adjust how ProfitPlate behaves in your kitchen – currency, display options and data controls."
     />
     <link rel="stylesheet" href="assets/styles.css" />
     <link
@@ -29,38 +29,40 @@
     <div class="page">
       <!-- Header with nav -->
       <header class="header">
-  <div class="logo-block">
-    <div class="logo-plate">
-      <span>PP</span>
-    </div>
-    <div class="brand-text">
-      <div class="name">ProfitPlate</div>
-      <div class="tagline">Know your profit per plate.</div>
-    </div>
-  </div>
+        <div class="logo-block">
+          <div class="logo-plate">
+            <span>PP</span>
+          </div>
+          <div class="brand-text">
+            <div class="name">ProfitPlate</div>
+            <div class="tagline">Know your profit per plate.</div>
+          </div>
+        </div>
 
-  <nav class="nav">
-    <a href="index.html" class="nav-link">Home</a>
-    <a href="purchases.html" class="nav-link">Purchases</a>
-    <a href="recipes.html" class="nav-link">Recipes</a>
-    <a href="settings.html" class="nav-link nav-link-active">Settings</a>
-  </nav>
-</header>
-
+        <nav class="nav">
+          <a href="index.html" class="nav-link">Home</a>
+          <a href="purchases.html" class="nav-link">Purchases</a>
+          <a href="recipes.html" class="nav-link">Recipes</a>
+          <a href="settings.html" class="nav-link nav-link-active"
+            >Settings</a
+          >
+        </nav>
+      </header>
 
       <main>
-        <!-- Hero -->
+        <!-- Intro -->
         <section class="hero">
           <h1 class="hero-title">Settings</h1>
           <p class="hero-subtitle">
             Adjust how ProfitPlate behaves in your kitchen – currency, display
-            options and data controls. In the real app, these settings would be
-            stored in your account.
+            options and data controls. In the real app, these would be stored in
+            your account and synced across devices.
           </p>
         </section>
 
-        <!-- General -->
+        <!-- Settings card -->
         <section class="form-card" style="margin-bottom: 24px;">
+          <!-- General -->
           <div class="form-title-row">
             <div class="form-title">General</div>
             <div class="form-hint">
@@ -69,36 +71,60 @@
           </div>
 
           <div class="form-row">
-            <div class="form-field">
-              <label class="form-label" for="setting-currency">Currency</label>
+            <div class="form-field" style="flex: 1;">
+              <label class="form-label" for="settings-language">
+                Language
+              </label>
               <select
-                id="setting-currency"
                 class="form-select"
-                name="currency"
+                id="settings-language"
+                name="language"
               >
-                <option value="EUR">€ – Euro</option>
-                <option value="USD">$ – US Dollar</option>
-                <option value="GBP">£ – British Pound</option>
-                <option value="RON">lei – Romanian Leu</option>
-                <option value="CHF">CHF – Swiss Franc</option>
+                <option value="en">English</option>
+                <option value="ro">Română</option>
+                <option value="fr">Français</option>
+                <option value="it">Italiano</option>
               </select>
             </div>
 
-            <div class="form-field">
-              <label class="form-label" for="setting-locale">
+            <div class="form-field" style="flex: 1;">
+              <label class="form-label" for="settings-currency">
+                Currency
+              </label>
+              <select
+                class="form-select"
+                id="settings-currency"
+                name="currency"
+              >
+                <option value="EUR">€ – Euro</option>
+                <option value="RON">lei – Romanian leu</option>
+                <option value="USD">$ – US dollar</option>
+                <option value="GBP">£ – British pound</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-field" style="flex: 1;">
+              <label class="form-label" for="settings-number-format">
                 Number format
               </label>
-              <select id="setting-locale" class="form-select" name="locale">
+              <select
+                class="form-select"
+                id="settings-number-format"
+                name="numberFormat"
+              >
                 <option value="eu">1.234,56 (EU style)</option>
                 <option value="us">1,234.56 (US/UK style)</option>
               </select>
             </div>
           </div>
-        </section>
 
-        <!-- Behaviour -->
-        <section class="form-card" style="margin-bottom: 24px;">
-          <div class="form-title-row">
+          <!-- Behaviour -->
+          <div
+            class="form-title-row"
+            style="margin-top: 24px; border-top: 1px solid #e0e3ea; padding-top: 16px;"
+          >
             <div class="form-title">Behaviour</div>
             <div class="form-hint">
               How ProfitPlate calculates and displays your costs.
@@ -107,64 +133,63 @@
 
           <div class="form-row">
             <div class="form-field" style="flex: 1;">
-              <label class="form-label">Auto-recalculate recipes</label>
+              <label class="form-label" for="settings-auto-recalc">
+                Auto-recalculate recipes
+              </label>
               <div
                 style="
                   display: flex;
-                  justify-content: space-between;
                   align-items: center;
-                  padding: 8px 12px;
-                  border-radius: 10px;
-                  border: 1px solid #d3d7e0;
+                  gap: 8px;
                   font-size: 13px;
+                  color: #444;
                 "
               >
+                <input
+                  id="settings-auto-recalc"
+                  type="checkbox"
+                  style="width: 16px; height: 16px;"
+                />
                 <span>
                   When an ingredient price changes in Purchases, update recipe
                   costs automatically.
                 </span>
-                <input
-                  id="setting-auto-recalc"
-                  type="checkbox"
-                  checked
-                  style="width: 18px; height: 18px;"
-                />
               </div>
             </div>
           </div>
 
           <div class="form-row">
             <div class="form-field" style="flex: 1;">
-              <label class="form-label">Show advanced details</label>
+              <label class="form-label" for="settings-show-advanced">
+                Show advanced details
+              </label>
               <div
                 style="
                   display: flex;
-                  justify-content: space-between;
                   align-items: center;
-                  padding: 8px 12px;
-                  border-radius: 10px;
-                  border: 1px solid #d3d7e0;
+                  gap: 8px;
                   font-size: 13px;
+                  color: #444;
                 "
               >
+                <input
+                  id="settings-show-advanced"
+                  type="checkbox"
+                  style="width: 16px; height: 16px;"
+                />
                 <span>
                   Display margin %, batch cost and ingredient breakdown by
                   default. Turn off for a simpler view.
                 </span>
-                <input
-                  id="setting-advanced"
-                  type="checkbox"
-                  checked
-                  style="width: 18px; height: 18px;"
-                />
               </div>
             </div>
           </div>
-        </section>
 
-        <!-- Data -->
-        <section class="form-card">
-          <div class="form-title-row">
+          <!-- Data & local storage -->
+          <div
+            class="form-title-row"
+            style="margin-top: 24px; border-top: 1px solid #e0e3ea; padding-top: 16px;"
+          >
             <div class="form-title">Data &amp; local storage</div>
             <div class="form-hint">
               ProfitPlate keeps everything in your browser for now. No server,
@@ -172,102 +197,116 @@
             </div>
           </div>
 
-          <p style="font-size: 13px; color: #555; margin-bottom: 12px;">
-            In the real app, this section would let you export / import data,
-            connect multiple devices and reset your account. For now you can
-            clear the local demo data from this browser.
-          </p>
+          <div class="form-row">
+            <div class="form-field" style="flex: 1;">
+              <button
+                type="button"
+                class="btn-secondary"
+                id="settings-clear-data"
+              >
+                Clear local demo data
+              </button>
+              <p
+                style="
+                  margin-top: 6px;
+                  font-size: 12px;
+                  color: #666;
+                  max-width: 520px;
+                "
+              >
+                This will wipe the example Purchases, Recipes and Settings from
+                this browser only. In a future version you’ll be able to import,
+                export and sync data between devices.
+              </p>
+            </div>
+          </div>
+        </section>
 
-          <button
-            type="button"
-            class="btn-secondary"
-            onclick="resetDemoData()"
-          >
-            Clear local demo data
-          </button>
+        <section class="hero" style="margin-bottom: 20px;">
+          <p style="font-size: 13px; color: #666;">
+            Settings are a visual prototype for now. In a future version,
+            they’ll be saved per account and synced across all your devices.
+          </p>
         </section>
       </main>
-
-            <div class="bottom-strip" style="margin-top: 22px;">
-        Settings are a visual prototype for now. In a future version, they’ll be
-        saved per-account and synced across your devices.
-      </div>
     </div>
 
-    <!-- Shared data store -->
-    <script src="assets/app.js"></script>
-
-    <!-- Settings logic: stored inside ppData.settings -->
+    <!-- Tiny local-settings helper so it feels alive -->
     <script>
-      function loadSettings() {
-        const s = (window.ppData && window.ppData.settings) || {};
+      (function () {
+        const STORAGE_KEY = "pp_settings_v1";
 
-        if (s.currency) {
-          document.getElementById("setting-currency").value = s.currency;
-        }
-        if (s.locale) {
-          document.getElementById("setting-locale").value = s.locale;
-        }
-        if (typeof s.autoRecalc === "boolean") {
-          document.getElementById("setting-auto-recalc").checked = s.autoRecalc;
-        }
-        if (typeof s.showAdvanced === "boolean") {
-          document.getElementById("setting-advanced").checked =
-            s.showAdvanced;
-        }
-      }
-
-      function saveSettings() {
-        if (!window.ppData) {
-          window.ppData = { purchases: [], recipes: [], settings: {} };
+        function loadSettings() {
+          try {
+            const raw = localStorage.getItem(STORAGE_KEY);
+            return raw ? JSON.parse(raw) : {};
+          } catch (e) {
+            return {};
+          }
         }
 
-        const s = window.ppData.settings || {};
-
-        s.currency = document.getElementById("setting-currency").value;
-        s.locale = document.getElementById("setting-locale").value;
-        s.autoRecalc =
-          document.getElementById("setting-auto-recalc").checked;
-        s.showAdvanced =
-          document.getElementById("setting-advanced").checked;
-
-        window.ppData.settings = s;
-        if (typeof saveData === "function") {
-          saveData(window.ppData);
+        function saveSettings(values) {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(values));
         }
-      }
 
-      function resetDemoData() {
-        if (!confirm("Clear all local ProfitPlate data in this browser?")) {
-          return;
+        const els = {
+          language: document.getElementById("settings-language"),
+          currency: document.getElementById("settings-currency"),
+          numberFormat: document.getElementById("settings-number-format"),
+          autoRecalc: document.getElementById("settings-auto-recalc"),
+          showAdvanced: document.getElementById("settings-show-advanced"),
+          clearData: document.getElementById("settings-clear-data"),
+        };
+
+        const current = loadSettings();
+
+        if (current.language && els.language) {
+          els.language.value = current.language;
         }
-        try {
-          const key =
-            window.PROFITPLATE_STORAGE_KEY || "profitplate-data-v1";
-          localStorage.removeItem(key);
-          alert("Local ProfitPlate data cleared. Reloading page...");
-          location.reload();
-        } catch (e) {
-          alert("Could not clear data: " + e.message);
+        if (current.currency && els.currency) {
+          els.currency.value = current.currency;
         }
-      }
+        if (current.numberFormat && els.numberFormat) {
+          els.numberFormat.value = current.numberFormat;
+        }
+        if (typeof current.autoRecalc === "boolean" && els.autoRecalc) {
+          els.autoRecalc.checked = current.autoRecalc;
+        }
+        if (typeof current.showAdvanced === "boolean" && els.showAdvanced) {
+          els.showAdvanced.checked = current.showAdvanced;
+        }
 
-      // Wire change handlers
-      document
-        .getElementById("setting-currency")
-        .addEventListener("change", saveSettings);
-      document
-        .getElementById("setting-locale")
-        .addEventListener("change", saveSettings);
-      document
-        .getElementById("setting-auto-recalc")
-        .addEventListener("change", saveSettings);
-      document
-        .getElementById("setting-advanced")
-        .addEventListener("change", saveSettings);
+        function persist() {
+          saveSettings({
+            language: els.language.value,
+            currency: els.currency.value,
+            numberFormat: els.numberFormat.value,
+            autoRecalc: els.autoRecalc.checked,
+            showAdvanced: els.showAdvanced.checked,
+          });
+        }
 
-      // Init from ppData
-      loadSettings();
+        ["change", "input"].forEach((evt) => {
+          els.language.addEventListener(evt, persist);
+          els.currency.addEventListener(evt, persist);
+          els.numberFormat.addEventListener(evt, persist);
+          els.autoRecalc.addEventListener(evt, persist);
+          els.showAdvanced.addEventListener(evt, persist);
+        });
+
+        if (els.clearData) {
+          els.clearData.addEventListener("click", () => {
+            if (
+              confirm(
+                "This will clear Purchases, Recipes and Settings saved in this browser.\n\nAre you sure?"
+              )
+            ) {
+              localStorage.clear();
+              location.reload();
+            }
+          });
+        }
+      })();
     </script>
   </body>
 </html>
