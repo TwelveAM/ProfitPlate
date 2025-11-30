@@ -460,233 +460,233 @@
     <script src="assets/app.js"></script>
 
     <!-- Tiny brain: filters + form helpers + pack helper -->
-    <script>
-      // Category -> sub-types for filters AND form
-      const categorySubtypes = {
-        "Meat & Fish": ["Fresh", "Frozen", "Smoked", "Raw", "Cured", "Seafood"],
-        "Dairy & Eggs": ["Milk / Cream", "Butter", "Cheese", "Eggs"],
-        "Vegetables & Fruit": ["Fresh", "Frozen", "Dried", "Canned"],
-        "Dry Goods": ["Pasta", "Flour", "Sugar", "Rice", "Legumes"],
-        "Spices & Condiments": ["Spices", "Oils", "Vinegars", "Sauces"],
-        Other: []
-      };
-
-      const categoryRow = document.getElementById("category-row");
-      const subtypeSection = document.getElementById("subtype-section");
-      const subtypeRow = document.getElementById("subtype-row");
-      const addFormCategory = document.getElementById("item-category");
-      const addFormSubtype = document.getElementById("item-subtype");
-      const purchaseForm = document.getElementById("purchase-form");
-      const addItemFormSection = document.getElementById("add-item-form");
-
-      // Pack helper elements
-      const unitSelect = document.getElementById("item-unit");
-      const packQtyInput = document.getElementById("pack-qty");
-      const packUnitSelect = document.getElementById("pack-unit");
-      const packPriceInput = document.getElementById("pack-price");
-      const priceInput = document.getElementById("item-price");
-
-      let currentCategory = null;
-      let addFormVisible = false;
-
-      function renderSubtypes(categoryKey) {
-        const subtypes = categorySubtypes[categoryKey] || [];
-
-        if (!subtypes.length) {
-          subtypeSection.style.display = "none";
-          subtypeRow.innerHTML = "";
-          return;
-        }
-
-        subtypeSection.style.display = "block";
-        subtypeRow.innerHTML = "";
-
-        subtypes.forEach((name) => {
-          const btn = document.createElement("button");
-          btn.className = "btn-secondary filter-pill";
-          btn.textContent = name;
-          btn.dataset.subtype = name;
-          subtypeRow.appendChild(btn);
-        });
-      }
-
-      // Category chips (toggle behaviour)
-      categoryRow.addEventListener("click", (event) => {
-        const btn = event.target.closest(".filter-pill");
-        if (!btn) return;
-
-        const categoryKey = btn.dataset.category;
-
-        if (
-          currentCategory === categoryKey &&
-          subtypeSection.style.display === "block"
-        ) {
-          currentCategory = null;
-          subtypeSection.style.display = "none";
-          subtypeRow.innerHTML = "";
-          categoryRow
-            .querySelectorAll(".filter-pill")
-            .forEach((b) => b.classList.remove("filter-pill-active"));
-          return;
-        }
-
-        currentCategory = categoryKey;
-        categoryRow
-          .querySelectorAll(".filter-pill")
-          .forEach((b) => b.classList.remove("filter-pill-active"));
-        btn.classList.add("filter-pill-active");
-
-        renderSubtypes(categoryKey);
-      });
-
-      // Toggle Add item form (no auto-scroll)
-      function toggleAddForm() {
-        addFormVisible = !addFormVisible;
-        addItemFormSection.style.display = addFormVisible ? "block" : "none";
-      }
-      window.toggleAddForm = toggleAddForm;
-
-      // Populate sub-type select in form when category changes
-      addFormCategory.addEventListener("change", (e) => {
-        const value = e.target.value;
-        const subtypes = categorySubtypes[value] || [];
-        addFormSubtype.innerHTML = "";
-
-        if (!subtypes.length) {
-          addFormSubtype.disabled = true;
-          const opt = document.createElement("option");
-          opt.value = "";
-          opt.textContent = "No sub-type";
-          addFormSubtype.appendChild(opt);
-          return;
-        }
-
-        addFormSubtype.disabled = false;
-        const placeholder = document.createElement("option");
-        placeholder.value = "";
-        placeholder.textContent = "Select...";
-        addFormSubtype.appendChild(placeholder);
-
-        subtypes.forEach((st) => {
-          const opt = document.createElement("option");
-          opt.value = st;
-          opt.textContent = st;
-          addFormSubtype.appendChild(opt);
-        });
-      });
-
-      // --- Pack helper logic ---
-
-      function normalizeUnit(u) {
-        if (!u) return "";
-        u = u.toLowerCase();
-        if (u === "gr") u = "g";
-        return u;
-      }
-
-      function convertToBase(qty, from, to) {
-        let q = Number(qty) || 0;
-        from = normalizeUnit(from);
-        to = normalizeUnit(to);
-
-        if (!from || !to) return 0;
-        if (from === to) return q;
-
-        // g <-> kg
-        if (from === "g" && to === "kg") return q / 1000;
-        if (from === "kg" && to === "g") return q * 1000;
-
-        // ml <-> l
-        if (from === "ml" && to === "l") return q / 1000;
-        if (from === "l" && to === "ml") return q * 1000;
-
-        // pcs or other: no conversion, assume same thing
-        return q;
-      }
-
-      function fillPriceFromPack() {
-        const baseUnit = unitSelect.value;
-        const packQtyRaw = packQtyInput.value || "0";
-        const packPriceRaw = packPriceInput.value || "0";
-        const packUnit = packUnitSelect.value;
-
-        const packQty = parseFloat(packQtyRaw.replace(",", "."));
-        const packPrice = parseFloat(packPriceRaw.replace(",", "."));
-
-        if (!baseUnit || !packUnit || !packQty || !packPrice || packQty <= 0) {
-          alert("Fill pack quantity, unit, and price first.");
-          return;
-        }
-
-        const qtyInBase = convertToBase(packQty, packUnit, baseUnit);
-
-        if (!qtyInBase || qtyInBase <= 0) {
-          alert(
-            "Could not convert pack unit to recipe unit. Use compatible units (g/kg or ml/L)."
-          );
-          return;
-        }
-
-        const perUnit = packPrice / qtyInBase;
-        priceInput.value = perUnit.toFixed(4);
-      }
-      window.fillPriceFromPack = fillPriceFromPack;
-
-      // real-ish submit: save to ppData.purchases
-purchaseForm.addEventListener("submit", (e) => {
-  e.preventDefault();
-
-  if (!window.ppData) {
-    window.ppData = { purchases: [], recipes: [], settings: {} };
-  }
-
-  const name = document.getElementById("item-name").value.trim();
-  const supplier = document.getElementById("item-supplier").value.trim();
-  const category = document.getElementById("item-category").value;
-  const subtype = document.getElementById("item-subtype").value || "";
-  const unit = document.getElementById("item-unit").value;
-  const notes = document.getElementById("item-notes").value.trim();
-
-  const priceRaw = document.getElementById("item-price").value || "0";
-  const price = parseFloat(priceRaw.replace(",", "."));
-
-  if (!name || !category || !unit || isNaN(price) || price <= 0) {
-    alert("Name, category, unit and price are required.");
-    return;
-  }
-
-  const item = {
-    id: "pur_" + Date.now(),
-    name,
-    supplier,
-    category,
-    subtype,
-    unit,
-    pricePerUnit: price,
-    currency:
-      (window.ppData.settings && window.ppData.settings.currency) || "EUR",
-    notes,
-    updatedAt: new Date().toISOString()
+<script>
+  // Category -> sub-types for filters AND form
+  const categorySubtypes = {
+    "Meat & Fish": ["Fresh", "Frozen", "Smoked", "Raw", "Cured", "Seafood"],
+    "Dairy & Eggs": ["Milk / Cream", "Butter", "Cheese", "Eggs"],
+    "Vegetables & Fruit": ["Fresh", "Frozen", "Dried", "Canned"],
+    "Dry Goods": ["Pasta", "Flour", "Sugar", "Rice", "Legumes"],
+    "Spices & Condiments": ["Spices", "Oils", "Vinegars", "Sauces"],
+    Other: []
   };
 
-  if (!Array.isArray(window.ppData.purchases)) {
-    window.ppData.purchases = [];
+  const categoryRow = document.getElementById("category-row");
+  const subtypeSection = document.getElementById("subtype-section");
+  const subtypeRow = document.getElementById("subtype-row");
+  const addFormCategory = document.getElementById("item-category");
+  const addFormSubtype = document.getElementById("item-subtype");
+  const purchaseForm = document.getElementById("purchase-form");
+  const addItemFormSection = document.getElementById("add-item-form");
+
+  // Pack helper elements
+  const unitSelect = document.getElementById("item-unit");
+  const packQtyInput = document.getElementById("pack-qty");
+  const packUnitSelect = document.getElementById("pack-unit");
+  const packPriceInput = document.getElementById("pack-price");
+  const priceInput = document.getElementById("item-price");
+
+  let currentCategory = null;
+  let addFormVisible = false;
+
+  function renderSubtypes(categoryKey) {
+    const subtypes = categorySubtypes[categoryKey] || [];
+
+    if (!subtypes.length) {
+      subtypeSection.style.display = "none";
+      subtypeRow.innerHTML = "";
+      return;
+    }
+
+    subtypeSection.style.display = "block";
+    subtypeRow.innerHTML = "";
+
+    subtypes.forEach((name) => {
+      const btn = document.createElement("button");
+      btn.className = "btn-secondary filter-pill";
+      btn.textContent = name;
+      btn.dataset.subtype = name;
+      subtypeRow.appendChild(btn);
+    });
   }
 
-  window.ppData.purchases.push(item);
+  // Category chips (toggle behaviour)
+  categoryRow.addEventListener("click", (event) => {
+    const btn = event.target.closest(".filter-pill");
+    if (!btn) return;
 
-  if (typeof saveData === "function") {
-    saveData(window.ppData);
+    const categoryKey = btn.dataset.category;
+
+    if (
+      currentCategory === categoryKey &&
+      subtypeSection.style.display === "block"
+    ) {
+      currentCategory = null;
+      subtypeSection.style.display = "none";
+      subtypeRow.innerHTML = "";
+      categoryRow
+        .querySelectorAll(".filter-pill")
+        .forEach((b) => b.classList.remove("filter-pill-active"));
+      return;
+    }
+
+    currentCategory = categoryKey;
+    categoryRow
+      .querySelectorAll(".filter-pill")
+      .forEach((b) => b.classList.remove("filter-pill-active"));
+    btn.classList.add("filter-pill-active");
+
+    renderSubtypes(categoryKey);
+  });
+
+  // Toggle Add item form (no auto-scroll)
+  function toggleAddForm() {
+    addFormVisible = !addFormVisible;
+    addItemFormSection.style.display = addFormVisible ? "block" : "none";
+  }
+  window.toggleAddForm = toggleAddForm;
+
+  // Populate sub-type select in form when category changes
+  addFormCategory.addEventListener("change", (e) => {
+    const value = e.target.value;
+    const subtypes = categorySubtypes[value] || [];
+    addFormSubtype.innerHTML = "";
+
+    if (!subtypes.length) {
+      addFormSubtype.disabled = true;
+      const opt = document.createElement("option");
+      opt.value = "";
+      opt.textContent = "No sub-type";
+      addFormSubtype.appendChild(opt);
+      return;
+    }
+
+    addFormSubtype.disabled = false;
+    const placeholder = document.createElement("option");
+    placeholder.value = "";
+    placeholder.textContent = "Select...";
+    addFormSubtype.appendChild(placeholder);
+
+    subtypes.forEach((st) => {
+      const opt = document.createElement("option");
+      opt.value = st;
+      opt.textContent = st;
+      addFormSubtype.appendChild(opt);
+    });
+  });
+
+  // --- Pack helper logic ---
+
+  function normalizeUnit(u) {
+    if (!u) return "";
+    u = u.toLowerCase();
+    if (u === "gr") u = "g";
+    return u;
   }
 
-  alert("Item saved locally. It will be available in Recipes.");
+  function convertToBase(qty, from, to) {
+    let q = Number(qty) || 0;
+    from = normalizeUnit(from);
+    to = normalizeUnit(to);
 
-  // reset form + pack helper
-  purchaseForm.reset();
-  packQtyInput.value = "";
-  packUnitSelect.value = "";
-  packPriceInput.value = "";
-});
-    </script>
-  </body>
+    if (!from || !to) return 0;
+    if (from === to) return q;
+
+    // g <-> kg
+    if (from === "g" && to === "kg") return q / 1000;
+    if (from === "kg" && to === "g") return q * 1000;
+
+    // ml <-> l
+    if (from === "ml" && to === "l") return q / 1000;
+    if (from === "l" && to === "ml") return q * 1000;
+
+    // pcs or other: no conversion, assume same thing
+    return q;
+  }
+
+  function fillPriceFromPack() {
+    const baseUnit = unitSelect.value;
+    const packQtyRaw = packQtyInput.value || "0";
+    const packPriceRaw = packPriceInput.value || "0";
+    const packUnit = packUnitSelect.value;
+
+    const packQty = parseFloat(packQtyRaw.replace(",", "."));
+    const packPrice = parseFloat(packPriceRaw.replace(",", "."));
+
+    if (!baseUnit || !packUnit || !packQty || !packPrice || packQty <= 0) {
+      alert("Fill pack quantity, unit, and price first.");
+      return;
+    }
+
+    const qtyInBase = convertToBase(packQty, packUnit, baseUnit);
+
+    if (!qtyInBase || qtyInBase <= 0) {
+      alert(
+        "Could not convert pack unit to recipe unit. Use compatible units (g/kg or ml/L)."
+      );
+      return;
+    }
+
+    const perUnit = packPrice / qtyInBase;
+    priceInput.value = perUnit.toFixed(4);
+  }
+  window.fillPriceFromPack = fillPriceFromPack;
+
+  // === REAL SUBMIT: save to ppData.purchases ===
+  purchaseForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+
+    if (!window.ppData) {
+      window.ppData = { purchases: [], recipes: [], settings: {} };
+    }
+
+    const name = document.getElementById("item-name").value.trim();
+    const supplier = document.getElementById("item-supplier").value.trim();
+    const category = document.getElementById("item-category").value;
+    const subtype = document.getElementById("item-subtype").value || "";
+    const unit = document.getElementById("item-unit").value;
+    const notes = document.getElementById("item-notes").value.trim();
+
+    const priceRaw = document.getElementById("item-price").value || "0";
+    const price = parseFloat(priceRaw.replace(",", "."));
+
+    if (!name || !category || !unit || isNaN(price) || price <= 0) {
+      alert("Name, category, unit and price are required.");
+      return;
+    }
+
+    const item = {
+      id: "pur_" + Date.now(),
+      name,
+      supplier,
+      category,
+      subtype,
+      unit,
+      pricePerUnit: price,
+      currency:
+        (window.ppData.settings && window.ppData.settings.currency) || "EUR",
+      notes,
+      updatedAt: new Date().toISOString()
+    };
+
+    if (!Array.isArray(window.ppData.purchases)) {
+      window.ppData.purchases = [];
+    }
+
+    window.ppData.purchases.push(item);
+
+    if (typeof saveData === "function") {
+      saveData(window.ppData);
+    }
+
+    alert("Item saved locally. It will be available in Recipes.");
+
+    // reset form + pack helper
+    purchaseForm.reset();
+    packQtyInput.value = "";
+    packUnitSelect.value = "";
+    packPriceInput.value = "";
+  });
+</script>
+</body>
 </html>
