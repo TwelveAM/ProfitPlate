@@ -632,13 +632,61 @@
       }
       window.fillPriceFromPack = fillPriceFromPack;
 
-      // prevent real submit for now (prototype only)
-      purchaseForm.addEventListener("submit", (e) => {
-        e.preventDefault();
-        alert(
-          "In the real app this would save the item.\nRight now it's just a visual prototype."
-        );
-      });
+      // real-ish submit: save to ppData.purchases
+purchaseForm.addEventListener("submit", (e) => {
+  e.preventDefault();
+
+  if (!window.ppData) {
+    window.ppData = { purchases: [], recipes: [], settings: {} };
+  }
+
+  const name = document.getElementById("item-name").value.trim();
+  const supplier = document.getElementById("item-supplier").value.trim();
+  const category = document.getElementById("item-category").value;
+  const subtype = document.getElementById("item-subtype").value || "";
+  const unit = document.getElementById("item-unit").value;
+  const notes = document.getElementById("item-notes").value.trim();
+
+  const priceRaw = document.getElementById("item-price").value || "0";
+  const price = parseFloat(priceRaw.replace(",", "."));
+
+  if (!name || !category || !unit || isNaN(price) || price <= 0) {
+    alert("Name, category, unit and price are required.");
+    return;
+  }
+
+  const item = {
+    id: "pur_" + Date.now(),
+    name,
+    supplier,
+    category,
+    subtype,
+    unit,
+    pricePerUnit: price,
+    currency:
+      (window.ppData.settings && window.ppData.settings.currency) || "EUR",
+    notes,
+    updatedAt: new Date().toISOString()
+  };
+
+  if (!Array.isArray(window.ppData.purchases)) {
+    window.ppData.purchases = [];
+  }
+
+  window.ppData.purchases.push(item);
+
+  if (typeof saveData === "function") {
+    saveData(window.ppData);
+  }
+
+  alert("Item saved locally. It will be available in Recipes.");
+
+  // reset form + pack helper
+  purchaseForm.reset();
+  packQtyInput.value = "";
+  packUnitSelect.value = "";
+  packPriceInput.value = "";
+});
     </script>
   </body>
 </html>
