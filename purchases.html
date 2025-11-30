@@ -454,8 +454,11 @@
   const packPriceInput = document.getElementById("pack-price");
   const priceInput = document.getElementById("item-price");
 
+  const purchasesTableBody = document.getElementById("purchases-table-body");
+
   let currentCategory = null;
   let addFormVisible = false;
+  let currentEditingId = null; // null = adding new, not editing
 
   function renderSubtypes(categoryKey) {
     const subtypes = categorySubtypes[categoryKey] || [];
@@ -511,6 +514,13 @@
   function toggleAddForm() {
     addFormVisible = !addFormVisible;
     addItemFormSection.style.display = addFormVisible ? "block" : "none";
+    if (!addFormVisible) {
+      currentEditingId = null;
+      purchaseForm.reset();
+      packQtyInput.value = "";
+      packUnitSelect.value = "";
+      packPriceInput.value = "";
+    }
   }
   window.toggleAddForm = toggleAddForm;
 
@@ -600,122 +610,14 @@
   }
   window.fillPriceFromPack = fillPriceFromPack;
 
-  // === REAL SUBMIT: save to ppData.purchases ===
-  purchaseForm.addEventListener("submit", (e) => {
-    e.preventDefault();
+  // === Data helpers ===
 
-    if (!window.ppData) {
-      window.ppData = { purchases: [], recipes: [], settings: {} };
-    }
-
-    const name = document.getElementById("item-name").value.trim();
-    const supplier = document.getElementById("item-supplier").value.trim();
-    const category = document.getElementById("item-category").value;
-    const subtype = document.getElementById("item-subtype").value || "";
-    const unit = document.getElementById("item-unit").value;
-    const notes = document.getElementById("item-notes").value.trim();
-
-    const priceRaw = document.getElementById("item-price").value || "0";
-    const price = parseFloat(priceRaw.replace(",", "."));
-
-    if (!name || !category || !unit || isNaN(price) || price <= 0) {
-      alert("Name, category, unit and price are required.");
-      return;
-    }
-
-    const item = {
-      id: "pur_" + Date.now(),
-      name,
-      supplier,
-      category,
-      subtype,
-      unit,
-      pricePerUnit: price,
-      currency:
-        (window.ppData.settings && window.ppData.settings.currency) || "EUR",
-      notes,
-      updatedAt: new Date().toISOString()
-    };
-
-    if (!Array.isArray(window.ppData.purchases)) {
-      window.ppData.purchases = [];
-    }
-
-    window.ppData.purchases.push(item);
-
-    if (typeof saveData === "function") {
-      saveData(window.ppData);
-    }
-
-    alert("Item saved locally. It will be available in Recipes.");
-
-    // reset form + pack helper
-    purchaseForm.reset();
-    packQtyInput.value = "";
-    packUnitSelect.value = "";
-    packPriceInput.value = "";
-  });
-    // === Render purchases table from ppData ===
-
-  const purchasesTableBody = document.getElementById("purchases-table-body");
-
-  function ensureSeedPurchases() {
+  function ensureDataShell() {
     if (!window.ppData) {
       window.ppData = { purchases: [], recipes: [], settings: {} };
     }
     if (!Array.isArray(window.ppData.purchases)) {
       window.ppData.purchases = [];
-    }
-
-    if (window.ppData.purchases.length > 0) {
-      return; // already have data, don't seed
-    }
-
-    const now = new Date().toISOString();
-    window.ppData.purchases = [
-      {
-        id: "seed_butter",
-        name: "Butter 82%",
-        supplier: "",
-        category: "Dairy & Eggs",
-        subtype: "Butter",
-        unit: "kg",
-        pricePerUnit: 6.4,
-        currency:
-          (window.ppData.settings && window.ppData.settings.currency) || "EUR",
-        notes: "",
-        updatedAt: now
-      },
-      {
-        id: "seed_pancetta",
-        name: "Pancetta cubetti",
-        supplier: "",
-        category: "Meat & Fish",
-        subtype: "Smoked",
-        unit: "kg",
-        pricePerUnit: 10.2,
-        currency:
-          (window.ppData.settings && window.ppData.settings.currency) || "EUR",
-        notes: "",
-        updatedAt: now
-      },
-      {
-        id: "seed_fries",
-        name: "Frozen fries",
-        supplier: "",
-        category: "Vegetables & Fruit",
-        subtype: "Frozen",
-        unit: "bag",
-        pricePerUnit: 4.2,
-        currency:
-          (window.ppData.settings && window.ppData.settings.currency) || "EUR",
-        notes: "",
-        updatedAt: now
-      }
-    ];
-
-    if (typeof saveData === "function") {
-      saveData(window.ppData);
     }
   }
 
@@ -731,10 +633,8 @@
   function renderPurchasesTable() {
     if (!purchasesTableBody) return;
 
-    const items =
-      (window.ppData && Array.isArray(window.ppData.purchases)
-        ? window.ppData.purchases
-        : []);
+    ensureDataShell();
+    const items = window.ppData.purchases;
 
     purchasesTableBody.innerHTML = "";
 
@@ -759,19 +659,23 @@
         <td style="padding: 9px 12px;">${item.subtype || ""}</td>
         <td style="padding: 9px 12px;">${item.unit || ""}</td>
         <td style="padding: 9px 12px;">
-          ${item.pricePerUnit != null
-            ? item.pricePerUnit.toFixed(2) +
-              " " +
-              (item.currency || "€") +
-              "/" +
-              (item.unit || "")
-            : ""}
+          ${
+            item.pricePerUnit != null
+              ? item.pricePerUnit.toFixed(2) +
+                " " +
+                (item.currency || "€") +
+                "/" +
+                (item.unit || "")
+              : ""
+          }
         </td>
         <td style="padding: 9px 12px;">${formatDateShort(
           item.updatedAt
         )}</td>
         <td style="padding: 9px 12px;">
-          <button class="btn-secondary">Edit</button>
+          <button class="btn-secondary purchase-edit-btn" data-id="${
+            item.id
+          }">Edit</button>
         </td>
       `;
 
@@ -779,16 +683,125 @@
     });
   }
 
-  // Init on page load: seed demo items once, then render
-  ensureSeedPurchases();
-  renderPurchasesTable();
+  // === Submit: add or update item ===
+  purchaseForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+    ensureDataShell();
 
-  // After saving a new item, re-render table immediately
-  purchaseForm.addEventListener("submit", () => {
+    const name = document.getElementById("item-name").value.trim();
+    const supplier = document.getElementById("item-supplier").value.trim();
+    const category = document.getElementById("item-category").value;
+    const subtype = document.getElementById("item-subtype").value || "";
+    const unit = document.getElementById("item-unit").value;
+    const notes = document.getElementById("item-notes").value.trim();
+
+    const priceRaw = document.getElementById("item-price").value || "0";
+    const price = parseFloat(priceRaw.replace(",", "."));
+
+    if (!name || !category || !unit || isNaN(price) || price <= 0) {
+      alert("Name, category, unit and price are required.");
+      return;
+    }
+
+    const now = new Date().toISOString();
+    const currency =
+      (window.ppData.settings && window.ppData.settings.currency) ||
+      "EUR";
+
+    if (currentEditingId) {
+      // UPDATE existing
+      const items = window.ppData.purchases;
+      const idx = items.findIndex((i) => i.id === currentEditingId);
+      if (idx !== -1) {
+        items[idx] = {
+          ...items[idx],
+          name,
+          supplier,
+          category,
+          subtype,
+          unit,
+          pricePerUnit: price,
+          currency,
+          notes,
+          updatedAt: now
+        };
+      }
+      alert("Item updated.");
+    } else {
+      // CREATE new
+      const item = {
+        id: "pur_" + Date.now(),
+        name,
+        supplier,
+        category,
+        subtype,
+        unit,
+        pricePerUnit: price,
+        currency,
+        notes,
+        updatedAt: now
+      };
+      window.ppData.purchases.push(item);
+      alert("Item saved locally. It will be available in Recipes.");
+    }
+
+    if (typeof saveData === "function") {
+      saveData(window.ppData);
+    }
+
+    // reset form / state
+    currentEditingId = null;
+    purchaseForm.reset();
+    packQtyInput.value = "";
+    packUnitSelect.value = "";
+    packPriceInput.value = "";
+
     renderPurchasesTable();
   });
-</script>
 
+  // === Handle Edit clicks ===
+  if (purchasesTableBody) {
+    purchasesTableBody.addEventListener("click", (e) => {
+      const btn = e.target.closest(".purchase-edit-btn");
+      if (!btn) return;
+
+      ensureDataShell();
+      const id = btn.dataset.id;
+      const item = window.ppData.purchases.find((i) => i.id === id);
+      if (!item) return;
+
+      // open form and fill it
+      addFormVisible = true;
+      addItemFormSection.style.display = "block";
+
+      document.getElementById("item-name").value = item.name;
+      document.getElementById("item-supplier").value = item.supplier || "";
+      document.getElementById("item-category").value = item.category || "";
+
+      // trigger subtype select build first
+      const event = new Event("change");
+      addFormCategory.dispatchEvent(event);
+
+      document.getElementById("item-subtype").value = item.subtype || "";
+      document.getElementById("item-unit").value = item.unit || "";
+      document.getElementById("item-price").value =
+        item.pricePerUnit != null ? item.pricePerUnit : "";
+      document.getElementById("item-notes").value = item.notes || "";
+
+      currentEditingId = item.id;
+
+      // optional: scroll to form
+      window.scrollTo({
+        top: addItemFormSection.offsetTop - 80,
+        behavior: "smooth"
+      });
+    });
+  }
+
+  // Init
+  ensureDataShell();
+  renderPurchasesTable();
+</script>
 </script>
 </body>
 </html>
