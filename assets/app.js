@@ -1,3 +1,63 @@
+// Shared data store for ProfitPlate: purchases, recipes, settings
+(function () {
+  const STORAGE_KEY = "profitplate-data-v1";
+
+  function defaultData() {
+    return {
+      purchases: [],
+      recipes: [],
+      settings: {
+        currency: "EUR",
+        locale: "eu", // "eu" = 1.234,56  /  "us" = 1,234.56
+        autoRecalc: true,
+        showAdvanced: true
+      }
+    };
+  }
+
+  function loadData() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return defaultData();
+      const parsed = JSON.parse(raw);
+      const base = defaultData();
+
+      return {
+        purchases: Array.isArray(parsed.purchases)
+          ? parsed.purchases
+          : base.purchases,
+        recipes: Array.isArray(parsed.recipes)
+          ? parsed.recipes
+          : base.recipes,
+        settings: Object.assign({}, base.settings, parsed.settings || {})
+      };
+    } catch (e) {
+      console.warn("ProfitPlate: failed to load data, using defaults", e);
+      return defaultData();
+    }
+  }
+
+  const data = loadData();
+
+  // Expose global data + saver
+  window.ppData = data;
+
+  window.saveData = function (newData) {
+    if (newData) {
+      window.ppData = newData;
+    }
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(window.ppData));
+    } catch (e) {
+      console.error("ProfitPlate: could not save data", e);
+    }
+  };
+
+  // Expose key so other pages can wipe everything if they want
+  window.PROFITPLATE_STORAGE_KEY = STORAGE_KEY;
+})();
+
+
 /*
   ProfitPlate Tiny Brain v1
   LocalStorage-based data engine
