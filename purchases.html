@@ -2,710 +2,154 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>ProfitPlate – Purchases</title>
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1, viewport-fit=cover"
-    />
-    <meta
-      name="description"
-      content="Manage your ingredients, categories, and supplier prices in ProfitPlate."
-    />
+    <title>Purchases – ProfitPlate</title>
+
     <link rel="stylesheet" href="assets/styles.css" />
-    <link
-      rel="icon"
-      type="image/png"
-      sizes="32x32"
-      href="assets/favicon-plate-32.png"
-    />
-    <link
-      rel="icon"
-      type="image/png"
-      sizes="64x64"
-      href="assets/favicon-plate-64.png"
-    />
   </head>
+
   <body>
-    <div class="page">
-      <!-- Header with nav -->
-      <header class="header">
-        <div class="logo-block">
-          <div class="logo-plate">
-            <span>PP</span>
-          </div>
-          <div class="brand-text">
-            <div class="name">ProfitPlate</div>
-            <div class="tagline">Know your profit per plate.</div>
-          </div>
-        </div>
+    <div class="container">
 
-        <nav class="nav">
-          <a href="index.html" class="nav-link">Home</a>
-          <a href="purchases.html" class="nav-link nav-link-active">Purchases</a>
-          <a href="recipes.html" class="nav-link">Recipes</a>
-          <a href="settings.html" class="nav-link">Settings</a>
-        </nav>
-      </header>
+      <!-- Navigation -->
+      <nav class="nav">
+        <a href="index.html" class="nav-link">Home</a>
+        <a href="purchases.html" class="nav-link nav-link-active">Purchases</a>
+        <a href="recipes.html" class="nav-link">Recipes</a>
+        <a href="settings.html" class="nav-link">Settings</a>
+      </nav>
 
-      <main>
-        <!-- Page title -->
-        <section class="hero">
-          <h1 class="hero-title">Purchases</h1>
-          <p class="hero-subtitle">
-            This is your ingredient base. Add items you buy, organize them by
-            category, and keep supplier prices up to date. Recipes will use
-            everything you add here.
-          </p>
-        </section>
+      <h1>Purchases</h1>
+      <p>
+        This is your ingredient base. Add items you buy, organize them by
+        category, and keep supplier prices up to date. Recipes will use everything
+        you add here.
+      </p>
 
-        <!-- Primary actions -->
-        <section class="hero-actions" style="margin-bottom: 16px;">
-          <button
-            class="btn-primary"
-            type="button"
-            id="add-item-toggle"
-          >
-            Add item manually
-          </button>
-          <button class="btn-secondary" type="button" disabled>
-            Upload invoice (AI, coming soon)
-          </button>
-        </section>
+      <!-- Add item button -->
+      <button class="btn-primary" onclick="toggleAddForm()">Add item manually</button>
 
-        <!-- Add item form (hidden by default) -->
-        <section
-          id="add-item-form"
-          class="form-card"
-          style="display: none; margin-bottom: 24px;"
-        >
-          <div class="form-title-row">
-            <div class="form-title">Add a new purchase item</div>
-            <div class="form-hint">
-              Example: Butter 82% 1kg, Pancetta cubetti 1kg, Frozen fries 2.5kg.
+      <!-- Add purchase item form -->
+      <div id="add-item-form" class="settings-box hidden" style="margin-top: 24px;">
+        <h2 class="settings-title">Add a new purchase item</h2>
+
+        <form id="purchase-form">
+          <label>Name</label>
+          <input id="item-name" placeholder="e.g. Butter 82% 1kg" />
+
+          <div class="recipe-form-row">
+            <div class="half">
+              <label>Category</label>
+              <select id="item-category">
+                <option value="">Select...</option>
+                <option value="Meat & Fish">Meat & Fish</option>
+                <option value="Dairy & Eggs">Dairy & Eggs</option>
+                <option value="Vegetables & Fruit">Vegetables & Fruit</option>
+                <option value="Dry Goods">Dry Goods</option>
+                <option value="Spices & Condiments">Spices & Condiments</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+
+            <div class="half">
+              <label>Sub-type</label>
+              <select id="item-subtype">
+                <option value="">Select...</option>
+              </select>
             </div>
           </div>
 
-          <form id="purchase-form">
-            <div class="form-row">
-              <div class="form-field" style="flex: 2;">
-                <label class="form-label" for="item-name">Name</label>
-                <input
-                  class="form-input"
-                  id="item-name"
-                  name="name"
-                  type="text"
-                  placeholder="e.g. Camembert 250g"
-                  required
-                />
-              </div>
-              <div class="form-field">
-                <label class="form-label" for="item-supplier">Supplier</label>
-                <input
-                  class="form-input"
-                  id="item-supplier"
-                  name="supplier"
-                  type="text"
-                  placeholder="e.g. Metro, Carrefour"
-                />
-              </div>
+          <label>Supplier</label>
+          <input id="item-supplier" placeholder="e.g. Metro" />
+
+          <div class="recipe-form-row">
+            <div class="half">
+              <label>Unit (for recipes)</label>
+              <select id="item-unit">
+                <option value="">Select...</option>
+                <option value="kg">kg</option>
+                <option value="g">gr</option>
+                <option value="l">L</option>
+                <option value="ml">ml</option>
+                <option value="pcs">pcs</option>
+                <option value="tray">tray</option>
+                <option value="box">box</option>
+              </select>
             </div>
 
-            <div class="form-row">
-              <div class="form-field">
-                <label class="form-label" for="item-category">Category</label>
-                <select
-                  class="form-select"
-                  id="item-category"
-                  name="category"
-                  required
-                >
-                  <option value="">Select...</option>
-                  <option value="Meat & Fish">Meat &amp; Fish</option>
-                  <option value="Dairy & Eggs">Dairy &amp; Eggs</option>
-                  <option value="Vegetables & Fruit">
-                    Vegetables &amp; Fruit
-                  </option>
-                  <option value="Dry Goods">Dry Goods</option>
-                  <option value="Spices & Condiments">
-                    Spices &amp; Condiments
-                  </option>
-                  <option value="Other">Other</option>
-                </select>
-              </div>
-
-              <div class="form-field">
-                <label class="form-label" for="item-subtype">Sub-type</label>
-                <input
-                  class="form-input"
-                  id="item-subtype"
-                  name="subtype"
-                  type="text"
-                  placeholder="e.g. Butter, Smoked, Frozen"
-                />
-              </div>
-
-              <div class="form-field">
-                <label class="form-label" for="item-unit">Unit (for recipes)</label>
-                <select
-                  class="form-select"
-                  id="item-unit"
-                  name="unit"
-                  required
-                >
-                  <option value="">Select...</option>
-                  <option value="kg">kg</option>
-                  <option value="g">gr</option>
-                  <option value="L">L</option>
-                  <option value="ml">ml</option>
-                  <option value="pcs">pcs</option>
-                  <option value="tray">tray</option>
-                  <option value="bag">bag</option>
-                  <option value="box">box</option>
-                  <option value="other">other</option>
-                </select>
-              </div>
+            <div class="half">
+              <label>Purchase price (per recipe unit)</label>
+              <input id="item-price" placeholder="e.g. 6.40" />
             </div>
-
-            <div class="form-row">
-              <div class="form-field">
-                <label class="form-label" for="item-price">
-                  Purchase price (per recipe unit)
-                </label>
-                <div style="display: flex; align-items: center; gap: 6px;">
-                  <input
-                    class="form-input"
-                    id="item-price"
-                    name="price"
-                    type="number"
-                    min="0"
-                    step="0.0001"
-                    placeholder="e.g. 6.40"
-                    required
-                  />
-                  <span style="font-size: 13px; color: #555;">€/unit</span>
-                </div>
-              </div>
-              <div class="form-field">
-                <label class="form-label">Or use pack helper (optional)</label>
-                <div style="display: flex; flex-wrap: wrap; gap: 6px;">
-                  <input
-                    id="pack-qty"
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    class="form-input"
-                    style="max-width: 80px;"
-                    placeholder="e.g. 100"
-                  />
-                  <select
-                    id="pack-unit"
-                    class="form-select"
-                    style="max-width: 80px;"
-                  >
-                    <option value="">unit</option>
-                    <option value="g">gr</option>
-                    <option value="kg">kg</option>
-                    <option value="ml">ml</option>
-                    <option value="L">L</option>
-                    <option value="pcs">pcs</option>
-                  </select>
-                  <span style="align-self: center; font-size: 13px;">for</span>
-                  <input
-                    id="pack-price"
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    class="form-input"
-                    style="max-width: 80px;"
-                    placeholder="e.g. 5"
-                  />
-                  <span style="align-self: center; font-size: 13px;">€</span>
-                  <button
-                    type="button"
-                    class="btn-secondary"
-                    onclick="fillPriceFromPack()"
-                  >
-                    Use pack
-                  </button>
-                </div>
-                <div style="font-size: 12px; color: #777; margin-top: 4px;">
-                  Example: 100 gr for 5 € → we calculate €/gr or €/kg based on
-                  the recipe unit.
-                </div>
-              </div>
-            </div>
-
-            <div class="form-row">
-              <div class="form-field" style="flex: 1;">
-                <label class="form-label" for="item-notes">Notes (optional)</label>
-                <input
-                  class="form-input"
-                  id="item-notes"
-                  name="notes"
-                  type="text"
-                  placeholder="e.g. vacuum packed, brand, fat %"
-                />
-              </div>
-            </div>
-
-            <div class="form-footer">
-              <button
-                type="button"
-                class="btn-ghost"
-                id="clear-form-btn"
-              >
-                Clear
-              </button>
-              <button type="submit" class="btn-primary">
-                Save item
-              </button>
-            </div>
-          </form>
-        </section>
-
-        <!-- Recently updated -->
-        <section style="margin-bottom: 18px;">
-          <div
-            style="
-              font-size: 13px;
-              margin-bottom: 6px;
-              color: #555;
-              font-weight: 600;
-            "
-          >
-            Recently updated
-          </div>
-          <div class="features" id="recently-updated"></div>
-        </section>
-
-        <!-- Search + table -->
-        <section>
-          <div style="margin-bottom: 10px;">
-            <input
-              type="text"
-              id="purchase-search"
-              placeholder="Search by ingredient, supplier, or category..."
-              style="
-                width: 100%;
-                padding: 10px 12px;
-                border-radius: 999px;
-                border: 1px solid #c3c7cf;
-                font-size: 13px;
-              "
-            />
           </div>
 
-          <div
-            style="
-              overflow-x: auto;
-              border-radius: 12px;
-              background: #ffffff;
-              box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-            "
-          >
-            <table
-              style="
-                width: 100%;
-                border-collapse: collapse;
-                font-size: 13px;
-              "
-            >
-              <thead>
-                <tr
-                  style="
-                    text-align: left;
-                    background: #f4f5f9;
-                    border-bottom: 1px solid #e0e3ea;
-                  "
-                >
-                  <th style="padding: 10px 12px;">Ingredient</th>
-                  <th style="padding: 10px 12px;">Category</th>
-                  <th style="padding: 10px 12px;">Sub-type</th>
-                  <th style="padding: 10px 12px;">Unit</th>
-                  <th style="padding: 10px 12px;">Latest price</th>
-                  <th style="padding: 10px 12px;">Last updated</th>
-                  <th style="padding: 10px 12px;">Actions</th>
-                </tr>
-              </thead>
-              <tbody id="purchases-table-body"></tbody>
-            </table>
-          </div>
-        </section>
-      </main>
+          <!-- Pack helper -->
+          <div class="settings-box" style="margin-top: 16px;">
+            <h3 style="margin-bottom: 10px;">Or use pack helper</h3>
 
-      <div class="bottom-strip" style="margin-top: 22px;">
-        Purchase data is stored locally in your browser. In the future this will
-        sync with an online account – for now it's just your local tiny brain.
+            <p style="margin-bottom: 10px; color:#555;">
+              Example: 100 gr for 5 € → automatically calculates €/gr or €/kg based on selected recipe unit.
+            </p>
+
+            <div class="recipe-form-row">
+              <input id="pack-qty" class="small-input" placeholder="e.g. 100" />
+              <select id="pack-unit" style="width: 110px;">
+                <option value="">unit</option>
+                <option value="g">gr</option>
+                <option value="kg">kg</option>
+                <option value="ml">ml</option>
+                <option value="l">L</option>
+                <option value="pcs">pcs</option>
+              </select>
+
+              <input id="pack-price" class="small-input" placeholder="e.g. 5" />
+              <button type="button" class="btn-secondary" onclick="fillPriceFromPack()">Use pack</button>
+            </div>
+          </div>
+
+          <label>Notes (optional)</label>
+          <input id="item-notes" placeholder="e.g. brand, fat %, packaging" />
+
+          <div style="margin-top: 20px; display:flex; gap:14px;">
+            <button class="btn-secondary" type="button" onclick="toggleAddForm()">Cancel</button>
+            <button class="btn-primary" type="submit">Save item</button>
+          </div>
+        </form>
       </div>
+
+      <hr />
+
+      <!-- Recently updated -->
+      <h2 style="margin-top: 30px;">Recently updated</h2>
+      <div id="recent-list"></div>
+
+      <hr />
+
+      <input
+        id="search-input"
+        placeholder="Search by ingredient, supplier, or category..."
+        style="margin-top: 20px;"
+      />
+
+      <!-- Main table -->
+      <table style="margin-top: 18px;">
+        <thead>
+          <tr>
+            <th>Ingredient</th>
+            <th>Category</th>
+            <th>Sub-type</th>
+            <th>Unit</th>
+            <th>Latest price</th>
+            <th>Last updated</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+
+        <tbody id="purchase-table"></tbody>
+      </table>
+
     </div>
 
-    <!-- Settings helper -->
+    <!-- Logic -->
     <script src="assets/app.js"></script>
-
-    <!-- Purchases logic -->
-    <script>
-      (function () {
-        const STORAGE_KEY = "pp_purchases";
-
-        function newId() {
-          return "p_" + Math.random().toString(36).substr(2, 9);
-        }
-
-        function loadPurchases() {
-          try {
-            return JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
-          } catch (e) {
-            return [];
-          }
-        }
-
-        function savePurchases(list) {
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(list || []));
-        }
-
-        function parseNumber(value) {
-          if (!value) return 0;
-          return parseFloat(String(value).replace(",", ".")) || 0;
-        }
-
-        function normalizeUnit(u) {
-          if (!u) return "";
-          return u.toLowerCase().replace("gr", "g");
-        }
-
-        // Pack helper conversion
-        function convertToBase(qty, from, to) {
-          let q = Number(qty) || 0;
-          from = normalizeUnit(from);
-          to = normalizeUnit(to);
-          if (!from || !to) return 0;
-          if (from === to) return q;
-
-          if (from === "g" && to === "kg") return q / 1000;
-          if (from === "kg" && to === "g") return q * 1000;
-
-          if (from === "ml" && to === "l") return q / 1000;
-          if (from === "l" && to === "ml") return q * 1000;
-
-          return q;
-        }
-
-        // Exposed for button
-        window.fillPriceFromPack = function () {
-          const unitSelect = document.getElementById("item-unit");
-          const packQtyInput = document.getElementById("pack-qty");
-          const packUnitSelect = document.getElementById("pack-unit");
-          const packPriceInput = document.getElementById("pack-price");
-          const priceInput = document.getElementById("item-price");
-
-          const baseUnit = unitSelect.value;
-          const packQty = parseNumber(packQtyInput.value);
-          const packPrice = parseNumber(packPriceInput.value);
-          const packUnit = packUnitSelect.value;
-
-          if (!baseUnit || !packUnit || !packQty || !packPrice) {
-            alert("Fill pack quantity, unit, and price first.");
-            return;
-          }
-
-          const qtyInBase = convertToBase(packQty, packUnit, baseUnit);
-          if (!qtyInBase || qtyInBase <= 0) {
-            alert(
-              "Could not convert pack unit to recipe unit. Use compatible units (g/kg or ml/L)."
-            );
-            return;
-          }
-
-          const perUnit = packPrice / qtyInBase;
-          priceInput.value = perUnit.toFixed(4);
-        };
-
-        // DOM refs
-        const addItemToggle = document.getElementById("add-item-toggle");
-        const addItemFormSection = document.getElementById("add-item-form");
-        const purchaseForm = document.getElementById("purchase-form");
-        const clearFormBtn = document.getElementById("clear-form-btn");
-        const tableBody = document.getElementById("purchases-table-body");
-        const recentContainer = document.getElementById("recently-updated");
-        const searchInput = document.getElementById("purchase-search");
-
-        const nameInput = document.getElementById("item-name");
-        const supplierInput = document.getElementById("item-supplier");
-        const categoryInput = document.getElementById("item-category");
-        const subtypeInput = document.getElementById("item-subtype");
-        const unitInput = document.getElementById("item-unit");
-        const priceInput = document.getElementById("item-price");
-        const notesInput = document.getElementById("item-notes");
-
-        let addFormVisible = false;
-        let editingId = null;
-
-        function setFormVisible(on) {
-          addFormVisible = !!on;
-          addItemFormSection.style.display = addFormVisible ? "block" : "none";
-        }
-
-        addItemToggle.addEventListener("click", () => {
-          setFormVisible(!addFormVisible);
-        });
-
-        clearFormBtn.addEventListener("click", () => {
-          purchaseForm.reset();
-          editingId = null;
-        });
-
-        function formatDate(iso) {
-          if (!iso) return "-";
-          try {
-            const d = new Date(iso);
-            return d.toISOString().slice(0, 10);
-          } catch (e) {
-            return "-";
-          }
-        }
-
-        function renderTable(filterText) {
-          const list = loadPurchases();
-          const q = (filterText || "").toLowerCase();
-
-          tableBody.innerHTML = "";
-
-          list
-            .filter((p) => {
-              if (!q) return true;
-              return (
-                p.name.toLowerCase().includes(q) ||
-                (p.category || "").toLowerCase().includes(q) ||
-                (p.supplier || "").toLowerCase().includes(q)
-              );
-            })
-            .forEach((p) => {
-              const tr = document.createElement("tr");
-
-              const latestPrice =
-                typeof p.latestPrice === "number"
-                  ? p.latestPrice.toFixed(4) + " €/ " + p.unit
-                  : "-";
-
-              tr.innerHTML = `
-                <td style="padding: 9px 12px;">${p.name}</td>
-                <td style="padding: 9px 12px;">${p.category || ""}</td>
-                <td style="padding: 9px 12px;">${p.subtype || ""}</td>
-                <td style="padding: 9px 12px;">${p.unit || ""}</td>
-                <td style="padding: 9px 12px;">${latestPrice}</td>
-                <td style="padding: 9px 12px;">${formatDate(p.lastUpdated)}</td>
-                <td style="padding: 9px 12px;">
-                  <button class="btn-secondary" data-edit="${p.id}">Edit</button>
-                </td>
-              `;
-
-              tableBody.appendChild(tr);
-            });
-        }
-
-        function renderRecent() {
-          const list = loadPurchases()
-            .slice()
-            .sort(
-              (a, b) =>
-                new Date(b.lastUpdated || 0) - new Date(a.lastUpdated || 0)
-            )
-            .slice(0, 3);
-
-          recentContainer.innerHTML = "";
-
-          if (!list.length) {
-            const empty = document.createElement("div");
-            empty.className = "feature-text";
-            empty.textContent = "No items yet. Add your first ingredient above.";
-            recentContainer.appendChild(empty);
-            return;
-          }
-
-          list.forEach((p) => {
-            const card = document.createElement("article");
-            card.className = "feature-card";
-            card.innerHTML = `
-              <div class="feature-title">
-                ${p.name} – ${
-              typeof p.latestPrice === "number"
-                ? p.latestPrice.toFixed(4) + " €/ " + p.unit
-                : "-"
-            }
-              </div>
-              <p class="feature-text">
-                Updated ${formatDate(p.lastUpdated)} • ${p.category || ""}${
-              p.subtype ? " (" + p.subtype + ")" : ""
-            }
-              </p>
-            `;
-            recentContainer.appendChild(card);
-          });
-        }
-
-        tableBody.addEventListener("click", (e) => {
-          const btn = e.target.closest("button[data-edit]");
-          if (!btn) return;
-          const id = btn.dataset.edit;
-          const list = loadPurchases();
-          const item = list.find((p) => p.id === id);
-          if (!item) return;
-
-          editingId = id;
-          nameInput.value = item.name || "";
-          supplierInput.value = item.supplier || "";
-          categoryInput.value = item.category || "";
-          subtypeInput.value = item.subtype || "";
-          unitInput.value = item.unit || "";
-          priceInput.value =
-            typeof item.latestPrice === "number" ? item.latestPrice : "";
-          notesInput.value = item.notes || "";
-
-          setFormVisible(true);
-          window.scrollTo({ top: 0, behavior: "smooth" });
-        });
-
-        purchaseForm.addEventListener("submit", (e) => {
-          e.preventDefault();
-
-          const name = nameInput.value.trim();
-          const supplier = supplierInput.value.trim();
-          const category = categoryInput.value;
-          const subtype = subtypeInput.value.trim();
-          const unit = unitInput.value;
-          const latestPrice = parseNumber(priceInput.value);
-          const notes = notesInput.value.trim();
-
-          if (!name) {
-            alert("Please enter a name.");
-            return;
-          }
-          if (!category) {
-            alert("Please choose a category.");
-            return;
-          }
-          if (!unit) {
-            alert("Please choose a unit.");
-            return;
-          }
-          if (!latestPrice || latestPrice <= 0) {
-            alert("Please enter a valid price per unit.");
-            return;
-          }
-
-          let list = loadPurchases();
-          const now = new Date().toISOString();
-
-          if (editingId) {
-            const idx = list.findIndex((p) => p.id === editingId);
-            if (idx !== -1) {
-              list[idx] = {
-                ...list[idx],
-                name,
-                supplier,
-                category,
-                subtype,
-                unit,
-                latestPrice,
-                notes,
-                lastUpdated: now
-              };
-            }
-          } else {
-            list.push({
-              id: newId(),
-              name,
-              supplier,
-              category,
-              subtype,
-              unit,
-              latestPrice,
-              notes,
-              createdAt: now,
-              lastUpdated: now
-            });
-          }
-
-          savePurchases(list);
-          alert("Item saved locally. It will be available in Recipes.");
-
-          editingId = null;
-          purchaseForm.reset();
-          renderTable(searchInput.value);
-          renderRecent();
-        });
-
-        searchInput.addEventListener("input", (e) => {
-          renderTable(e.target.value);
-        });
-
-        // Initial render
-        renderTable("");
-        renderRecent();
-      })();
-    </script>
-    <script>
-// Sub-categories per main category
-const categorySubtypes = {
-  "Meat & Fish": ["Fresh", "Frozen", "Smoked", "Raw", "Cured", "Seafood"],
-  "Dairy & Eggs": ["Milk / Cream", "Butter", "Cheese", "Eggs"],
-  "Vegetables & Fruit": ["Fresh", "Frozen", "Dried", "Canned"],
-  "Dry Goods": ["Pasta", "Flour", "Sugar", "Rice", "Legumes"],
-  "Spices & Condiments": ["Spices", "Oils", "Vinegars", "Sauces"],
-  "Other": []
-};
-
-// UI elements
-const categoryRow = document.getElementById("category-row");
-const subtypeSection = document.getElementById("subtype-section");
-const subtypeRow = document.getElementById("subtype-row");
-
-let currentCategory = null;
-
-// Render subtypes
-function renderSubtypes(category) {
-  const list = categorySubtypes[category] || [];
-  subtypeRow.innerHTML = "";
-
-  if (list.length === 0) {
-    subtypeSection.style.display = "none";
-    return;
-  }
-
-  subtypeSection.style.display = "block";
-
-  list.forEach(st => {
-    const btn = document.createElement("button");
-    btn.className = "btn-secondary filter-pill";
-    btn.textContent = st;
-    btn.dataset.subtype = st;
-    subtypeRow.appendChild(btn);
-  });
-}
-
-// Category click
-categoryRow.addEventListener("click", e => {
-  const btn = e.target.closest(".filter-pill");
-  if (!btn) return;
-
-  const category = btn.dataset.category;
-
-  // Toggle behavior
-  if (currentCategory === category) {
-    currentCategory = null;
-    subtypeSection.style.display = "none";
-    subtypeRow.innerHTML = "";
-    categoryRow.querySelectorAll(".filter-pill").forEach(b => b.classList.remove("filter-pill-active"));
-    return;
-  }
-
-  currentCategory = category;
-
-  categoryRow.querySelectorAll(".filter-pill").forEach(b => b.classList.remove("filter-pill-active"));
-  btn.classList.add("filter-pill-active");
-
-  renderSubtypes(category);
-});
-</script>
   </body>
 </html>
