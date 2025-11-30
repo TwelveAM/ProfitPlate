@@ -69,119 +69,32 @@
         </section>
 
         <!-- Add recipe form -->
-        <section
-          class="recipe-card"
-          id="add-recipe-card"
-          style="display: none; margin-bottom: 20px;"
-        >
-          <div class="recipe-card-title">Add a new recipe</div>
-          <div class="recipe-card-subtitle">
-            Give the recipe a name, set how many portions it makes, then add
-            ingredients from your Purchases. ProfitPlate will calculate cost per
-            portion automatically.
-          </div>
+<section id="recipe-form-section" style="display:none;">
+  <h2>Add / Edit recipe</h2>
 
-          <form id="recipe-form">
-            <div class="form-row" style="margin-bottom: 10px;">
-              <div class="form-field" style="flex: 2;">
-                <label class="form-label" for="recipe-name">Recipe name</label>
-                <input
-                  class="form-input"
-                  id="recipe-name"
-                  type="text"
-                  placeholder="e.g. Pasta Carbonara"
-                  required
-                />
-              </div>
-              <div class="form-field">
-                <label class="form-label" for="recipe-portions">Portions per batch</label>
-                <input
-                  class="form-input"
-                  id="recipe-portions"
-                  type="number"
-                  min="1"
-                  step="1"
-                  placeholder="e.g. 5"
-                  required
-                />
-              </div>
-              <div class="form-field">
-                <label class="form-label" for="recipe-selling-price">
-                  Selling price per portion (optional)
-                </label>
-                <input
-                  class="form-input"
-                  id="recipe-selling-price"
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  placeholder="e.g. 9.50"
-                />
-              </div>
-            </div>
+  <form id="recipe-form">
+    <label>Recipe name</label>
+    <input id="recipe-name" type="text" required />
 
-            <div style="font-size: 13px; font-weight: 600; margin-bottom: 6px;">
-              Ingredients
-            </div>
-            <div
-              style="
-                overflow-x: auto;
-                border-radius: 10px;
-                border: 1px solid #e0e3ea;
-                background: #f9fafb;
-                margin-bottom: 8px;
-              "
-            >
-              <table
-                style="
-                  width: 100%;
-                  border-collapse: collapse;
-                  font-size: 13px;
-                "
-              >
-                <thead>
-                  <tr
-                    style="
-                      text-align: left;
-                      background: #f4f5f9;
-                      border-bottom: 1px solid #e0e3ea;
-                    "
-                  >
-                    <th style="padding: 7px 8px;">Purchase item</th>
-                    <th style="padding: 7px 8px;">Quantity</th>
-                    <th style="padding: 7px 8px;">Unit</th>
-                    <th style="padding: 7px 8px;">Actions</th>
-                  </tr>
-                </thead>
-                <tbody id="recipe-ingredients-body">
-                  <!-- JS will add rows -->
-                </tbody>
-              </table>
-            </div>
+    <label>Portions per batch</label>
+    <input id="recipe-portions" type="number" min="1" required />
 
-            <button
-              type="button"
-              class="btn-secondary"
-              onclick="addIngredientRow()"
-              style="margin-bottom: 10px;"
-            >
-              + Add ingredient
-            </button>
+    <label>Selling price per portion (optional)</label>
+    <input id="recipe-selling" type="number" min="0" step="0.01" />
 
-            <div class="form-footer">
-              <button
-                type="button"
-                class="btn-ghost"
-                onclick="resetRecipeForm()"
-              >
-                Clear
-              </button>
-              <button type="submit" class="btn-primary">
-                Save recipe
-              </button>
-            </div>
-          </form>
-        </section>
+    <h3>Ingredients</h3>
+    <div id="ingredients-container"></div>
+
+    <button type="button" id="add-ingredient-btn" class="btn-secondary">
+      + Add ingredient
+    </button>
+
+    <div style="margin-top:15px;">
+      <button type="submit" class="btn-primary">Save recipe</button>
+    </div>
+  </form>
+</section>
+
 
         <!-- Dynamic Recipe List -->
         <section class="recipe-list" id="recipe-list">
