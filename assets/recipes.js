@@ -1,325 +1,444 @@
-// ---------------------------------------------------------
-// ProfitPlate – Recipes logic (create, edit, calculate)
-// ---------------------------------------------------------
+// recipes.js – logic for Recipes page
 
-// --- Local storage helpers ---
-function loadPurchases() {
-  return JSON.parse(localStorage.getItem("pp_purchases") || "[]");
-}
+(function () {
+  // Guard: only run on recipes.html
+  if (!document.getElementById("recipes-list")) return;
 
-function savePurchases(arr) {
-  localStorage.setItem("pp_purchases", JSON.stringify(arr));
-}
+  // ======== DOM references ========
+  const formWrapper = document.getElementById("recipe-form-wrapper");
+  const formTitle = document.getElementById("recipe-form-title");
+  const formEl = document.getElementById("recipe-form");
 
-function loadRecipes() {
-  return JSON.parse(localStorage.getItem("pp_recipes") || "[]");
-}
+  const nameInput = document.getElementById("recipe-name");
+  const portionsInput = document.getElementById("recipe-portions");
+  const priceInput = document.getElementById("recipe-price");
+  const recipeIdInput = document.getElementById("recipe-id");
 
-function saveRecipes(arr) {
-  localStorage.setItem("pp_recipes", JSON.stringify(arr));
-}
+  const ingredientsContainer = document.getElementById("ingredients-container");
+  const recipesList = document.getElementById("recipes-list");
 
-// Unique ID generator
-function newId() {
-  return "r_" + Math.random().toString(36).substr(2, 9);
-}
+  // Purchases cached for dropdowns
+  let purchases = [];
 
-// --- Unit helpers --------------------------------------------------
-
-function normUnit(u) {
-  if (!u) return "";
-  return u.toLowerCase().replace("gr", "g"); // treat "gr" as "g"
-}
-
-// ---------------------------------------------------------
-// DOM Elements
-// ---------------------------------------------------------
-const formSection = document.getElementById("recipe-form-section");
-const recipeForm = document.getElementById("recipe-form");
-const recipeListContainer = document.getElementById("recipe-list");
-const ingredientsContainer = document.getElementById("ingredients-container");
-const addIngredientBtn = document.getElementById("add-ingredient-btn");
-const addRecipeBtn = document.getElementById("add-recipe-btn");
-const cancelRecipeBtn = document.getElementById("cancel-recipe-btn");
-
-let editingRecipeId = null;
-
-// ---------------------------------------------------------
-// Create ingredient row in form
-// ---------------------------------------------------------
-function renderIngredientRow(existing) {
-  const purchases = loadPurchases();
-  const wrapper = document.createElement("div");
-  wrapper.className = "recipe-ingredient-row";
-
-  // Purchase item select
-  const purchaseSelect = document.createElement("select");
-  purchaseSelect.className = "recipe-purchase-select";
-
-  if (!purchases.length) {
-    const opt = document.createElement("option");
-    opt.value = "";
-    opt.textContent = "No purchases saved yet";
-    purchaseSelect.appendChild(opt);
-    purchaseSelect.disabled = true;
-  } else {
-    purchases.forEach((p) => {
-      const opt = document.createElement("option");
-      opt.value = p.id;
-      opt.textContent = p.name;
-      purchaseSelect.appendChild(opt);
-    });
+  // ======== Unit helpers (same logic as purchases/app) ========
+  function normalizeUnit(u) {
+    if (!u) return "";
+    u = String(u).toLowerCase();
+    if (u === "gr") u = "g";
+    return u;
   }
 
-  // Quantity
-  const qtyInput = document.createElement("input");
-  qtyInput.type = "number";
-  qtyInput.min = "0";
-  qtyInput.step = "0.01";
-  qtyInput.className = "recipe-qty-input";
+  function convertQuantity(qty, fromUnit, toUnit) {
+    let q = Number(qty) || 0;
+    let from = normalizeUnit(fromUnit);
+    let to = normalizeUnit(toUnit);
+    if (!from || !to || from === to) return q;
 
-  // Unit
-  const unitSelect = document.createElement("select");
-  ["gr", "kg", "ml", "l", "pcs"].forEach((u) => {
-    const opt = document.createElement("option");
-    opt.value = u;
-    opt.textContent = u;
-    unitSelect.appendChild(opt);
-  });
+    // grams <-> kg
+    if (from === "g" && to === "kg") return q / 1000;
+    if (from === "kg" && to === "g") return q * 1000;
 
-  // Remove button
-  const removeBtn = document.createElement("button");
-  removeBtn.type = "button";
-  removeBtn.className = "btn-secondary";
-  removeBtn.textContent = "Remove";
-  removeBtn.onclick = () => wrapper.remove();
+    // ml <-> l
+    if (from === "ml" && to === "l") return q / 1000;
+    if (from === "l" && to === "ml") return q * 1000;
 
-  // If editing existing ingredient
-  if (existing) {
-    purchaseSelect.value = existing.purchaseId;
-    qtyInput.value = existing.quantity;
-    unitSelect.value = existing.unit || "gr";
+    // incompatible: just return original as a fallback
+    return q;
   }
 
-  wrapper.appendChild(purchaseSelect);
-  wrapper.appendChild(qtyInput);
-  wrapper.appendChild(unitSelect);
-  wrapper.appendChild(removeBtn);
-  ingredientsContainer.appendChild(wrapper);
-}
-
-// ---------------------------------------------------------
-// Render list of saved recipes
-// ---------------------------------------------------------
-function renderRecipeList() {
-  const recipes = loadRecipes();
-  recipeListContainer.innerHTML = "";
-
-  if (!recipes.length) {
-    const empty = document.createElement("div");
-    empty.className = "recipe-meta";
-    empty.textContent = "No recipes yet. Use “Add recipe” to create one.";
-    recipeListContainer.appendChild(empty);
-    return;
+  // ======== Helper: get store =========
+  function getStore() {
+    if (!window.ppStore) {
+      console.error("ppStore (from app.js) not found.");
+      return null;
+    }
+    return window.ppStore;
   }
 
-  recipes.forEach((r) => {
+  // ======== Ingredient row handling ========
+
+  function buildPurchaseOptions(selectedId) {
+    const frag = document.createDocumentFragment();
+    const optPlaceholder = document.createElement("option");
+    optPlaceholder.value = "";
+    optPlaceholder.textContent = "Select ingredient…";
+    frag.appendChild(optPlaceholder);
+
+    purchases
+      .slice()
+      .sort((a, b) => a.name.localeCompare(b.name))
+      .forEach((p) => {
+        const opt = document.createElement("option");
+        opt.value = p.id;
+        opt.textContent = p.name;
+        if (selectedId && selectedId === p.id) opt.selected = true;
+        frag.appendChild(opt);
+      });
+
+    return frag;
+  }
+
+  function addIngredientRow(existing) {
     const row = document.createElement("div");
-    row.className = "recipe-row";
+    row.className = "recipe-ingredient-row";
 
-    const cost = calculateRecipeCost(r);
-    let meta = `${r.portions} portions per batch`;
-    if (r.sellingPricePerPortion) {
-      const margin = r.sellingPricePerPortion - cost;
-      meta += ` • margin ${margin.toFixed(2)} €/portion`;
+    const select = document.createElement("select");
+    select.className = "form-select";
+    select.appendChild(
+      buildPurchaseOptions(existing ? existing.purchaseId : null)
+    );
+
+    const qtyInput = document.createElement("input");
+    qtyInput.type = "number";
+    qtyInput.placeholder = "Qty";
+    qtyInput.value = existing ? existing.quantity : "";
+    qtyInput.className = "small-input";
+
+    const unitSelect = document.createElement("select");
+    unitSelect.className = "form-select";
+    ["kg", "gr", "L", "ml", "pcs", "tray", "box"].forEach((u) => {
+      const opt = document.createElement("option");
+      opt.value = u.toLowerCase();
+      opt.textContent = u;
+      if (existing && normalizeUnit(existing.unit) === opt.value) {
+        opt.selected = true;
+      }
+      unitSelect.appendChild(opt);
+    });
+
+    const removeBtn = document.createElement("button");
+    removeBtn.type = "button";
+    removeBtn.textContent = "Remove";
+    removeBtn.className = "btn-danger remove-btn";
+    removeBtn.addEventListener("click", () => {
+      row.remove();
+    });
+
+    row.appendChild(select);
+    row.appendChild(qtyInput);
+    row.appendChild(unitSelect);
+    row.appendChild(removeBtn);
+    ingredientsContainer.appendChild(row);
+  }
+
+  // Expose globally for button in HTML
+  window.addIngredientRow = addIngredientRow;
+
+  // ======== Show / hide form ========
+
+  function clearRecipeForm() {
+    nameInput.value = "";
+    portionsInput.value = "";
+    priceInput.value = "";
+    recipeIdInput.value = "";
+    ingredientsContainer.innerHTML = "";
+  }
+
+  function showRecipeForm(editId) {
+    clearRecipeForm();
+
+    const store = getStore();
+    if (!store) return;
+
+    if (editId) {
+      const existing = store.getRecipes().find((r) => r.id === editId);
+      if (existing) {
+        formTitle.textContent = "Edit recipe";
+        recipeIdInput.value = existing.id;
+        nameInput.value = existing.name || "";
+        portionsInput.value = existing.portions || "";
+        if (existing.sellingPrice != null) {
+          priceInput.value = existing.sellingPrice;
+        }
+
+        (existing.ingredients || []).forEach((ing) => addIngredientRow(ing));
+      } else {
+        formTitle.textContent = "Add a new recipe";
+        addIngredientRow();
+      }
+    } else {
+      formTitle.textContent = "Add a new recipe";
+      addIngredientRow();
     }
 
-    row.innerHTML = `
-      <div>
-        <div class="recipe-name">${r.name}</div>
-        <div class="recipe-meta">${meta}</div>
-      </div>
-      <div style="display:flex;align-items:center;gap:8px;">
-        <span class="recipe-cost-badge">${cost.toFixed(2)} €/portion</span>
-        <button type="button" class="btn-secondary" data-edit="${r.id}">
-          View details
-        </button>
-      </div>
-    `;
-
-    recipeListContainer.appendChild(row);
-  });
-}
-
-// ---------------------------------------------------------
-// Cost calculation
-// ---------------------------------------------------------
-function calculateRecipeCost(recipe) {
-  const purchases = loadPurchases();
-  let total = 0;
-
-  recipe.ingredients.forEach((ing) => {
-    const purchase = purchases.find((p) => p.id === ing.purchaseId);
-    if (!purchase) return;
-
-    const unit = normUnit(ing.unit);
-    const priceUnit = normUnit(purchase.unit);
-
-    let recipeQty = parseFloat(ing.quantity) || 0;
-
-    // g ↔ kg
-    if (unit === "g" && priceUnit === "kg") recipeQty = recipeQty / 1000;
-    if (unit === "kg" && priceUnit === "g") recipeQty = recipeQty * 1000;
-
-    // ml ↔ l
-    if (unit === "ml" && priceUnit === "l") recipeQty = recipeQty / 1000;
-    if (unit === "l" && priceUnit === "ml") recipeQty = recipeQty * 1000;
-
-    // pcs / other: no conversion
-
-    const cost = recipeQty * (purchase.latestPrice || 0);
-    total += cost;
-  });
-
-  if (!recipe.portions || recipe.portions <= 0) return 0;
-  return total / recipe.portions;
-}
-
-// ---------------------------------------------------------
-// Load a recipe for editing
-// ---------------------------------------------------------
-function startEditingRecipe(id) {
-  const recipes = loadRecipes();
-  const r = recipes.find((x) => x.id === id);
-  if (!r) return;
-
-  editingRecipeId = id;
-
-  // Open form
-  formSection.style.display = "block";
-  window.scrollTo({ top: 0, behavior: "smooth" });
-
-  // Fill form fields
-  document.getElementById("recipe-name").value = r.name;
-  document.getElementById("recipe-portions").value = r.portions;
-  document.getElementById("recipe-selling").value =
-    r.sellingPricePerPortion || "";
-
-  // Ingredients
-  ingredientsContainer.innerHTML = "";
-  r.ingredients.forEach((ing) => renderIngredientRow(ing));
-}
-
-// ---------------------------------------------------------
-// Save recipe (create or update)
-// ---------------------------------------------------------
-recipeForm.addEventListener("submit", (e) => {
-  e.preventDefault();
-
-  const name = document.getElementById("recipe-name").value.trim();
-  const portions = parseFloat(
-    document.getElementById("recipe-portions").value
-  );
-  const selling =
-    parseFloat(document.getElementById("recipe-selling").value) || null;
-
-  const rows = [...document.querySelectorAll(".recipe-ingredient-row")];
-
-  const ingredients = rows
-    .map((row) => {
-      return {
-        purchaseId: row.children[0].value,
-        quantity: parseFloat(row.children[1].value),
-        unit: row.children[2].value
-      };
-    })
-    .filter((ing) => !!ing.purchaseId && !isNaN(ing.quantity));
-
-  if (!name) {
-    alert("Give the recipe a name.");
-    return;
-  }
-  if (!portions || portions <= 0) {
-    alert("Set how many portions the batch makes.");
-    return;
-  }
-  if (ingredients.length === 0) {
-    alert("Add at least one ingredient.");
-    return;
+    formWrapper.classList.remove("hidden");
+    window.scrollTo({ top: formWrapper.offsetTop - 40, behavior: "smooth" });
   }
 
-  let recipes = loadRecipes();
+  function hideRecipeForm() {
+    formWrapper.classList.add("hidden");
+  }
 
-  if (editingRecipeId) {
-    // Update existing
-    const idx = recipes.findIndex((r) => r.id === editingRecipeId);
-    if (idx !== -1) {
-      recipes[idx].name = name;
-      recipes[idx].portions = portions;
-      recipes[idx].sellingPricePerPortion = selling;
-      recipes[idx].ingredients = ingredients;
-      recipes[idx].updatedAt = new Date().toISOString();
+  window.showRecipeForm = showRecipeForm;
+  window.hideRecipeForm = hideRecipeForm;
+
+  // ======== Read form -> recipe object ========
+
+  function readFormToRecipe() {
+    const name = nameInput.value.trim();
+    const portions = Number(portionsInput.value) || 0;
+    const sellingRaw = priceInput.value.trim();
+    const sellingPrice =
+      sellingRaw === "" ? null : Number(sellingRaw.replace(",", "."));
+
+    if (!name || !portions) {
+      alert("Please enter a name and portions per batch.");
+      return null;
     }
-    alert("Recipe updated!");
-  } else {
-    // Create new
-    recipes.push({
-      id: newId(),
+
+    const ingRows = Array.from(
+      ingredientsContainer.querySelectorAll(".recipe-ingredient-row")
+    );
+
+    const ingredients = [];
+    for (const row of ingRows) {
+      const selects = row.getElementsByTagName("select");
+      const inputs = row.getElementsByTagName("input");
+
+      const purchaseId = selects[0].value;
+      const qty = Number(inputs[0].value);
+      const unit = selects[1].value;
+
+      if (!purchaseId || !qty || qty <= 0) continue; // skip incomplete
+
+      ingredients.push({
+        purchaseId,
+        quantity: qty,
+        unit,
+      });
+    }
+
+    if (!ingredients.length) {
+      alert("Add at least one ingredient to the recipe.");
+      return null;
+    }
+
+    const id = recipeIdInput.value || `r_${Date.now()}`;
+
+    return {
+      id,
       name,
       portions,
-      sellingPricePerPortion: selling,
+      sellingPrice,
       ingredients,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
+    };
+  }
+
+  // ======== Cost calculations & rendering ========
+
+  function findPurchase(id) {
+    return purchases.find((p) => p.id === id);
+  }
+
+  function computeRecipeCosts(recipe) {
+    let batchCost = 0;
+    const ingredientsDetailed = [];
+
+    (recipe.ingredients || []).forEach((ing) => {
+      const p = findPurchase(ing.purchaseId);
+      if (!p) return;
+
+      const basePrice = Number(p.pricePerUnit) || 0; // €/baseUnit
+      let ingredientQtyInBase = Number(ing.quantity) || 0;
+
+      // convert ingredient quantity to purchase unit if needed
+      ingredientQtyInBase = convertQuantity(
+        ing.quantity,
+        ing.unit,
+        p.unit || ing.unit
+      );
+
+      const costInRecipe = ingredientQtyInBase * basePrice;
+
+      batchCost += costInRecipe;
+
+      ingredientsDetailed.push({
+        ingredientName: p.name,
+        category: p.category || "",
+        subtype: p.subtype || "",
+        quantity: ing.quantity,
+        unit: ing.unit,
+        pricePerUnit: basePrice,
+        costInRecipe,
+      });
     });
-    alert("Recipe saved!");
+
+    const portions = recipe.portions || 0;
+    const costPerPortion = portions ? batchCost / portions : 0;
+
+    let marginPerPortion = null;
+    let marginPercent = null;
+
+    if (recipe.sellingPrice != null) {
+      marginPerPortion = recipe.sellingPrice - costPerPortion;
+      if (recipe.sellingPrice > 0) {
+        marginPercent = (marginPerPortion / recipe.sellingPrice) * 100;
+      }
+    }
+
+    return {
+      batchCost,
+      costPerPortion,
+      marginPerPortion,
+      marginPercent,
+      ingredientsDetailed,
+    };
   }
 
-  saveRecipes(recipes);
-  editingRecipeId = null;
-  recipeForm.reset();
-  ingredientsContainer.innerHTML = "";
-  formSection.style.display = "none";
-  renderRecipeList();
-});
+  function renderRecipes() {
+    const store = getStore();
+    if (!store) return;
 
-// ---------------------------------------------------------
-// Add ingredient button
-// ---------------------------------------------------------
-addIngredientBtn.addEventListener("click", () => {
-  renderIngredientRow();
-});
+    const recipes = store.getRecipes();
+    recipesList.innerHTML = "";
 
-// ---------------------------------------------------------
-// Add recipe / Cancel buttons
-// ---------------------------------------------------------
-addRecipeBtn.addEventListener("click", () => {
-  editingRecipeId = null;
-  recipeForm.reset();
-  ingredientsContainer.innerHTML = "";
-  formSection.style.display = "block";
-  window.scrollTo({ top: 0, behavior: "smooth" });
-});
+    if (!recipes.length) {
+      const p = document.createElement("p");
+      p.className = "text-muted";
+      p.textContent =
+        "No recipes yet. Click “Add recipe” to create your first one.";
+      recipesList.appendChild(p);
+      return;
+    }
 
-cancelRecipeBtn.addEventListener("click", () => {
-  editingRecipeId = null;
-  recipeForm.reset();
-  ingredientsContainer.innerHTML = "";
-  formSection.style.display = "none";
-});
+    recipes.forEach((recipe) => {
+      const card = document.createElement("div");
+      card.className = "recipe-box";
 
-// ---------------------------------------------------------
-// Listen for Edit clicks
-// ---------------------------------------------------------
-recipeListContainer.addEventListener("click", (e) => {
-  const btn = e.target.closest("button[data-edit]");
-  if (btn) {
-    const id = btn.dataset.edit;
-    startEditingRecipe(id);
+      const costs = computeRecipeCosts(recipe);
+
+      // Header
+      const header = document.createElement("div");
+      header.style.display = "flex";
+      header.style.justifyContent = "space-between";
+      header.style.alignItems = "center";
+      header.style.marginBottom = "10px";
+
+      const left = document.createElement("div");
+      const title = document.createElement("div");
+      title.className = "recipe-title";
+      title.textContent = recipe.name;
+
+      const meta = document.createElement("div");
+      meta.className = "recipe-summary";
+      meta.textContent = `${recipe.portions || 0} portions per batch`;
+
+      left.appendChild(title);
+      left.appendChild(meta);
+
+      const right = document.createElement("div");
+      right.style.display = "flex";
+      right.style.alignItems = "center";
+      right.style.gap = "10px";
+
+      const badge = document.createElement("span");
+      badge.className = "recipe-cost-badge";
+      badge.style.padding = "6px 12px";
+      badge.style.borderRadius = "999px";
+      badge.style.background = "#e3f5eb";
+      badge.style.color = "#0b6e46";
+      badge.style.fontSize = "14px";
+      badge.textContent = `${costs.costPerPortion.toFixed(2)} €/portion`;
+
+      const editBtn = document.createElement("button");
+      editBtn.type = "button";
+      editBtn.className = "btn-secondary";
+      editBtn.textContent = "Edit";
+      editBtn.addEventListener("click", () => showRecipeForm(recipe.id));
+
+      right.appendChild(badge);
+      right.appendChild(editBtn);
+
+      header.appendChild(left);
+      header.appendChild(right);
+      card.appendChild(header);
+
+      // Summary row (cost + margin)
+      const summary = document.createElement("div");
+      summary.className = "recipe-summary";
+      let summaryText = `Total batch cost: ${costs.batchCost.toFixed(
+        2
+      )} € • Cost per portion: ${costs.costPerPortion.toFixed(2)} €`;
+      if (recipe.sellingPrice != null) {
+        summaryText += ` • Selling price: ${Number(
+          recipe.sellingPrice
+        ).toFixed(2)} €/portion`;
+        if (costs.marginPerPortion != null) {
+          summaryText += ` • Margin: ${costs.marginPerPortion.toFixed(
+            2
+          )} € (${(costs.marginPercent || 0).toFixed(0)}%)`;
+        }
+      }
+      summary.textContent = summaryText;
+      card.appendChild(summary);
+
+      // Ingredients table
+      const tableWrapper = document.createElement("div");
+      tableWrapper.style.marginTop = "12px";
+
+      const table = document.createElement("table");
+      const thead = document.createElement("thead");
+      thead.innerHTML = `
+        <tr>
+          <th>Ingredient</th>
+          <th>Category</th>
+          <th>Sub-type</th>
+          <th>Quantity</th>
+          <th>Unit</th>
+          <th>Price/unit</th>
+          <th>Cost in recipe</th>
+        </tr>
+      `;
+      table.appendChild(thead);
+
+      const tbody = document.createElement("tbody");
+
+      costs.ingredientsDetailed.forEach((ing) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${ing.ingredientName}</td>
+          <td>${ing.category}</td>
+          <td>${ing.subtype}</td>
+          <td>${ing.quantity}</td>
+          <td>${ing.unit}</td>
+          <td>${ing.pricePerUnit.toFixed(4)} €/unit</td>
+          <td>${ing.costInRecipe.toFixed(2)} €</td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      table.appendChild(tbody);
+      tableWrapper.appendChild(table);
+      card.appendChild(tableWrapper);
+
+      recipesList.appendChild(card);
+    });
   }
-});
 
-// ---------------------------------------------------------
-// Init
-// ---------------------------------------------------------
-renderRecipeList();
+  // ======== Form submit ========
+
+  formEl.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const store = getStore();
+    if (!store) return;
+
+    const recipe = readFormToRecipe();
+    if (!recipe) return;
+
+    store.upsertRecipe(recipe);
+    hideRecipeForm();
+    renderRecipes();
+  });
+
+  // ======== Init ========
+
+  function initRecipesPage() {
+    const store = getStore();
+    if (!store) return;
+
+    purchases = store.getPurchases();
+    renderRecipes();
+  }
+
+  document.addEventListener("DOMContentLoaded", initRecipesPage);
+})();
