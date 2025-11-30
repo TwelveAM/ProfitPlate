@@ -59,8 +59,22 @@
           </p>
 
           <div class="hero-actions">
-            <a href="purchases.html" class="btn-primary">Start 24-hour free trial</a>
-            <a href="#how-it-works" class="btn-secondary">See how it works</a>
+            <!-- Use real buttons so they pick up the same styling as Purchases -->
+            <button
+              class="btn-primary"
+              type="button"
+              onclick="window.location.href='purchases.html'"
+            >
+              Start 24-hour free trial
+            </button>
+
+            <button
+              class="btn-secondary"
+              type="button"
+              onclick="document.getElementById('how-it-works').scrollIntoView({ behavior: 'smooth' });"
+            >
+              See how it works
+            </button>
           </div>
         </section>
 
