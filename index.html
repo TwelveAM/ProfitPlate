@@ -9,7 +9,7 @@
     />
     <meta
       name="description"
-      content="ProfitPlate helps restaurants calculate real cost per dish and profit margin in seconds — without spreadsheets."
+      content="ProfitPlate helps small restaurants calculate real cost per dish, portion and profit margin in seconds."
     />
     <link rel="stylesheet" href="assets/styles.css" />
     <link
@@ -27,7 +27,7 @@
   </head>
   <body>
     <div class="page">
-      <!-- Header with logo + nav -->
+      <!-- Header -->
       <header class="header">
         <div class="logo-block">
           <div class="logo-plate">
@@ -50,104 +50,87 @@
       <main>
         <!-- Hero -->
         <section class="hero">
-          <h1 class="hero-title">Stop guessing. <span class="accent">Know</span> your dish cost.</h1>
+          <h1 class="hero-title">
+            Stop guessing. <span class="hero-highlight">Know</span> your dish cost.
+          </h1>
           <p class="hero-subtitle">
-            ProfitPlate is a simple tool for small restaurants to calculate exact
-            cost per dish, portion, and profit margin — in seconds, not spreadsheets.
+            ProfitPlate is a simple tool for small restaurants to calculate real
+            cost per dish, portion and profit margin — in seconds, not spreadsheets.
           </p>
 
           <div class="hero-actions">
-            <a href="purchases.html" class="btn-primary">
-              Start 24-hour free trial
-            </a>
-            <a href="#how-it-works" class="btn-secondary">
-              See how it works
-            </a>
+            <a href="purchases.html" class="btn-primary">Start 24-hour free trial</a>
+            <a href="#how-it-works" class="btn-secondary">See how it works</a>
           </div>
         </section>
 
-        <!-- Features -->
-        <section class="features-section">
-          <div class="features-row">
-            <article class="feature-card">
-              <h2 class="feature-title">Ingredient-based costing</h2>
-              <p class="feature-text">
-                Add ingredients once, use them in any recipe. ProfitPlate calculates
-                cost per portion automatically using your latest supplier prices.
-              </p>
-            </article>
+        <!-- Features row -->
+        <section class="features">
+          <article class="feature-card">
+            <div class="feature-title">Ingredient-based costing</div>
+            <p class="feature-text">
+              Add ingredients once, use them in any recipe. ProfitPlate calculates
+              cost per portion automatically using your latest supplier prices.
+            </p>
+          </article>
 
-            <article class="feature-card">
-              <h2 class="feature-title">Live price updates</h2>
-              <p class="feature-text">
-                Update supplier prices and see every affected dish update instantly.
-                Perfect when pancetta, butter, or salmon jump in price overnight.
-              </p>
-            </article>
+          <article class="feature-card">
+            <div class="feature-title">Live price updates</div>
+            <p class="feature-text">
+              Update supplier prices and see every affected dish update instantly.
+              Perfect when butter, pancetta or salmon jump in price overnight.
+            </p>
+          </article>
 
-            <article class="feature-card">
-              <h2 class="feature-title">Clean PDF exports</h2>
-              <p class="feature-text">
-                Export costing sheets you can print, share with your team,
-                or keep for documentation and menu engineering.
-              </p>
-            </article>
+          <article class="feature-card">
+            <div class="feature-title">Clean PDF exports</div>
+            <p class="feature-text">
+              Export dish costing sheets you can print, share with your team or keep
+              for documentation and menu engineering.
+            </p>
+          </article>
 
-            <article class="feature-card">
-              <h2 class="feature-title">Built for real kitchens</h2>
-              <p class="feature-text">
-                Designed by a working chef, not an accountant. Simple enough
-                to use during service, powerful enough for menu planning days.
-              </p>
-            </article>
-          </div>
+          <article class="feature-card">
+            <div class="feature-title">Built for real kitchens</div>
+            <p class="feature-text">
+              Designed by a working chef, not an accountant. Simple enough to use
+              during service, powerful enough for menu planning days.
+            </p>
+          </article>
         </section>
 
         <!-- How it works -->
-        <section id="how-it-works" class="how-section">
-          <h2 class="section-title">How ProfitPlate fits in your day</h2>
-          <div class="how-steps">
-            <div class="how-step">
-              <div class="how-step-label">1. Update your Purchases</div>
-              <p>
-                In the morning, you add or update items in <strong>Purchases</strong>:
-                butter, pancetta, salmon, fries, flour. Set category, sub-type,
-                unit and price (or use the pack helper if the invoice is weird).
-              </p>
-            </div>
-            <div class="how-step">
-              <div class="how-step-label">2. Build your Recipes</div>
-              <p>
-                In <strong>Recipes</strong>, you pick ingredients from your Purchases
-                list, set quantities and units actually used in the dish, and
-                ProfitPlate calculates cost per portion and batch.
-              </p>
-            </div>
-            <div class="how-step">
-              <div class="how-step-label">3. Check margin &amp; export</div>
-              <p>
-                Adjust selling price until the margin looks healthy. When you’re happy,
-                export a clean PDF or just keep it in ProfitPlate for later.
-              </p>
-            </div>
-          </div>
+        <section id="how-it-works" class="hero hero-secondary">
+          <h2 class="hero-title">How ProfitPlate fits in your day</h2>
+          <p class="hero-subtitle">
+            A quick rhythm that matches how you actually work.
+          </p>
+
+          <ol class="how-list">
+            <li>
+              <strong>Update your Purchases.</strong> Add or edit items from your latest
+              invoices – butter, pancetta, fries, flour. Set category, sub-type, unit and
+              price (or use the pack helper if the invoice is weird).
+            </li>
+            <li>
+              <strong>Build your Recipes.</strong> Pick ingredients from Purchases,
+              set the quantities and units you actually use in the dish. ProfitPlate
+              calculates batch cost and cost per portion automatically.
+            </li>
+            <li>
+              <strong>Check margin &amp; export.</strong> Adjust selling price until the
+              margin looks healthy. When you’re happy, export a clean PDF or keep it
+              in ProfitPlate for later.
+            </li>
+          </ol>
         </section>
 
-        <!-- Early dev note -->
-        <section class="dev-note">
-          <p>
-            ProfitPlate is in early development. This version runs entirely in your
-            browser using local storage — no login, no cloud, just your device.
-            In the future this will sync to an online account so you can share
-            data between phone, tablet and office PC.
-          </p>
+        <!-- Status strip -->
+        <section class="bottom-strip">
+          ProfitPlate is in early development. This is the first version of the
+          website — the costing app is coming next.
         </section>
       </main>
-
-      <div class="bottom-strip">
-        This is a static prototype of the ProfitPlate website. The costing app
-        is coming next — for now, you can test Purchases, Recipes and Settings locally.
-      </div>
     </div>
   </body>
 </html>
