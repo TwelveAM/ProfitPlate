@@ -2,104 +2,83 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>ProfitPlate – Meal cost calculator for restaurants</title>
+    <title>ProfitPlate – Home</title>
     <meta
       name="viewport"
       content="width=device-width, initial-scale=1, viewport-fit=cover"
     />
     <meta
       name="description"
-      content="ProfitPlate helps restaurants calculate real cost per dish and profit margin in seconds."
+      content="ProfitPlate helps chefs calculate dish cost, portion cost and margin without spreadsheets."
     />
-    <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-plate-32.png" />
-<link rel="icon" type="image/png" sizes="64x64" href="assets/favicon-plate-64.png" />
     <link rel="stylesheet" href="assets/styles.css" />
   </head>
   <body>
-    <div class="page">
-      <!-- Header with logo -->
-<header class="header">
-  <div class="logo-block">
-    <div class="logo-plate">
-      <span>PP</span>
-    </div>
-    <div class="brand-text">
-      <div class="name">ProfitPlate</div>
-      <div class="tagline">Know your profit per plate.</div>
-    </div>
-  </div>
+    <div class="container">
+      <!-- Navigation -->
+      <nav class="nav">
+        <a href="index.html" class="nav-link nav-link-active">Home</a>
+        <a href="purchases.html" class="nav-link">Purchases</a>
+        <a href="recipes.html" class="nav-link">Recipes</a>
+        <a href="settings.html" class="nav-link">Settings</a>
+      </nav>
 
-  <nav class="nav">
-    <a href="index.html" class="nav-link nav-link-active">Home</a>
-    <a href="purchases.html" class="nav-link">Purchases</a>
-    <a href="recipes.html" class="nav-link">Recipes</a>
-    <a href="settings.html" class="nav-link">Settings</a>
-  </nav>
-</header>
+      <!-- Hero -->
+      <header>
+        <h1 style="font-size: 32px; margin-bottom: 8px;">
+          Stop guessing. Know your dish cost.
+        </h1>
+        <p class="text-muted" style="max-width: 640px; font-size: 16px;">
+          ProfitPlate is a simple tool for restaurants to calculate exact cost
+          per dish, portion and margin — in seconds, not spreadsheets.
+        </p>
+      </header>
 
-
-
-      <!-- Hero section -->
-      <main>
-        <section class="hero">
-          <h1 class="hero-title">
-            Stop guessing. <span class="hero-highlight">Know</span> your dish
-            cost.
-          </h1>
-          <p class="hero-subtitle">
-            ProfitPlate is a simple tool for restaurants to calculate
-            exact cost per dish, portion, and profit margin — in seconds, not
-            spreadsheets.
-          </p>
-
-          <div class="hero-actions">
-            <button class="btn-primary">Start 24-hour free trial</button>
-            <button class="btn-secondary">See how it works</button>
-          </div>
-        </section>
-
-        <!-- Features -->
-        <section class="features">
-          <article class="feature-card">
-            <div class="feature-title">Ingredient-based costing</div>
-            <p class="feature-text">
-              Add ingredients once, use them in any recipe. ProfitPlate
-              calculates cost per portion automatically.
-            </p>
-          </article>
-
-          <article class="feature-card">
-            <div class="feature-title">Live price updates</div>
-            <p class="feature-text">
-              Update supplier prices and see every affected dish update
-              instantly.
-            </p>
-          </article>
-
-          <article class="feature-card">
-            <div class="feature-title">Clean PDF exports</div>
-            <p class="feature-text">
-              Export dish costing sheets you can print, share with your team, or
-              keep for documentation.
-            </p>
-          </article>
-
-          <article class="feature-card">
-            <div class="feature-title">Built for real kitchens</div>
-            <p class="feature-text">
-              Designed by a working chef, not an accountant. Simple enough to
-              use during service.
-            </p>
-          </article>
-        </section>
-      </main>
-
-      <!-- Bottom text -->
-      <div class="bottom-strip">
-        ProfitPlate is in early development. This is the first version of the
-        website – the costing app is coming next.
+      <div style="margin-top: 24px; display: flex; gap: 12px;">
+        <a href="purchases.html" class="btn btn-primary">Start by adding purchases</a>
+        <a href="recipes.html" class="btn btn-secondary">Go to recipes</a>
       </div>
+
+      <hr />
+
+      <section>
+        <h2 style="font-size: 22px; margin-bottom: 8px;">
+          Ingredient-based costing
+        </h2>
+        <p class="text-muted" style="max-width: 720px;">
+          Add ingredients once, use them in any recipe. ProfitPlate calculates
+          cost per portion automatically using the latest purchase prices.
+        </p>
+      </section>
+
+      <section class="mt-20">
+        <h3 style="font-size: 18px; margin-bottom: 6px;">Live price updates</h3>
+        <p class="text-muted" style="max-width: 720px;">
+          Update supplier prices and every affected dish updates instantly.
+        </p>
+
+        <h3 style="font-size: 18px; margin: 18px 0 6px;">Clean exports</h3>
+        <p class="text-muted" style="max-width: 720px;">
+          Export neat costing sheets you can print, share with your team, or
+          keep for documentation (in the real app).
+        </p>
+
+        <h3 style="font-size: 18px; margin: 18px 0 6px;">Built for real kitchens</h3>
+        <p class="text-muted" style="max-width: 720px;">
+          Designed by a working chef, not an accountant. Simple enough to use
+          during service, detailed enough for the boss.
+        </p>
+      </section>
+
+      <hr />
+
+      <p class="text-muted" style="font-size: 14px;">
+        ProfitPlate is in early development. This prototype stores everything in
+        your browser only – no server, no cloud. Perfect for testing in one
+        kitchen.
+      </p>
     </div>
+
     <script src="assets/app.js"></script>
   </body>
 </html>
