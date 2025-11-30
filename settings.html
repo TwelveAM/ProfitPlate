@@ -187,59 +187,65 @@
         </section>
       </main>
 
-      <div class="bottom-strip" style="margin-top: 22px;">
+            <div class="bottom-strip" style="margin-top: 22px;">
         Settings are a visual prototype for now. In a future version, they’ll be
         saved per-account and synced across your devices.
       </div>
     </div>
 
-    <!-- Tiny brain for settings – uses localStorage but stays simple -->
+    <!-- Shared data store -->
+    <script src="assets/app.js"></script>
+
+    <!-- Settings logic: stored inside ppData.settings -->
     <script>
-      const STORAGE_KEY = "profitplate-settings";
-
       function loadSettings() {
-        try {
-          const raw = localStorage.getItem(STORAGE_KEY);
-          if (!raw) return;
-          const s = JSON.parse(raw);
+        const s = (window.ppData && window.ppData.settings) || {};
 
-          if (s.currency) {
-            document.getElementById("setting-currency").value = s.currency;
-          }
-          if (s.locale) {
-            document.getElementById("setting-locale").value = s.locale;
-          }
-          if (typeof s.autoRecalc === "boolean") {
-            document.getElementById("setting-auto-recalc").checked =
-              s.autoRecalc;
-          }
-          if (typeof s.showAdvanced === "boolean") {
-            document.getElementById("setting-advanced").checked =
-              s.showAdvanced;
-          }
-        } catch (e) {
-          console.warn("Could not load settings", e);
+        if (s.currency) {
+          document.getElementById("setting-currency").value = s.currency;
+        }
+        if (s.locale) {
+          document.getElementById("setting-locale").value = s.locale;
+        }
+        if (typeof s.autoRecalc === "boolean") {
+          document.getElementById("setting-auto-recalc").checked = s.autoRecalc;
+        }
+        if (typeof s.showAdvanced === "boolean") {
+          document.getElementById("setting-advanced").checked =
+            s.showAdvanced;
         }
       }
 
       function saveSettings() {
-        const s = {
-          currency: document.getElementById("setting-currency").value,
-          locale: document.getElementById("setting-locale").value,
-          autoRecalc: document.getElementById("setting-auto-recalc").checked,
-          showAdvanced: document.getElementById("setting-advanced").checked
-        };
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(s));
+        if (!window.ppData) {
+          window.ppData = { purchases: [], recipes: [], settings: {} };
+        }
+
+        const s = window.ppData.settings || {};
+
+        s.currency = document.getElementById("setting-currency").value;
+        s.locale = document.getElementById("setting-locale").value;
+        s.autoRecalc =
+          document.getElementById("setting-auto-recalc").checked;
+        s.showAdvanced =
+          document.getElementById("setting-advanced").checked;
+
+        window.ppData.settings = s;
+        if (typeof saveData === "function") {
+          saveData(window.ppData);
+        }
       }
 
       function resetDemoData() {
-        if (!confirm("Clear local ProfitPlate data in this browser?")) return;
+        if (!confirm("Clear all local ProfitPlate data in this browser?")) {
+          return;
+        }
         try {
-          // Settings themselves
-          localStorage.removeItem(STORAGE_KEY);
-          // Future: purchases/recipes data key (we'll hook to real key later)
-          // localStorage.removeItem("profitplate-data");
-          alert("Local demo settings cleared. Reload the page to see defaults.");
+          const key =
+            window.PROFITPLATE_STORAGE_KEY || "profitplate-data-v1";
+          localStorage.removeItem(key);
+          alert("Local ProfitPlate data cleared. Reloading page...");
+          location.reload();
         } catch (e) {
           alert("Could not clear data: " + e.message);
         }
@@ -259,7 +265,7 @@
         .getElementById("setting-advanced")
         .addEventListener("change", saveSettings);
 
-      // Init
+      // Init from ppData
       loadSettings();
     </script>
   </body>
