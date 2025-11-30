@@ -655,6 +655,140 @@
     packUnitSelect.value = "";
     packPriceInput.value = "";
   });
+    // === Render purchases table from ppData ===
+
+  const purchasesTableBody = document.getElementById("purchases-table-body");
+
+  function ensureSeedPurchases() {
+    if (!window.ppData) {
+      window.ppData = { purchases: [], recipes: [], settings: {} };
+    }
+    if (!Array.isArray(window.ppData.purchases)) {
+      window.ppData.purchases = [];
+    }
+
+    if (window.ppData.purchases.length > 0) {
+      return; // already have data, don't seed
+    }
+
+    const now = new Date().toISOString();
+    window.ppData.purchases = [
+      {
+        id: "seed_butter",
+        name: "Butter 82%",
+        supplier: "",
+        category: "Dairy & Eggs",
+        subtype: "Butter",
+        unit: "kg",
+        pricePerUnit: 6.4,
+        currency:
+          (window.ppData.settings && window.ppData.settings.currency) || "EUR",
+        notes: "",
+        updatedAt: now
+      },
+      {
+        id: "seed_pancetta",
+        name: "Pancetta cubetti",
+        supplier: "",
+        category: "Meat & Fish",
+        subtype: "Smoked",
+        unit: "kg",
+        pricePerUnit: 10.2,
+        currency:
+          (window.ppData.settings && window.ppData.settings.currency) || "EUR",
+        notes: "",
+        updatedAt: now
+      },
+      {
+        id: "seed_fries",
+        name: "Frozen fries",
+        supplier: "",
+        category: "Vegetables & Fruit",
+        subtype: "Frozen",
+        unit: "bag",
+        pricePerUnit: 4.2,
+        currency:
+          (window.ppData.settings && window.ppData.settings.currency) || "EUR",
+        notes: "",
+        updatedAt: now
+      }
+    ];
+
+    if (typeof saveData === "function") {
+      saveData(window.ppData);
+    }
+  }
+
+  function formatDateShort(iso) {
+    if (!iso) return "";
+    try {
+      return iso.slice(0, 10); // YYYY-MM-DD
+    } catch {
+      return "";
+    }
+  }
+
+  function renderPurchasesTable() {
+    if (!purchasesTableBody) return;
+
+    const items =
+      (window.ppData && Array.isArray(window.ppData.purchases)
+        ? window.ppData.purchases
+        : []);
+
+    purchasesTableBody.innerHTML = "";
+
+    if (items.length === 0) {
+      const tr = document.createElement("tr");
+      const td = document.createElement("td");
+      td.colSpan = 7;
+      td.style.padding = "10px 12px";
+      td.textContent =
+        "No purchases yet. Add an item above to see it here.";
+      tr.appendChild(td);
+      purchasesTableBody.appendChild(tr);
+      return;
+    }
+
+    items.forEach((item) => {
+      const tr = document.createElement("tr");
+
+      tr.innerHTML = `
+        <td style="padding: 9px 12px;">${item.name}</td>
+        <td style="padding: 9px 12px;">${item.category || ""}</td>
+        <td style="padding: 9px 12px;">${item.subtype || ""}</td>
+        <td style="padding: 9px 12px;">${item.unit || ""}</td>
+        <td style="padding: 9px 12px;">
+          ${item.pricePerUnit != null
+            ? item.pricePerUnit.toFixed(2) +
+              " " +
+              (item.currency || "€") +
+              "/" +
+              (item.unit || "")
+            : ""}
+        </td>
+        <td style="padding: 9px 12px;">${formatDateShort(
+          item.updatedAt
+        )}</td>
+        <td style="padding: 9px 12px;">
+          <button class="btn-secondary">Edit</button>
+        </td>
+      `;
+
+      purchasesTableBody.appendChild(tr);
+    });
+  }
+
+  // Init on page load: seed demo items once, then render
+  ensureSeedPurchases();
+  renderPurchasesTable();
+
+  // After saving a new item, re-render table immediately
+  purchaseForm.addEventListener("submit", () => {
+    renderPurchasesTable();
+  });
+</script>
+
 </script>
 </body>
 </html>
