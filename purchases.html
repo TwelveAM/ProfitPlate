@@ -40,11 +40,10 @@
         </div>
 
         <nav class="nav">
-  <a href="index.html" class="nav-link">Home</a>
-  <a href="purchases.html" class="nav-link nav-link-active">Purchases</a>
-  <a href="recipes.html" class="nav-link">Recipes</a>
-</nav>
-
+          <a href="index.html" class="nav-link">Home</a>
+          <a href="purchases.html" class="nav-link nav-link-active">Purchases</a>
+          <a href="recipes.html" class="nav-link">Recipes</a>
+        </nav>
       </header>
 
       <main>
@@ -147,7 +146,7 @@
               </div>
 
               <div class="form-field">
-                <label class="form-label" for="item-unit">Unit</label>
+                <label class="form-label" for="item-unit">Unit (for recipes)</label>
                 <select
                   class="form-select"
                   id="item-unit"
@@ -156,8 +155,8 @@
                 >
                   <option value="">Select...</option>
                   <option value="kg">kg</option>
-                  <option value="g">g</option>
-                  <option value="L">L</option>
+                  <option value="g">gr</option>
+                  <option value="l">L</option>
                   <option value="ml">ml</option>
                   <option value="pcs">pcs</option>
                   <option value="tray">tray</option>
@@ -170,7 +169,9 @@
 
             <div class="form-row">
               <div class="form-field">
-                <label class="form-label" for="item-price">Purchase price</label>
+                <label class="form-label" for="item-price">
+                  Purchase price (per recipe unit)
+                </label>
                 <div style="display: flex; align-items: center; gap: 6px;">
                   <input
                     class="form-input"
@@ -178,13 +179,81 @@
                     name="price"
                     type="number"
                     min="0"
-                    step="0.01"
-                    placeholder="e.g. 59"
+                    step="0.0001"
+                    placeholder="e.g. 2.50"
                     required
                   />
                   <span style="font-size: 13px; color: #555;">€/unit</span>
                 </div>
+
+                <!-- Pack helper -->
+                <div
+                  style="
+                    margin-top: 8px;
+                    font-size: 12px;
+                    color: #555;
+                  "
+                >
+                  <div style="margin-bottom: 4px; font-weight: 600;">
+                    Or use pack helper (optional)
+                  </div>
+                  <div
+                    style="
+                      display: flex;
+                      flex-wrap: wrap;
+                      gap: 6px;
+                      align-items: center;
+                    "
+                  >
+                    <input
+                      class="form-input"
+                      id="pack-qty"
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      placeholder="e.g. 100"
+                      style="max-width: 80px;"
+                    />
+                    <select
+                      class="form-select"
+                      id="pack-unit"
+                      style="max-width: 90px;"
+                    >
+                      <option value="">unit</option>
+                      <option value="g">gr</option>
+                      <option value="kg">kg</option>
+                      <option value="ml">ml</option>
+                      <option value="l">L</option>
+                      <option value="pcs">pcs</option>
+                    </select>
+                    <span>for</span>
+                    <input
+                      class="form-input"
+                      id="pack-price"
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      placeholder="e.g. 5"
+                      style="max-width: 90px;"
+                    />
+                    <span>€</span>
+                    <button
+                      type="button"
+                      class="btn-secondary"
+                      onclick="fillPriceFromPack()"
+                    >
+                      Use pack
+                    </button>
+                  </div>
+                  <div style="margin-top: 4px;">
+                    <em style="font-size: 11px;"
+                      >Example: 100 gr for 5 € → we calculate €/gr or €/kg
+                      based on the recipe unit.</em
+                    >
+                  </div>
+                </div>
               </div>
+
               <div class="form-field">
                 <label class="form-label" for="item-notes">Notes (optional)</label>
                 <input
@@ -339,10 +408,41 @@
                   <th style="padding: 10px 12px;">Actions</th>
                 </tr>
               </thead>
-              <tbody id="purchases-tbody">
-  <!-- JS will render purchases here -->
-</tbody>
-
+              <tbody>
+                <tr>
+                  <td style="padding: 9px 12px;">Butter 82%</td>
+                  <td style="padding: 9px 12px;">Dairy &amp; Eggs</td>
+                  <td style="padding: 9px 12px;">Butter</td>
+                  <td style="padding: 9px 12px;">kg</td>
+                  <td style="padding: 9px 12px;">6.40 €/kg</td>
+                  <td style="padding: 9px 12px;">2 hours ago</td>
+                  <td style="padding: 9px 12px;">
+                    <button class="btn-secondary">Edit</button>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding: 9px 12px;">Pancetta cubetti</td>
+                  <td style="padding: 9px 12px;">Meat &amp; Fish</td>
+                  <td style="padding: 9px 12px;">Smoked</td>
+                  <td style="padding: 9px 12px;">kg</td>
+                  <td style="padding: 9px 12px;">10.20 €/kg</td>
+                  <td style="padding: 9px 12px;">3 days ago</td>
+                  <td style="padding: 9px 12px;">
+                    <button class="btn-secondary">Edit</button>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding: 9px 12px;">Frozen fries</td>
+                  <td style="padding: 9px 12px;">Vegetables &amp; Fruit</td>
+                  <td style="padding: 9px 12px;">Frozen</td>
+                  <td style="padding: 9px 12px;">2.5kg bag</td>
+                  <td style="padding: 9px 12px;">4.20 €/bag</td>
+                  <td style="padding: 9px 12px;">5 days ago</td>
+                  <td style="padding: 9px 12px;">
+                    <button class="btn-secondary">Edit</button>
+                  </td>
+                </tr>
+              </tbody>
             </table>
           </div>
         </section>
@@ -353,10 +453,8 @@
         not store data yet — the next step is wiring it to real storage.
       </div>
     </div>
-    
-    <script src="assets/app.js"></script>
 
-    <!-- Purchases page logic -->
+    <!-- Tiny brain: filters + form helpers + pack helper -->
     <script>
       // Category -> sub-types for filters AND form
       const categorySubtypes = {
@@ -375,59 +473,17 @@
       const addFormSubtype = document.getElementById("item-subtype");
       const purchaseForm = document.getElementById("purchase-form");
       const addItemFormSection = document.getElementById("add-item-form");
-      const tbody = document.getElementById("purchases-tbody");
+
+      // Pack helper elements
+      const unitSelect = document.getElementById("item-unit");
+      const packQtyInput = document.getElementById("pack-qty");
+      const packUnitSelect = document.getElementById("pack-unit");
+      const packPriceInput = document.getElementById("pack-price");
+      const priceInput = document.getElementById("item-price");
 
       let currentCategory = null;
       let addFormVisible = false;
-      let editingId = null; // null = add mode, set = edit mode
 
-      function formatDateShort(iso) {
-        if (!iso) return "";
-        try {
-          return iso.slice(0, 10);
-        } catch {
-          return "";
-        }
-      }
-
-      function renderPurchasesTable() {
-        tbody.innerHTML = "";
-
-        if (!ppData.purchases.length) {
-          tbody.innerHTML = `
-            <tr>
-              <td colspan="7" style="padding: 10px 12px; color:#666;">
-                No purchases yet. Use "Add item manually" to add your first ingredient.
-              </td>
-            </tr>
-          `;
-          return;
-        }
-
-        ppData.purchases.forEach((p) => {
-          const tr = document.createElement("tr");
-          const priceLabel =
-            (p.pricePerUnit ?? 0).toFixed(2) + " €/" + (p.unit || "unit");
-
-          tr.innerHTML = `
-            <td style="padding: 9px 12px;">${p.name}</td>
-            <td style="padding: 9px 12px;">${p.category || ""}</td>
-            <td style="padding: 9px 12px;">${p.subtype || ""}</td>
-            <td style="padding: 9px 12px;">${p.unit || ""}</td>
-            <td style="padding: 9px 12px;">${priceLabel}</td>
-            <td style="padding: 9px 12px;">${formatDateShort(p.updatedAt)}</td>
-            <td style="padding: 9px 12px;">
-              <button class="btn-secondary" type="button"
-                onclick="startEditPurchase('${p.id}')">
-                Edit
-              </button>
-            </td>
-          `;
-          tbody.appendChild(tr);
-        });
-      }
-
-      // Category chips behaviour
       function renderSubtypes(categoryKey) {
         const subtypes = categorySubtypes[categoryKey] || [];
 
@@ -449,6 +505,7 @@
         });
       }
 
+      // Category chips (toggle behaviour)
       categoryRow.addEventListener("click", (event) => {
         const btn = event.target.closest(".filter-pill");
         if (!btn) return;
@@ -481,15 +538,7 @@
       function toggleAddForm() {
         addFormVisible = !addFormVisible;
         addItemFormSection.style.display = addFormVisible ? "block" : "none";
-
-        if (!addFormVisible) {
-          // Reset editing state when closing
-          editingId = null;
-          purchaseForm.reset();
-        }
       }
-
-      // Expose toggle for the button onclick
       window.toggleAddForm = toggleAddForm;
 
       // Populate sub-type select in form when category changes
@@ -521,100 +570,70 @@
         });
       });
 
-      // Start editing an existing purchase
-      function startEditPurchase(id) {
-        const item = getPurchaseById(id);
-        if (!item) return;
+      // --- Pack helper logic ---
 
-        editingId = id;
-        if (!addFormVisible) {
-          toggleAddForm();
-        }
-
-        document.getElementById("item-name").value = item.name || "";
-        document.getElementById("item-supplier").value = item.supplier || "";
-        document.getElementById("item-category").value = item.category || "";
-
-        // Trigger subtype population
-        const event = new Event("change");
-        addFormCategory.dispatchEvent(event);
-
-        document.getElementById("item-subtype").value = item.subtype || "";
-        document.getElementById("item-unit").value = item.unit || "";
-        document.getElementById("item-price").value =
-          item.pricePerUnit != null ? item.pricePerUnit : "";
-        document.getElementById("item-notes").value = item.notes || "";
+      function normalizeUnit(u) {
+        if (!u) return "";
+        u = u.toLowerCase();
+        if (u === "gr") u = "g";
+        return u;
       }
 
-      // Expose to global so inline onclick can use it
-      window.startEditPurchase = startEditPurchase;
+      function convertToBase(qty, from, to) {
+        let q = Number(qty) || 0;
+        from = normalizeUnit(from);
+        to = normalizeUnit(to);
 
-      // Handle form submit (add or edit)
-      purchaseForm.addEventListener("submit", (e) => {
-        e.preventDefault();
+        if (!from || !to) return 0;
+        if (from === to) return q;
 
-        const name = document.getElementById("item-name").value.trim();
-        const supplier = document.getElementById("item-supplier").value.trim();
-        const category = document.getElementById("item-category").value;
-        const subtype = document.getElementById("item-subtype").value;
-        const unit = document.getElementById("item-unit").value;
-        const price = parseFloat(
-          document.getElementById("item-price").value.replace(",", ".")
-        );
-        const notes = document.getElementById("item-notes").value.trim();
+        // g <-> kg
+        if (from === "g" && to === "kg") return q / 1000;
+        if (from === "kg" && to === "g") return q * 1000;
 
-        if (!name || !category || !unit || isNaN(price)) {
-          alert("Please fill name, category, unit and a valid price.");
+        // ml <-> l
+        if (from === "ml" && to === "l") return q / 1000;
+        if (from === "l" && to === "ml") return q * 1000;
+
+        // pcs or other: no conversion, assume same thing
+        return q;
+      }
+
+      function fillPriceFromPack() {
+        const baseUnit = unitSelect.value;
+        const packQtyRaw = packQtyInput.value || "0";
+        const packPriceRaw = packPriceInput.value || "0";
+        const packUnit = packUnitSelect.value;
+
+        const packQty = parseFloat(packQtyRaw.replace(",", "."));
+        const packPrice = parseFloat(packPriceRaw.replace(",", "."));
+
+        if (!baseUnit || !packUnit || !packQty || !packPrice || packQty <= 0) {
+          alert("Fill pack quantity, unit, and price first.");
           return;
         }
 
-        const now = new Date().toISOString();
+        const qtyInBase = convertToBase(packQty, packUnit, baseUnit);
 
-        if (editingId) {
-          // Update existing
-          const item = getPurchaseById(editingId);
-          if (item) {
-            item.name = name;
-            item.supplier = supplier;
-            item.category = category;
-            item.subtype = subtype;
-            item.unit = unit;
-            item.pricePerUnit = price;
-            item.notes = notes;
-            item.updatedAt = now;
-          }
-        } else {
-          // New item
-          const newId = "pur_" + Date.now();
-          const newItem = {
-            id: newId,
-            name,
-            category,
-            subtype,
-            unit,
-            pricePerUnit: price,
-            currency: ppData.settings?.currency || "EUR",
-            supplier,
-            notes,
-            updatedAt: now
-          };
-          addPurchaseItem(newItem);
+        if (!qtyInBase || qtyInBase <= 0) {
+          alert(
+            "Could not convert pack unit to recipe unit. Use compatible units (g/kg or ml/L)."
+          );
+          return;
         }
 
-        // Make sure data is saved
-        saveData(ppData);
-        // Refresh table
-        renderPurchasesTable();
+        const perUnit = packPrice / qtyInBase;
+        priceInput.value = perUnit.toFixed(4);
+      }
+      window.fillPriceFromPack = fillPriceFromPack;
 
-        // Reset form and editing state
-        editingId = null;
-        purchaseForm.reset();
-        alert("Item saved (locally). Recipes will use the new price.");
+      // prevent real submit for now (prototype only)
+      purchaseForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+        alert(
+          "In the real app this would save the item.\nRight now it's just a visual prototype."
+        );
       });
-
-      // Initial render from stored data
-      renderPurchasesTable();
     </script>
-
   </body>
 </html>
