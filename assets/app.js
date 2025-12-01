@@ -40,15 +40,20 @@
     showAdvanced: true,
   });
 
-  // Normalise / clean
+  // ===========================
+  // Normalise / clean purchases
+  // ===========================
   function sanitizePurchases() {
     purchases = (purchases || [])
       .filter((p) => p && typeof p === "object")
       .map((p) => {
         const n = { ...p };
+
+        // Normalise price
         const v = Number(n.pricePerUnit);
         n.pricePerUnit = Number.isFinite(v) && v >= 0 ? v : 0;
 
+        // Normalise priceHistory
         if (Array.isArray(n.priceHistory)) {
           n.priceHistory = n.priceHistory
             .filter((h) => h && h.date)
@@ -103,20 +108,23 @@
     };
 
     const symbol = symbolMap[currency] || currency;
+
     return { currency, symbol, locale };
   }
 
   function formatMoney(value, decimals) {
     const { symbol, locale } = getFormatting();
     const n = Number(value) || 0;
+
     const formatted = n.toLocaleString(locale, {
       minimumFractionDigits: decimals,
       maximumFractionDigits: decimals,
     });
+
     return `${formatted} ${symbol}`;
   }
 
-  // DD-MM-YYYY display
+  // DD-MM-YYYY for display
   function formatDate(iso) {
     if (!iso) return "-";
     const d = new Date(iso);
@@ -141,10 +149,12 @@
     let q = Number(qty) || 0;
     const from = normalizeUnit(fromUnit);
     const to = normalizeUnit(toUnit);
+
     if (!from || !to || from === to) return q;
 
     if (from === "g" && to === "kg") return q / 1000;
     if (from === "kg" && to === "g") return q * 1000;
+
     if (from === "ml" && to === "l") return q / 1000;
     if (from === "l" && to === "ml") return q * 1000;
 
@@ -165,11 +175,10 @@
       const idx = purchases.findIndex((p) => p.id === purchase.id);
       const existing = idx !== -1 ? purchases[idx] : null;
 
-      const id = purchase.id || (existing && existing.id) || "p_" + Date.now();
+      const id =
+        purchase.id || (existing && existing.id) || "p_" + Date.now();
       const createdAt =
-        (existing && existing.createdAt) ||
-        purchase.createdAt ||
-        nowIso;
+        (existing && existing.createdAt) || purchase.createdAt || nowIso;
 
       const numericPrice =
         Number(String(purchase.pricePerUnit || "").replace(",", ".")) || 0;
@@ -182,12 +191,18 @@
 
       if (!existing) {
         if (numericPrice > 0) {
-          history.unshift({ date: nowIso, pricePerUnit: numericPrice });
+          history.unshift({
+            date: nowIso,
+            pricePerUnit: numericPrice,
+          });
         }
       } else {
         const prevPrice = Number(existing.pricePerUnit) || 0;
         if (numericPrice > 0 && numericPrice !== prevPrice) {
-          history.unshift({ date: nowIso, pricePerUnit: numericPrice });
+          history.unshift({
+            date: nowIso,
+            pricePerUnit: numericPrice,
+          });
         } else if (!history.length && prevPrice > 0) {
           history.unshift({
             date: existing.updatedAt || existing.createdAt || nowIso,
@@ -253,6 +268,10 @@
     const categoryInput = document.getElementById("item-category");
     const subtypeInput = document.getElementById("item-subtype");
     const supplierInput = document.getElementById("item-supplier");
+    const invoiceNumberInput = document.getElementById(
+      "item-invoice-number"
+    );
+    const invoiceDateInput = document.getElementById("item-invoice-date");
     const unitInput = document.getElementById("item-unit");
     const priceInput = document.getElementById("item-price");
     const notesInput = document.getElementById("item-notes");
@@ -299,6 +318,7 @@
       });
     }
 
+    // Price history helpers
     function clearHistoryUI() {
       if (!historyBlock || !historyBody) return;
       historyBlock.classList.add("hidden");
@@ -307,19 +327,24 @@
 
     function renderHistoryForItem(item) {
       if (!historyBlock || !historyBody) return;
-      const hist = Array.isArray(item.priceHistory) ? item.priceHistory : [];
+
+      const hist = Array.isArray(item.priceHistory)
+        ? item.priceHistory
+        : [];
       if (!hist.length) {
         clearHistoryUI();
         return;
       }
 
       historyBody.innerHTML = "";
+
       hist.forEach((entry) => {
         const tr = document.createElement("tr");
         const td1 = document.createElement("td");
         const td2 = document.createElement("td");
 
         td1.textContent = formatDate(entry.date);
+
         const price = Number(entry.pricePerUnit) || 0;
         td2.textContent =
           price > 0
@@ -377,7 +402,7 @@
       const qtyInBase = convertQty(packQty, packUnit, baseUnit);
       if (!qtyInBase || qtyInBase <= 0) {
         alert(
-          "Units not compatible. Use g/kg or ml/L or the same unit for the pack and recipe."
+          "Units not compatible.\nUse g/kg or ml/L or the same unit for the pack and recipe."
         );
         return;
       }
@@ -402,7 +427,7 @@
       if (!purchases.length) {
         const p = document.createElement("p");
         p.className = "text-muted";
-        p.textContent = "No items yet. Add your first ingredient above.";
+        p.textContent = "No items yet.\nAdd your first ingredient above.";
         recentList.appendChild(p);
         return;
       }
@@ -427,25 +452,28 @@
               (item.unit || "")
             : "-";
 
+        const title = document.createElement("div");
+        title.className = "card-updated-title";
+        title.textContent = `${item.name} – ${priceLabel}`;
+
         let metaParts = [];
         metaParts.push("Updated " + formatDate(item.updatedAt));
+
         if (item.category) {
           let cat = item.category;
           if (item.subtype) cat += " (" + item.subtype + ")";
           metaParts.push(cat);
         }
+
         if (item.supplier) {
           metaParts.push("Supplier: " + item.supplier);
         }
-        const line2 = metaParts.join(" • ");
 
-        card.innerHTML =
-          '<div class="card-updated-title">' +
-          (item.name + " – " + priceLabel) +
-          "</div><small>" +
-          line2 +
-          "</small>";
+        const meta = document.createElement("small");
+        meta.textContent = metaParts.join(" • ");
 
+        card.appendChild(title);
+        card.appendChild(meta);
         recentList.appendChild(card);
       });
     }
@@ -460,7 +488,8 @@
           return (
             p.name.toLowerCase().includes(q) ||
             (p.category || "").toLowerCase().includes(q) ||
-            (p.supplier || "").toLowerCase().includes(q)
+            (p.supplier || "").toLowerCase().includes(q) ||
+            (p.invoiceNumber || "").toLowerCase().includes(q)
           );
         })
         .forEach((item) => {
@@ -484,6 +513,7 @@
           addCell(item.category || "");
           addCell(item.subtype || "");
           addCell(item.supplier || "");
+          addCell(item.invoiceNumber || "");
           addCell(item.unit || "");
           addCell(priceLabel);
           addCell(formatDate(item.updatedAt));
@@ -528,6 +558,10 @@
       populateSubtypeSelect(item.category || "");
       subtypeInput.value = item.subtype || "";
       supplierInput.value = item.supplier || "";
+      if (invoiceNumberInput)
+        invoiceNumberInput.value = item.invoiceNumber || "";
+      if (invoiceDateInput)
+        invoiceDateInput.value = item.invoiceDate || "";
       unitInput.value = item.unit || "";
 
       const price = getSafePrice(item);
@@ -552,6 +586,12 @@
       const category = categoryInput.value;
       const subtype = subtypeInput.value;
       const supplier = supplierInput.value.trim();
+      const invoiceNumber = invoiceNumberInput
+        ? invoiceNumberInput.value.trim()
+        : "";
+      const invoiceDate = invoiceDateInput
+        ? invoiceDateInput.value
+        : "";
       const unit = unitInput.value;
       const price =
         Number(String(priceInput.value || "").replace(",", ".")) || 0;
@@ -589,6 +629,8 @@
         category,
         subtype,
         supplier,
+        invoiceNumber,
+        invoiceDate,
         unit,
         pricePerUnit: price,
         notes,
@@ -601,14 +643,13 @@
       purchases = ppStore.getPurchases();
 
       alert(
-        "Item saved locally. It will be available to use on the Recipes page."
+        "Item saved locally.\nIt will be available to use on the Recipes page."
       );
 
       editingId = null;
       purchaseForm.reset();
       clearHistoryUI();
       addFormWrapper.classList.add("hidden");
-
       renderRecent();
       renderTable(searchInput ? searchInput.value : "");
     });
