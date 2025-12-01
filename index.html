@@ -24,14 +24,12 @@
       color: var(--text-main);
     }
 
-    /* Layout wrapper */
     .page {
       max-width: 960px;
       margin: 0 auto;
       padding: 16px 20px 40px;
     }
 
-    /* Header + nav */
     header {
       background-color: #ffffff;
       border-bottom: 1px solid #dddddd;
@@ -43,7 +41,7 @@
       padding: 12px 20px 10px;
     }
 
-    /* Hero banner now lives inside header, above nav */
+    /* HERO BANNER */
     .hero-banner {
       width: 630px;
       max-width: 100%;
@@ -83,6 +81,7 @@
       font-weight: 400;
     }
 
+    /* NAV */
     nav {
       margin-top: 6px;
       margin-bottom: 6px;
@@ -95,13 +94,13 @@
       display: flex;
       gap: 32px;
       align-items: center;
+      justify-content: center;   /* <– match Purchases & Recipes */
     }
 
     .nav-link {
       text-decoration: none;
       font-size: 14px;
       color: #222222;
-      position: relative;
       padding: 6px 12px;
       border-radius: 999px;
       transition: background-color 0.15s ease, color 0.15s ease;
@@ -240,10 +239,11 @@
     }
   </style>
 </head>
+
 <body>
   <header>
     <div class="header-inner">
-      <!-- Banner moved to the very top -->
+      <!-- Banner -->
       <div class="hero-banner">
         <div class="hero-icons">⚖️</div>
         <div class="hero-title-block">
@@ -253,6 +253,7 @@
         <div class="hero-icons">🥩</div>
       </div>
 
+      <!-- Nav -->
       <nav>
         <ul class="nav-list">
           <li><a class="nav-link active" href="index.html">Home</a></li>
@@ -268,7 +269,8 @@
     <main>
       <h1>Stop guessing. Know your dish cost.</h1>
       <p class="lead">
-        ProfitPlate is a simple tool for small restaurants to calculate real cost per dish, cost per portion, and profit margin — in seconds, not spreadsheets.
+        ProfitPlate is a simple tool for small restaurants to calculate real cost per dish,
+        cost per portion, and profit margin — in seconds, not spreadsheets.
       </p>
 
       <div class="cta-row">
@@ -280,22 +282,26 @@
         <div class="section-inner">
           <h2>Ingredient-based costing</h2>
           <p>
-            Add ingredients once, use them in any recipe. ProfitPlate calculates cost per portion automatically using your latest supplier prices.
+            Add ingredients once, use them in any recipe. ProfitPlate calculates cost per portion
+            automatically using your latest supplier prices.
           </p>
 
           <h2>Live price updates</h2>
           <p>
-            Update supplier prices once and see every affected dish update instantly. Perfect when butter, pancetta, salmon or fries jump in price overnight.
+            Update supplier prices once and see every affected dish update instantly.
+            Perfect when butter, pancetta, salmon or fries jump in price overnight.
           </p>
 
           <h2>Clean PDF exports (future)</h2>
           <p>
-            Export dish costing sheets you can print, share with your team, or keep for documentation and menu engineering.
+            Export dish costing sheets you can print, share with your team, or keep for
+            documentation and menu engineering.
           </p>
 
           <h2>Built for real kitchens</h2>
           <p>
-            Designed by a working chef, not an accountant. Simple enough to use during service, powerful enough for menu-planning days.
+            Designed by a working chef, not an accountant. Simple enough to use during service,
+            powerful enough for menu-planning days.
           </p>
         </div>
       </section>
@@ -306,16 +312,19 @@
           <p>A quick rhythm that matches how you actually work:</p>
           <ol class="how-steps">
             <li>
-              <strong>Update your Purchases.</strong> Add or edit items from your latest invoices – butter, pancetta, fries, flour.
+              <strong>Update your Purchases.</strong>
+              Add or edit items from your latest invoices – butter, pancetta, fries, flour.
               Set category, sub-type, unit and price (or use the pack helper if the invoice is weird).
             </li>
             <li>
-              <strong>Build your Recipes.</strong> Pick ingredients from Purchases, set the quantities and units you actually use in the dish.
+              <strong>Build your Recipes.</strong>
+              Pick ingredients from Purchases, set the quantities and units you actually use in the dish.
               ProfitPlate calculates batch cost and cost per portion automatically.
             </li>
             <li>
-              <strong>Check margin &amp; export.</strong> Adjust selling price until the margin looks healthy.
-              When you’re happy, export a clean PDF or keep it in ProfitPlate for later.
+              <strong>Check margin &amp; export.</strong>
+              Adjust selling price until the margin looks healthy. When you’re happy, export a clean PDF
+              or keep it in ProfitPlate for later.
             </li>
           </ol>
         </div>
@@ -325,10 +334,12 @@
         <div class="section-inner">
           <h2>Where the app is today</h2>
           <p>
-            ProfitPlate is in early development. This version runs entirely in your browser using local storage — no login, no cloud, just your device.
+            ProfitPlate is in early development. This version runs entirely in your browser using
+            local storage — no login, no cloud, just your device.
           </p>
           <p>
-            For now you can test Purchases, Recipes and Settings locally in your browser. In a future release, the costing app, online accounts and syncing will come next.
+            For now you can test Purchases, Recipes and Settings locally in your browser.
+            In a future release, the costing app, online accounts and syncing will come next.
           </p>
         </div>
       </section>
