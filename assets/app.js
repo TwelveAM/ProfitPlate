@@ -366,14 +366,16 @@
     window.fillPriceFromPack = fillPriceFromPack;
 
     // Helpers
-    function formatDate(iso) {
-      if (!iso) return "-";
-      try {
-        const d = new Date(iso);
-        return d.toISOString().slice(0, 10);
-      } catch (e) {
-        return "-";
-      }
+    function formatDateYYYY(dateStr) {
+  if (!dateStr) return "";
+  const d = new Date(dateStr);
+  if (isNaN(d)) return dateStr;
+  const dd = String(d.getDate()).padStart(2, "0");
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const yyyy = d.getFullYear();
+  return `${dd}-${mm}-${yyyy}`;
+}
+
     }
 
     function getSafePrice(item) {
