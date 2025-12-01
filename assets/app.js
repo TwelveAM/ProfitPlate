@@ -43,18 +43,61 @@
     showAdvanced: true,
   });
 
-  // Small safety: normalise any weird old data
+  // --- sanitize old / broken purchase entries (from earlier versions)
   function sanitizePurchases() {
     purchases = (purchases || [])
       .filter((p) => p && typeof p === "object")
       .map((p) => {
         const n = { ...p };
-        const v = Number(n.pricePerUnit);
-        n.pricePerUnit = Number.isFinite(v) && v >= 0 ? v : 0;
+
+        // Normalize price
+        const raw = n.pricePerUnit;
+        const price = Number(raw);
+        if (!Number.isFinite(price) || price < 0) {
+          n.pricePerUnit = 0;
+        } else {
+          n.pricePerUnit = price;
+        }
+
+        // Normalize history: ensure array of { date, pricePerUnit }
+        let hist = Array.isArray(n.priceHistory) ? n.priceHistory : [];
+        hist = hist
+          .filter((h) => h && typeof h === "object")
+          .map((h) => {
+            const hp = Number(h.pricePerUnit);
+            const d =
+              h.date ||
+              n.updatedAt ||
+              n.createdAt ||
+              new Date().toISOString();
+            return {
+              date: d,
+              pricePerUnit: Number.isFinite(hp) ? hp : n.pricePerUnit || 0,
+            };
+          });
+
+        // If there is no history but we have a price, seed one entry
+        if (!hist.length && n.pricePerUnit > 0) {
+          const baseDate =
+            n.updatedAt || n.createdAt || new Date().toISOString();
+          hist.push({
+            date: baseDate,
+            pricePerUnit: n.pricePerUnit,
+          });
+        }
+
+        // Keep only last 10 records (oldest dropped)
+        if (hist.length > 10) {
+          hist = hist.slice(hist.length - 10);
+        }
+
+        n.priceHistory = hist;
         return n;
       });
+
     safeSave(KEYS.purchases, purchases);
   }
+
   sanitizePurchases();
 
   // ===========================
@@ -72,33 +115,6 @@
 
   window.loadSettings = loadSettings;
   window.saveSettings = saveSettings;
-
-  // ===========================
-  // Formatting helpers (currency + locale)
-  // ===========================
-  function getFormatting() {
-    const s = loadSettings();
-    const currency = s.currency || "EUR";
-    const locale = s.locale === "us" ? "en-US" : "de-DE";
-    const symbolMap = {
-      EUR: "€",
-      RON: "lei",
-      USD: "$",
-      GBP: "£",
-    };
-    const symbol = symbolMap[currency] || currency;
-    return { currency, symbol, locale };
-  }
-
-  function formatMoney(value, decimals) {
-    const { symbol, locale } = getFormatting();
-    const n = Number(value) || 0;
-    const formatted = n.toLocaleString(locale, {
-      minimumFractionDigits: decimals,
-      maximumFractionDigits: decimals,
-    });
-    return `${formatted} ${symbol}`;
-  }
 
   // ===========================
   // Shared unit helpers
@@ -137,13 +153,84 @@
     getPurchases() {
       return purchases.slice();
     },
+
     upsertPurchase(purchase) {
+      // central place to maintain history, created/updated timestamps
+      const nowIso = new Date().toISOString();
+
+      // Find existing
       const idx = purchases.findIndex((p) => p.id === purchase.id);
-      if (idx === -1) {
-        purchases.push(purchase);
-      } else {
-        purchases[idx] = purchase;
+      const existing = idx !== -1 ? purchases[idx] : null;
+
+      const id = purchase.id || (existing && existing.id) || "p_" + Date.now();
+      const createdAt =
+        (existing && existing.createdAt) || purchase.createdAt || nowIso;
+
+      const numericPrice =
+        Number(String(purchase.pricePerUnit || "").replace(",", ".")) || 0;
+
+      // Start from existing history if present
+      let history = existing && Array.isArray(existing.priceHistory)
+        ? existing.priceHistory.slice()
+        : [];
+
+      // Last recorded price in history (if any)
+      let lastRecorded =
+        history.length > 0
+          ? Number(history[history.length - 1].pricePerUnit)
+          : null;
+
+      if (!history.length && existing && existing.pricePerUnit > 0) {
+        // Seed with existing stored price
+        history.push({
+          date: existing.updatedAt || existing.createdAt || nowIso,
+          pricePerUnit: Number(existing.pricePerUnit) || 0,
+        });
+        lastRecorded = history[history.length - 1].pricePerUnit;
       }
+
+      // If price changed, append new history record
+      if (
+        numericPrice > 0 &&
+        (lastRecorded === null ||
+          !Number.isFinite(lastRecorded) ||
+          numericPrice !== lastRecorded)
+      ) {
+        history.push({
+          date: nowIso,
+          pricePerUnit: numericPrice,
+        });
+      }
+
+      // If still no history but we have a price (new item), seed entry
+      if (!history.length && numericPrice > 0) {
+        history.push({
+          date: nowIso,
+          pricePerUnit: numericPrice,
+        });
+      }
+
+      // Keep only last 10
+      if (history.length > 10) {
+        history = history.slice(history.length - 10);
+      }
+
+      const merged = {
+        ...(existing || {}),
+        ...purchase,
+        id,
+        createdAt,
+        updatedAt: nowIso,
+        pricePerUnit: numericPrice,
+        priceHistory: history,
+      };
+
+      if (idx === -1) {
+        purchases.push(merged);
+      } else {
+        purchases[idx] = merged;
+      }
+
       sanitizePurchases();
     },
 
@@ -151,6 +238,7 @@
     getRecipes() {
       return recipes.slice();
     },
+
     upsertRecipe(recipe) {
       const idx = recipes.findIndex((r) => r.id === recipe.id);
       if (idx === -1) {
@@ -188,6 +276,10 @@
     const packUnitSelect = document.getElementById("pack-unit");
     const packPriceInput = document.getElementById("pack-price");
 
+    // NEW: price history block inside form (will be wired once we update HTML)
+    const historyBlock = document.getElementById("price-history-block");
+    const historyBody = document.getElementById("price-history-body");
+
     let editingId = null;
 
     // Category -> subtype options
@@ -203,12 +295,10 @@
     function populateSubtypeSelect(category) {
       const list = categorySubtypes[category] || [];
       subtypeInput.innerHTML = "";
-
       const placeholder = document.createElement("option");
       placeholder.value = "";
       placeholder.textContent = list.length ? "Select..." : "No sub-type";
       subtypeInput.appendChild(placeholder);
-
       list.forEach((st) => {
         const opt = document.createElement("option");
         opt.value = st;
@@ -226,10 +316,11 @@
     // Toggle form visibility
     function toggleAddForm() {
       if (!addFormWrapper || !purchaseForm) return;
-
       const isHidden = addFormWrapper.classList.contains("hidden");
+
       if (isHidden) {
         addFormWrapper.classList.remove("hidden");
+        if (historyBlock) historyBlock.classList.add("hidden");
         window.scrollTo({
           top: addFormWrapper.offsetTop - 40,
           behavior: "smooth",
@@ -238,6 +329,7 @@
         addFormWrapper.classList.add("hidden");
         editingId = null;
         purchaseForm.reset();
+        if (historyBlock) historyBlock.classList.add("hidden");
       }
     }
 
@@ -262,7 +354,7 @@
       const qtyInBase = convertQty(packQty, packUnit, baseUnit);
       if (!qtyInBase || qtyInBase <= 0) {
         alert(
-          "Units not compatible. Use g/kg or ml/L or the same unit for the pack and recipe."
+          "Units not compatible.\nUse g/kg or ml/L or the same unit for the pack and recipe."
         );
         return;
       }
@@ -284,10 +376,16 @@
       }
     }
 
+    function getSafePrice(item) {
+      const p = Number(item.pricePerUnit);
+      if (!Number.isFinite(p) || p <= 0) return 0;
+      return p;
+    }
+
     function renderRecent() {
       if (!recentList) return;
-
       recentList.innerHTML = "";
+
       if (!purchases.length) {
         const p = document.createElement("p");
         p.className = "text-muted";
@@ -308,12 +406,13 @@
         const card = document.createElement("div");
         card.className = "card-updated";
 
+        const price = getSafePrice(item);
         const priceLabel =
-          formatMoney(item.pricePerUnit, 4) +
-          " / " +
-          (item.unit || "");
+          price > 0
+            ? price.toFixed(4) + " €/ " + (item.unit || "")
+            : "-";
 
-        const line1 = `${item.name} – ${priceLabel}`;
+        const line1 = item.name + " – " + priceLabel;
         const line2 =
           "Updated " +
           formatDate(item.updatedAt) +
@@ -321,9 +420,7 @@
           (item.category || "") +
           (item.subtype ? " (" + item.subtype + ")" : "");
 
-        card.innerHTML =
-          line1 + "<br/><span class=\"text-muted\">" + line2 + "</span>";
-
+        card.innerHTML = line1 + "<br />" + line2;
         recentList.appendChild(card);
       });
     }
@@ -350,16 +447,16 @@
             tr.appendChild(td);
           }
 
+          const price = getSafePrice(item);
+          const priceLabel =
+            price > 0
+              ? price.toFixed(4) + " €/ " + (item.unit || "")
+              : "-";
+
           addCell(item.name);
           addCell(item.category || "");
           addCell(item.subtype || "");
           addCell(item.unit || "");
-
-          const priceLabel =
-            formatMoney(item.pricePerUnit, 4) +
-            " / " +
-            (item.unit || "");
-
           addCell(priceLabel);
           addCell(formatDate(item.updatedAt));
 
@@ -374,6 +471,48 @@
 
           tableBody.appendChild(tr);
         });
+    }
+
+    // NEW: render price history table (last 10)
+    function renderPriceHistory(item) {
+      if (!historyBlock || !historyBody) return;
+
+      historyBody.innerHTML = "";
+
+      if (!item || !Array.isArray(item.priceHistory) || !item.priceHistory.length) {
+        const tr = document.createElement("tr");
+        const td = document.createElement("td");
+        td.colSpan = 2;
+        td.textContent = "No price history yet.";
+        tr.appendChild(td);
+        historyBody.appendChild(tr);
+
+        historyBlock.classList.remove("hidden");
+        return;
+      }
+
+      const sorted = item.priceHistory
+        .slice()
+        .sort((a, b) => new Date(b.date) - new Date(a.date)) // newest first
+        .slice(0, 10);
+
+      sorted.forEach((entry) => {
+        const tr = document.createElement("tr");
+
+        const tdDate = document.createElement("td");
+        tdDate.textContent = formatDate(entry.date);
+
+        const tdPrice = document.createElement("td");
+        const val = Number(entry.pricePerUnit) || 0;
+        tdPrice.textContent =
+          val.toFixed(4) + " €/ " + (item.unit || "");
+
+        tr.appendChild(tdDate);
+        tr.appendChild(tdPrice);
+        historyBody.appendChild(tr);
+      });
+
+      historyBlock.classList.remove("hidden");
     }
 
     // Initial render
@@ -397,16 +536,23 @@
       if (!item) return;
 
       editingId = id;
+
       nameInput.value = item.name || "";
       categoryInput.value = item.category || "";
       populateSubtypeSelect(item.category || "");
       subtypeInput.value = item.subtype || "";
       supplierInput.value = item.supplier || "";
       unitInput.value = item.unit || "";
-      priceInput.value = item.pricePerUnit.toFixed(4);
+
+      const price = getSafePrice(item);
+      priceInput.value = price > 0 ? price.toFixed(4) : "";
+
       notesInput.value = item.notes || "";
 
       addFormWrapper.classList.remove("hidden");
+      if (historyBlock) historyBlock.classList.remove("hidden");
+      renderPriceHistory(item);
+
       window.scrollTo({
         top: addFormWrapper.offsetTop - 40,
         behavior: "smooth",
@@ -463,6 +609,7 @@
         notes,
         createdAt,
         updatedAt: now,
+        // priceHistory will be handled/merged inside ppStore.upsertPurchase
       };
 
       // Persist through store
@@ -470,12 +617,13 @@
       purchases = ppStore.getPurchases();
 
       alert(
-        "Item saved locally. It will be available to use on the Recipes page."
+        "Item saved locally.\nIt will be available to use on the Recipes page."
       );
 
       editingId = null;
       purchaseForm.reset();
       addFormWrapper.classList.add("hidden");
+      if (historyBlock) historyBlock.classList.add("hidden");
 
       renderRecent();
       renderTable(searchInput ? searchInput.value : "");
@@ -487,6 +635,5 @@
   // ===========================
   document.addEventListener("DOMContentLoaded", function () {
     initPurchasesPage();
-    // Recipes and Settings are initialized in their own JS
   });
 })();
