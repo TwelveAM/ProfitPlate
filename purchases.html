@@ -4,326 +4,299 @@
   <meta charset="UTF-8" />
   <title>Purchases – ProfitPlate</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
+  <meta
+    name="description"
+    content="Manage your ingredient base for ProfitPlate – purchases, categories, prices and suppliers."
+  />
   <link rel="stylesheet" href="assets/styles.css" />
-
-  <style>
-    :root {
-      --green-main: #0b5d3f;
-      --green-dark: #06412a;
-      --bg: #f5f5f5;
-      --text-main: #222;
-      --text-muted: #555;
-    }
-
-    * { box-sizing: border-box; }
-
-    body {
-      margin: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background-color: var(--bg);
-      color: var(--text-main);
-    }
-
-    .page {
-      max-width: 960px;
-      margin: 0 auto;
-      padding: 16px 20px 40px;
-    }
-
-    header {
-      background: #fff;
-      border-bottom: 1px solid #ddd;
-    }
-
-    .header-inner {
-      max-width: 960px;
-      margin: 0 auto;
-      padding: 12px 20px 10px;
-    }
-
-    /* HERO BANNER */
-    .hero-banner {
-      width: 630px;
-      max-width: 100%;
-      height: 130px;
-      margin: 4px auto 16px;
-      border-radius: 14px;
-      background: linear-gradient(135deg, var(--green-main), var(--green-dark));
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 32px;
-      color: #fff;
-      box-shadow: 0 10px 24px rgba(0,0,0,0.16);
-    }
-
-    .hero-icons { font-size: 42px; opacity: 0.9; }
-
-    .hero-title-block {
-      text-align: center;
-      flex: 1;
-      margin: 0 24px;
-    }
-
-    .hero-title {
-      font-size: 32px;
-      font-weight: 700;
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
-    }
-
-    .hero-subtitle {
-      margin-top: 6px;
-      font-size: 16px;
-      font-weight: 400;
-    }
-
-    /* NAV */
-    .nav-list {
-      list-style: none;
-      padding: 0;
-      margin: 10px 0 8px;
-      display: flex;
-      gap: 32px;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .nav-link {
-      text-decoration: none;
-      font-size: 14px;
-      color: #222;
-      padding: 6px 12px;
-      border-radius: 999px;
-      transition: 0.15s;
-    }
-
-    .nav-link:hover { background: rgba(11,93,63,0.1); }
-    .nav-link.active { background: var(--green-main); color: #fff; font-weight: 500; }
-
-    h1 { font-size: 30px; margin-bottom: 10px; }
-    h2 { font-size: 22px; margin-top: 24px; margin-bottom: 8px; }
-    p { font-size: 14px; color: var(--text-muted); }
-
-    .mt-20 { margin-top: 20px; }
-
-    /* FORM GRID */
-    .form-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 14px 20px;
-    }
-
-    .form-grid-full { grid-column: 1 / -1; }
-
-    label { font-size: 13px; font-weight: 500; margin-bottom: 4px; display: block; }
-
-    .actions-row {
-      display: flex;
-      justify-content: flex-end;
-      gap: 10px;
-      margin-top: 16px;
-    }
-
-    /* TABLE HEADER + SEARCH */
-    .table-header-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 16px;
-      margin-top: 10px;
-    }
-
-    /* ======================== */
-    /* FIXED: RECENTLY UPDATED  */
-    /* ======================== */
-    #recent-list {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-      margin-top: 14px;
-    }
-
-    #recent-list .card-updated {
-      flex: 1 1 300px;
-      margin: 0;
-      padding: 12px 16px !important;
-    }
-
-  </style>
 </head>
 
 <body>
-<header>
-  <div class="header-inner">
-
-    <!-- Banner -->
-    <div class="hero-banner">
-      <div class="hero-icons">⚖️</div>
-      <div class="hero-title-block">
-        <div class="hero-title">PROFITPLATE</div>
-        <div class="hero-subtitle">Know your profit per plate.</div>
+  <header>
+    <div class="header-inner" style="max-width:960px;margin:0 auto;padding:12px 20px 10px;">
+      <!-- Banner -->
+      <div
+        class="hero-banner"
+        style="
+          width:630px;
+          max-width:100%;
+          height:130px;
+          margin:4px auto 16px;
+          border-radius:14px;
+          background:linear-gradient(135deg,#0b5d3f,#06412a);
+          display:flex;
+          align-items:center;
+          justify-content:space-between;
+          padding:0 32px;
+          color:#fff;
+          box-shadow:0 10px 24px rgba(0,0,0,.16);
+        "
+      >
+        <div class="hero-icons" style="font-size:42px;opacity:.9;">⚖️</div>
+        <div class="hero-title-block" style="text-align:center;flex:1;margin:0 24px;">
+          <div class="hero-title" style="font-size:32px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;">
+            PROFITPLATE
+          </div>
+          <div class="hero-subtitle" style="margin-top:6px;font-size:16px;font-weight:400;">
+            Know your profit per plate.
+          </div>
+        </div>
+        <div class="hero-icons" style="font-size:42px;opacity:.9;">🥩</div>
       </div>
-      <div class="hero-icons">🥩</div>
+
+      <!-- Nav -->
+      <nav style="margin-top:6px;margin-bottom:6px;">
+        <ul
+          class="nav-list"
+          style="
+            list-style:none;
+            padding:0;
+            margin:0;
+            display:flex;
+            gap:32px;
+            align-items:center;
+            justify-content:center;
+          "
+        >
+          <li>
+            <a class="nav-link" href="index.html"
+               style="text-decoration:none;font-size:14px;color:#222;padding:6px 12px;border-radius:999px;">
+              Home
+            </a>
+          </li>
+          <li>
+            <a class="nav-link active" href="purchases.html"
+               style="
+                 text-decoration:none;
+                 font-size:14px;
+                 color:#fff;
+                 padding:6px 12px;
+                 border-radius:999px;
+                 background:#0b5d3f;
+                 font-weight:500;
+               ">
+              Purchases
+            </a>
+          </li>
+          <li>
+            <a class="nav-link" href="recipes.html"
+               style="text-decoration:none;font-size:14px;color:#222;padding:6px 12px;border-radius:999px;">
+              Recipes
+            </a>
+          </li>
+          <li>
+            <a class="nav-link" href="settings.html"
+               style="text-decoration:none;font-size:14px;color:#222;padding:6px 12px;border-radius:999px;">
+              Settings
+            </a>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <div class="page" style="max-width:960px;margin:0 auto;padding:16px 20px 40px;">
+    <h1>Purchases</h1>
+    <p style="font-size:14px;color:#555;max-width:720px;">
+      This is your ingredient base. Add items you buy, organize them by category, and keep supplier prices
+      up to date. Recipes will use everything you add here.
+    </p>
+
+    <div style="margin-top:20px;margin-bottom:10px;">
+      <button type="button" class="btn btn-primary" onclick="toggleAddForm()">Add item manually</button>
     </div>
 
-    <!-- Nav -->
-    <nav>
-      <ul class="nav-list">
-        <li><a class="nav-link" href="index.html">Home</a></li>
-        <li><a class="nav-link active" href="purchases.html">Purchases</a></li>
-        <li><a class="nav-link" href="recipes.html">Recipes</a></li>
-        <li><a class="nav-link" href="settings.html">Settings</a></li>
-      </ul>
-    </nav>
+    <!-- Add / edit purchase form -->
+    <div id="add-item-form" class="hidden" style="margin-top:10px;">
+      <div class="settings-box">
+        <h2 class="section-title">Add a new purchase item</h2>
 
-  </div>
-</header>
+        <form id="purchase-form">
+          <div class="settings-field">
+            <label for="item-name" class="settings-label">Name</label>
+            <input id="item-name" type="text" placeholder="e.g. Butter 82% 1kg" />
+          </div>
 
-<div class="page">
-  <h1>Purchases</h1>
-  <p>
-    This is your ingredient base. Add items you buy, organize them by category,
-    and keep supplier prices up to date. Recipes will use everything you add here.
-  </p>
+          <div class="settings-field" style="display:flex;gap:12px;flex-wrap:wrap;">
+            <div style="flex:1;min-width:160px;">
+              <label for="item-category" class="settings-label">Category</label>
+              <select id="item-category" class="settings-select">
+                <option value="">Select...</option>
+                <option value="Meat &amp; Fish">Meat &amp; Fish</option>
+                <option value="Dairy & Eggs">Dairy &amp; Eggs</option>
+                <option value="Vegetables & Fruit">Vegetables &amp; Fruit</option>
+                <option value="Dry Goods">Dry Goods</option>
+                <option value="Spices & Condiments">Spices &amp; Condiments</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
 
-  <div class="mt-20">
-    <button type="button" class="btn btn-primary" onclick="toggleAddForm()">Add item manually</button>
-  </div>
+            <div style="flex:1;min-width:160px;">
+              <label for="item-subtype" class="settings-label">Sub-type</label>
+              <select id="item-subtype" class="settings-select">
+                <option value="">Select...</option>
+              </select>
+            </div>
+          </div>
 
-  <!-- Add/Edit Form -->
-  <div id="add-item-form" class="mt-20 hidden">
-    <h2 id="add-item-title">Add a new purchase item</h2>
+          <div class="settings-field">
+            <label for="item-supplier" class="settings-label">Supplier</label>
+            <input id="item-supplier" type="text" placeholder="e.g. Metro, local butcher..." />
+          </div>
 
-    <form id="purchase-form">
-      <div class="form-grid">
+          <div class="settings-field" style="display:flex;gap:12px;flex-wrap:wrap;">
+            <div style="flex:1;min-width:160px;">
+              <label for="item-unit" class="settings-label">Unit (for recipes)</label>
+              <select id="item-unit" class="settings-select">
+                <option value="">Select...</option>
+                <option value="kg">kg</option>
+                <option value="g">gr</option>
+                <option value="L">L</option>
+                <option value="ml">ml</option>
+                <option value="pcs">pcs</option>
+              </select>
+            </div>
 
-        <div>
-          <label for="item-name">Name</label>
-          <input id="item-name" type="text" placeholder="e.g. Butter 82% fat" />
-        </div>
+            <div style="flex:1;min-width:160px;">
+              <label for="item-price" class="settings-label">Purchase price (per recipe unit)</label>
+              <input
+                id="item-price"
+                type="number"
+                step="0.0001"
+                placeholder="e.g. 16.00"
+              />
+            </div>
+          </div>
 
-        <div>
-          <label for="item-category">Category</label>
-          <select id="item-category">
-            <option value="">Select...</option>
-            <option>Meat & Fish</option>
-            <option>Dairy & Eggs</option>
-            <option>Vegetables & Fruit</option>
-            <option>Dry Goods</option>
-            <option>Spices & Condiments</option>
-            <option>Other</option>
-          </select>
-        </div>
+          <hr style="margin:16px 0;" />
 
-        <div>
-          <label for="item-subtype">Sub-type</label>
-          <select id="item-subtype"><option value="">Select...</option></select>
-        </div>
-
-        <div>
-          <label for="item-supplier">Supplier</label>
-          <input id="item-supplier" type="text" placeholder="e.g. Metro, Sysco, local butcher" />
-        </div>
-
-        <div>
-          <label for="item-unit">Unit (for recipes)</label>
-          <select id="item-unit">
-            <option value="">Select...</option>
-            <option value="kg">kg</option>
-            <option value="g">gr</option>
-            <option value="l">L</option>
-            <option value="ml">ml</option>
-            <option value="pcs">pcs</option>
-          </select>
-        </div>
-
-        <div>
-          <label for="item-price">Purchase price (per recipe unit)</label>
-          <input id="item-price" type="number" step="0.0001" placeholder="e.g. 0.045" />
-        </div>
-
-        <!-- PACK HELPER -->
-        <div class="form-grid-full">
-          <h3 style="margin:16px 0 6px;font-size:15px;">Or use pack helper</h3>
-          <p style="margin:0 0 10px;font-size:13px;color:var(--text-muted);">
+          <h3 style="margin:0 0 4px;font-size:15px;">Or use pack helper</h3>
+          <p class="settings-help" style="margin-top:2px;">
             Example: 100 gr for 5 € → auto-converts price per unit.
           </p>
-        </div>
 
-        <div>
-          <label for="pack-qty">Pack quantity</label>
-          <input id="pack-qty" type="number" step="0.01" placeholder="e.g. 100" />
-        </div>
+          <div class="settings-field" style="display:flex;gap:12px;flex-wrap:wrap;margin-top:10px;">
+            <div style="flex:1;min-width:120px;">
+              <label for="pack-qty" class="settings-label">Pack quantity</label>
+              <input id="pack-qty" type="number" step="0.01" placeholder="e.g. 100" />
+            </div>
 
-        <div>
-          <label for="pack-unit">Pack unit</label>
-          <select id="pack-unit">
-            <option value="">unit</option>
-            <option value="g">gr</option>
-            <option value="kg">kg</option>
-            <option value="ml">ml</option>
-            <option value="l">L</option>
-            <option value="pcs">pcs</option>
-          </select>
-        </div>
+            <div style="flex:1;min-width:120px;">
+              <label for="pack-unit" class="settings-label">Pack unit</label>
+              <select id="pack-unit" class="settings-select">
+                <option value="">unit</option>
+                <option value="g">gr</option>
+                <option value="kg">kg</option>
+                <option value="ml">ml</option>
+                <option value="L">L</option>
+                <option value="pcs">pcs</option>
+              </select>
+            </div>
 
-        <div>
-          <label for="pack-price">Pack price (€)</label>
-          <input id="pack-price" type="number" step="0.01" placeholder="e.g. 5" />
-        </div>
+            <div style="flex:1;min-width:120px;">
+              <label for="pack-price" class="settings-label">Pack price (€)</label>
+              <input id="pack-price" type="number" step="0.01" placeholder="e.g. 5.00" />
+            </div>
 
-        <div style="display:flex;align-items:flex-end;">
-          <button type="button" class="btn btn-secondary" onclick="fillPriceFromPack()">Use pack</button>
-        </div>
+            <div style="display:flex;align-items:flex-end;">
+              <button
+                type="button"
+                class="btn btn-secondary"
+                style="margin-top:22px;"
+                onclick="fillPriceFromPack()"
+              >
+                Use pack
+              </button>
+            </div>
+          </div>
 
-        <div class="form-grid-full">
-          <label for="item-notes">Notes (optional)</label>
-          <textarea id="item-notes" rows="2" placeholder="Fat %, origin, brand…"></textarea>
-        </div>
+          <div class="settings-field">
+            <label for="item-notes" class="settings-label">Notes (optional)</label>
+            <textarea
+              id="item-notes"
+              rows="2"
+              placeholder="Invoice number, remarks, storage notes..."
+            ></textarea>
+          </div>
 
+          <!-- PRICE HISTORY BLOCK (last 10 changes) -->
+          <div
+            id="price-history-block"
+            class="settings-box hidden"
+            style="margin-top:16px;background:#fafafa;border:1px dashed #ddd;"
+          >
+            <h3 class="section-title" style="font-size:15px;margin-bottom:8px;">Price history</h3>
+            <p class="settings-help" style="margin-top:0;margin-bottom:8px;">
+              Last 10 recorded price changes for this ingredient (newest first).
+            </p>
+            <div style="overflow-x:auto;">
+              <table class="history-table" style="width:100%;border-collapse:collapse;font-size:13px;">
+                <thead>
+                  <tr>
+                    <th style="text-align:left;padding:4px 6px;border-bottom:1px solid #ddd;">Date</th>
+                    <th style="text-align:left;padding:4px 6px;border-bottom:1px solid #ddd;">Price / unit</th>
+                  </tr>
+                </thead>
+                <tbody id="price-history-body"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:18px;">
+            <button type="button" class="btn btn-secondary" onclick="toggleAddForm()">Cancel</button>
+            <button type="submit" class="btn btn-primary">Save item</button>
+          </div>
+        </form>
       </div>
+    </div>
 
-      <div class="actions-row">
-        <button type="button" class="btn btn-secondary" onclick="toggleAddForm()">Cancel</button>
-        <button type="submit" class="btn btn-primary">Save item</button>
-      </div>
+    <hr style="margin:24px 0 16px;" />
 
-    </form>
+    <!-- Recently updated -->
+    <h2>Recently updated</h2>
+    <div id="recent-list" style="margin-top:10px;">
+      <!-- Filled by app.js -->
+    </div>
+
+    <hr style="margin:24px 0 16px;" />
+
+    <!-- All ingredients -->
+    <div
+      style="
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+        gap:12px;
+        margin-bottom:8px;
+      "
+    >
+      <h2 style="margin:0;">All ingredients</h2>
+      <input
+        id="search-input"
+        type="text"
+        placeholder="Search by name, category or supplier..."
+        style="max-width:260px;"
+      />
+    </div>
+
+    <div style="overflow-x:auto;margin-top:8px;">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Ingredient</th>
+            <th>Category</th>
+            <th>Sub-type</th>
+            <th>Unit</th>
+            <th>Latest price</th>
+            <th>Last updated</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="purchase-table"></tbody>
+      </table>
+    </div>
   </div>
 
-  <hr class="mt-20" />
-
-  <!-- RECENTLY UPDATED -->
-  <h2>Recently updated</h2>
-  <div id="recent-list"></div>
-
-  <hr class="mt-20" />
-
-  <!-- TABLE -->
-  <div class="table-header-row">
-    <h2>All ingredients</h2>
-    <input id="search-input" type="text" placeholder="Search by name, category or supplier…" style="max-width:260px;width:100%;" />
-  </div>
-
-  <table class="mt-20">
-    <thead>
-      <tr>
-        <th>Ingredient</th>
-        <th>Category</th>
-        <th>Sub-type</th>
-        <th>Unit</th>
-        <th>Latest price</th>
-        <th>Last updated</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-    <tbody id="purchase-table"></tbody>
-  </table>
-</div>
-
-<script src="assets/app.js"></script>
+  <script src="assets/app.js"></script>
 </body>
 </html>
