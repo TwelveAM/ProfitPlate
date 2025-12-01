@@ -8,17 +8,53 @@
   const formWrapper = document.getElementById("recipe-form-wrapper");
   const formTitle = document.getElementById("recipe-form-title");
   const formEl = document.getElementById("recipe-form");
-
   const nameInput = document.getElementById("recipe-name");
   const portionsInput = document.getElementById("recipe-portions");
   const priceInput = document.getElementById("recipe-price");
   const recipeIdInput = document.getElementById("recipe-id");
-
   const ingredientsContainer = document.getElementById("ingredients-container");
   const recipesList = document.getElementById("recipes-list");
 
   // Purchases cached for dropdowns
   let purchases = [];
+
+  // Settings (currency, locale, behaviour)
+  const settings =
+    typeof window.loadSettings === "function"
+      ? window.loadSettings()
+      : {
+          currency: "EUR",
+          locale: "eu",
+          autoRecalc: true,
+          showAdvanced: true,
+        };
+
+  const showAdvanced =
+    settings.showAdvanced !== false; // default true if missing
+
+  // ======== Formatting helpers (match app.js) ========
+  function getFormatting() {
+    const currency = settings.currency || "EUR";
+    const locale = settings.locale === "us" ? "en-US" : "de-DE";
+    const symbolMap = {
+      EUR: "€",
+      RON: "lei",
+      USD: "$",
+      GBP: "£",
+    };
+    const symbol = symbolMap[currency] || currency;
+    return { currency, symbol, locale };
+  }
+
+  function formatMoney(value, decimals) {
+    const { symbol, locale } = getFormatting();
+    const n = Number(value) || 0;
+    const formatted = n.toLocaleString(locale, {
+      minimumFractionDigits: decimals,
+      maximumFractionDigits: decimals,
+    });
+    return `${formatted} ${symbol}`;
+  }
 
   // ======== Unit helpers (same logic as purchases/app) ========
   function normalizeUnit(u) {
@@ -32,6 +68,7 @@
     let q = Number(qty) || 0;
     let from = normalizeUnit(fromUnit);
     let to = normalizeUnit(toUnit);
+
     if (!from || !to || from === to) return q;
 
     // grams <-> kg
@@ -56,9 +93,9 @@
   }
 
   // ======== Ingredient row handling ========
-
   function buildPurchaseOptions(selectedId) {
     const frag = document.createDocumentFragment();
+
     const optPlaceholder = document.createElement("option");
     optPlaceholder.value = "";
     optPlaceholder.textContent = "Select ingredient…";
@@ -118,6 +155,7 @@
     row.appendChild(qtyInput);
     row.appendChild(unitSelect);
     row.appendChild(removeBtn);
+
     ingredientsContainer.appendChild(row);
   }
 
@@ -125,7 +163,6 @@
   window.addIngredientRow = addIngredientRow;
 
   // ======== Show / hide form ========
-
   function clearRecipeForm() {
     nameInput.value = "";
     portionsInput.value = "";
@@ -150,7 +187,6 @@
         if (existing.sellingPrice != null) {
           priceInput.value = existing.sellingPrice;
         }
-
         (existing.ingredients || []).forEach((ing) => addIngredientRow(ing));
       } else {
         formTitle.textContent = "Add a new recipe";
@@ -162,7 +198,10 @@
     }
 
     formWrapper.classList.remove("hidden");
-    window.scrollTo({ top: formWrapper.offsetTop - 40, behavior: "smooth" });
+    window.scrollTo({
+      top: formWrapper.offsetTop - 40,
+      behavior: "smooth",
+    });
   }
 
   function hideRecipeForm() {
@@ -173,7 +212,6 @@
   window.hideRecipeForm = hideRecipeForm;
 
   // ======== Read form -> recipe object ========
-
   function readFormToRecipe() {
     const name = nameInput.value.trim();
     const portions = Number(portionsInput.value) || 0;
@@ -189,8 +227,8 @@
     const ingRows = Array.from(
       ingredientsContainer.querySelectorAll(".recipe-ingredient-row")
     );
-
     const ingredients = [];
+
     for (const row of ingRows) {
       const selects = row.getElementsByTagName("select");
       const inputs = row.getElementsByTagName("input");
@@ -225,7 +263,6 @@
   }
 
   // ======== Cost calculations & rendering ========
-
   function findPurchase(id) {
     return purchases.find((p) => p.id === id);
   }
@@ -238,18 +275,17 @@
       const p = findPurchase(ing.purchaseId);
       if (!p) return;
 
-      const basePrice = Number(p.pricePerUnit) || 0; // €/baseUnit
-      let ingredientQtyInBase = Number(ing.quantity) || 0;
+      const basePrice = Number(p.pricePerUnit) || 0; // price per purchase.unit
+      const purchaseUnit = p.unit || ing.unit;
 
       // convert ingredient quantity to purchase unit if needed
-      ingredientQtyInBase = convertQuantity(
+      const qtyInPurchaseUnit = convertQuantity(
         ing.quantity,
         ing.unit,
-        p.unit || ing.unit
+        purchaseUnit
       );
 
-      const costInRecipe = ingredientQtyInBase * basePrice;
-
+      const costInRecipe = qtyInPurchaseUnit * basePrice;
       batchCost += costInRecipe;
 
       ingredientsDetailed.push({
@@ -295,8 +331,7 @@
     if (!recipes.length) {
       const p = document.createElement("p");
       p.className = "text-muted";
-      p.textContent =
-        "No recipes yet. Click “Add recipe” to create your first one.";
+      p.textContent = "No recipes yet. Click “Add recipe” to create your first one.";
       recipesList.appendChild(p);
       return;
     }
@@ -338,7 +373,11 @@
       badge.style.background = "#e3f5eb";
       badge.style.color = "#0b6e46";
       badge.style.fontSize = "14px";
-      badge.textContent = `${costs.costPerPortion.toFixed(2)} €/portion`;
+
+      badge.textContent = `${formatMoney(
+        costs.costPerPortion,
+        2
+      )} /portion`;
 
       const editBtn = document.createElement("button");
       editBtn.type = "button";
@@ -356,67 +395,94 @@
       // Summary row (cost + margin)
       const summary = document.createElement("div");
       summary.className = "recipe-summary";
-      let summaryText = `Total batch cost: ${costs.batchCost.toFixed(
-        2
-      )} € • Cost per portion: ${costs.costPerPortion.toFixed(2)} €`;
-      if (recipe.sellingPrice != null) {
-        summaryText += ` • Selling price: ${Number(
-          recipe.sellingPrice
-        ).toFixed(2)} €/portion`;
-        if (costs.marginPerPortion != null) {
-          summaryText += ` • Margin: ${costs.marginPerPortion.toFixed(
-            2
-          )} € (${(costs.marginPercent || 0).toFixed(0)}%)`;
+
+      let summaryText;
+
+      if (showAdvanced) {
+        summaryText =
+          `Total batch cost: ${formatMoney(costs.batchCost, 2)}` +
+          ` • Cost per portion: ${formatMoney(costs.costPerPortion, 2)}`;
+
+        if (recipe.sellingPrice != null) {
+          summaryText +=
+            ` • Selling price: ${formatMoney(
+              recipe.sellingPrice,
+              2
+            )} /portion`;
+
+          if (costs.marginPerPortion != null) {
+            summaryText +=
+              ` • Margin: ${formatMoney(
+                costs.marginPerPortion,
+                2
+              )} (${(costs.marginPercent || 0).toFixed(0)}%)`;
+          }
+        }
+      } else {
+        // Simple view – no batch cost, no margin, no breakdown line
+        summaryText = `Cost per portion: ${formatMoney(
+          costs.costPerPortion,
+          2
+        )}`;
+        if (recipe.sellingPrice != null) {
+          summaryText +=
+            ` • Selling price: ${formatMoney(
+              recipe.sellingPrice,
+              2
+            )} /portion`;
         }
       }
+
       summary.textContent = summaryText;
       card.appendChild(summary);
 
-      // Ingredients table
-      const tableWrapper = document.createElement("div");
-      tableWrapper.style.marginTop = "12px";
+      // Ingredients table (only if advanced)
+      if (showAdvanced) {
+        const tableWrapper = document.createElement("div");
+        tableWrapper.style.marginTop = "12px";
 
-      const table = document.createElement("table");
-      const thead = document.createElement("thead");
-      thead.innerHTML = `
-        <tr>
-          <th>Ingredient</th>
-          <th>Category</th>
-          <th>Sub-type</th>
-          <th>Quantity</th>
-          <th>Unit</th>
-          <th>Price/unit</th>
-          <th>Cost in recipe</th>
-        </tr>
-      `;
-      table.appendChild(thead);
+        const table = document.createElement("table");
 
-      const tbody = document.createElement("tbody");
-
-      costs.ingredientsDetailed.forEach((ing) => {
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td>${ing.ingredientName}</td>
-          <td>${ing.category}</td>
-          <td>${ing.subtype}</td>
-          <td>${ing.quantity}</td>
-          <td>${ing.unit}</td>
-          <td>${ing.pricePerUnit.toFixed(4)} €/unit</td>
-          <td>${ing.costInRecipe.toFixed(2)} €</td>
+        const thead = document.createElement("thead");
+        thead.innerHTML = `
+          <tr>
+            <th>Ingredient</th>
+            <th>Category</th>
+            <th>Sub-type</th>
+            <th>Quantity</th>
+            <th>Unit</th>
+            <th>Price/unit</th>
+            <th>Cost in recipe</th>
+          </tr>
         `;
-        tbody.appendChild(tr);
-      });
+        table.appendChild(thead);
 
-      table.appendChild(tbody);
-      tableWrapper.appendChild(table);
-      card.appendChild(tableWrapper);
+        const tbody = document.createElement("tbody");
+
+        costs.ingredientsDetailed.forEach((ing) => {
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td>${ing.ingredientName}</td>
+            <td>${ing.category}</td>
+            <td>${ing.subtype}</td>
+            <td>${ing.quantity}</td>
+            <td>${ing.unit}</td>
+            <td>${formatMoney(ing.pricePerUnit, 4)}/unit</td>
+            <td>${formatMoney(ing.costInRecipe, 2)}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+
+        table.appendChild(tbody);
+        tableWrapper.appendChild(table);
+        card.appendChild(tableWrapper);
+      }
 
       recipesList.appendChild(card);
     });
   }
 
   // ======== Form submit ========
-
   formEl.addEventListener("submit", (e) => {
     e.preventDefault();
     const store = getStore();
@@ -431,11 +497,9 @@
   });
 
   // ======== Init ========
-
   function initRecipesPage() {
     const store = getStore();
     if (!store) return;
-
     purchases = store.getPurchases();
     renderRecipes();
   }
