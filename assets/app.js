@@ -427,17 +427,21 @@
               (item.unit || "")
             : "-";
 
-        const line1 = item.name + " – " + priceLabel;
-        const line2 =
-          "Updated " +
-          formatDate(item.updatedAt) +
-          " • " +
-          (item.category || "") +
-          (item.subtype ? " (" + item.subtype + ")" : "");
+        let metaParts = [];
+        metaParts.push("Updated " + formatDate(item.updatedAt));
+        if (item.category) {
+          let cat = item.category;
+          if (item.subtype) cat += " (" + item.subtype + ")";
+          metaParts.push(cat);
+        }
+        if (item.supplier) {
+          metaParts.push("Supplier: " + item.supplier);
+        }
+        const line2 = metaParts.join(" • ");
 
         card.innerHTML =
           '<div class="card-updated-title">' +
-          line1 +
+          (item.name + " – " + priceLabel) +
           "</div><small>" +
           line2 +
           "</small>";
@@ -479,6 +483,7 @@
           addCell(item.name);
           addCell(item.category || "");
           addCell(item.subtype || "");
+          addCell(item.supplier || "");
           addCell(item.unit || "");
           addCell(priceLabel);
           addCell(formatDate(item.updatedAt));
