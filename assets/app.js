@@ -1,8 +1,5 @@
 // app.js – Tiny brain for ProfitPlate
-// - Shared storage (purchases, recipes, settings)
-// - Purchases page behaviour (form, pack helper, table render)
-// - Settings helpers
-// - Exposes window.ppStore for recipes.js
+// Storage + Purchases page logic (+ exposes ppStore for recipes.js)
 
 (function () {
   // ===========================
@@ -43,7 +40,7 @@
     showAdvanced: true,
   });
 
-  // Small safety: normalise any weird old data
+  // Normalise / clean
   function sanitizePurchases() {
     purchases = (purchases || [])
       .filter((p) => p && typeof p === "object")
@@ -51,6 +48,21 @@
         const n = { ...p };
         const v = Number(n.pricePerUnit);
         n.pricePerUnit = Number.isFinite(v) && v >= 0 ? v : 0;
+
+        if (Array.isArray(n.priceHistory)) {
+          n.priceHistory = n.priceHistory
+            .filter((h) => h && h.date)
+            .map((h) => ({
+              date: h.date,
+              pricePerUnit:
+                Number(h.pricePerUnit) > 0
+                  ? Number(h.pricePerUnit)
+                  : n.pricePerUnit,
+            }));
+        } else {
+          n.priceHistory = [];
+        }
+
         return n;
       });
 
@@ -116,7 +128,7 @@
   }
 
   // ===========================
-  // Shared unit helpers
+  // Unit helpers
   // ===========================
   function normalizeUnit(u) {
     if (!u) return "";
@@ -131,15 +143,11 @@
     const to = normalizeUnit(toUnit);
     if (!from || !to || from === to) return q;
 
-    // g <-> kg
     if (from === "g" && to === "kg") return q / 1000;
     if (from === "kg" && to === "g") return q * 1000;
-
-    // ml <-> l
     if (from === "ml" && to === "l") return q / 1000;
     if (from === "l" && to === "ml") return q * 1000;
 
-    // incompatible? just return original
     return q;
   }
 
@@ -154,21 +162,43 @@
 
     upsertPurchase(purchase) {
       const nowIso = new Date().toISOString();
-
       const idx = purchases.findIndex((p) => p.id === purchase.id);
       const existing = idx !== -1 ? purchases[idx] : null;
 
-      const id =
-        purchase.id || (existing && existing.id) || "p_" + Date.now();
-
+      const id = purchase.id || (existing && existing.id) || "p_" + Date.now();
       const createdAt =
         (existing && existing.createdAt) ||
         purchase.createdAt ||
         nowIso;
 
       const numericPrice =
-        Number(String(purchase.pricePerUnit || "").replace(",", ".")) ||
-        0;
+        Number(String(purchase.pricePerUnit || "").replace(",", ".")) || 0;
+
+      // Build / update priceHistory (max 10)
+      let history = [];
+      if (existing && Array.isArray(existing.priceHistory)) {
+        history = existing.priceHistory.slice();
+      }
+
+      if (!existing) {
+        if (numericPrice > 0) {
+          history.unshift({ date: nowIso, pricePerUnit: numericPrice });
+        }
+      } else {
+        const prevPrice = Number(existing.pricePerUnit) || 0;
+        if (numericPrice > 0 && numericPrice !== prevPrice) {
+          history.unshift({ date: nowIso, pricePerUnit: numericPrice });
+        } else if (!history.length && prevPrice > 0) {
+          history.unshift({
+            date: existing.updatedAt || existing.createdAt || nowIso,
+            pricePerUnit: prevPrice,
+          });
+        }
+      }
+
+      if (history.length > 10) {
+        history = history.slice(0, 10);
+      }
 
       const merged = {
         ...(existing || {}),
@@ -177,6 +207,7 @@
         createdAt,
         updatedAt: nowIso,
         pricePerUnit: numericPrice,
+        priceHistory: history,
       };
 
       if (idx === -1) {
@@ -230,6 +261,9 @@
     const packUnitSelect = document.getElementById("pack-unit");
     const packPriceInput = document.getElementById("pack-price");
 
+    const historyBlock = document.getElementById("price-history-block");
+    const historyBody = document.getElementById("price-history-body");
+
     let editingId = null;
 
     // Category -> subtype options
@@ -265,6 +299,43 @@
       });
     }
 
+    function clearHistoryUI() {
+      if (!historyBlock || !historyBody) return;
+      historyBlock.classList.add("hidden");
+      historyBody.innerHTML = "";
+    }
+
+    function renderHistoryForItem(item) {
+      if (!historyBlock || !historyBody) return;
+      const hist = Array.isArray(item.priceHistory) ? item.priceHistory : [];
+      if (!hist.length) {
+        clearHistoryUI();
+        return;
+      }
+
+      historyBody.innerHTML = "";
+      hist.forEach((entry) => {
+        const tr = document.createElement("tr");
+        const td1 = document.createElement("td");
+        const td2 = document.createElement("td");
+
+        td1.textContent = formatDate(entry.date);
+        const price = Number(entry.pricePerUnit) || 0;
+        td2.textContent =
+          price > 0
+            ? formatMoney(price, 4).replace(/\s.*$/, "") +
+              " / " +
+              (item.unit || "")
+            : "-";
+
+        tr.appendChild(td1);
+        tr.appendChild(td2);
+        historyBody.appendChild(tr);
+      });
+
+      historyBlock.classList.remove("hidden");
+    }
+
     // Toggle form visibility
     function toggleAddForm() {
       if (!addFormWrapper || !purchaseForm) return;
@@ -272,6 +343,7 @@
 
       if (isHidden) {
         addFormWrapper.classList.remove("hidden");
+        clearHistoryUI();
         window.scrollTo({
           top: addFormWrapper.offsetTop - 40,
           behavior: "smooth",
@@ -280,6 +352,7 @@
         addFormWrapper.classList.add("hidden");
         editingId = null;
         purchaseForm.reset();
+        clearHistoryUI();
       }
     }
 
@@ -458,6 +531,8 @@
       notesInput.value = item.notes || "";
 
       addFormWrapper.classList.remove("hidden");
+      renderHistoryForItem(item);
+
       window.scrollTo({
         top: addFormWrapper.offsetTop - 40,
         behavior: "smooth",
@@ -514,6 +589,7 @@
         notes,
         createdAt,
         updatedAt: now,
+        priceHistory: existing ? existing.priceHistory : [],
       };
 
       ppStore.upsertPurchase(obj);
@@ -525,6 +601,7 @@
 
       editingId = null;
       purchaseForm.reset();
+      clearHistoryUI();
       addFormWrapper.classList.add("hidden");
 
       renderRecent();
