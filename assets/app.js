@@ -43,19 +43,14 @@
     showAdvanced: true,
   });
 
-  // --- sanitize old / broken purchase entries (from earlier versions)
+  // Small safety: normalise any weird old data
   function sanitizePurchases() {
     purchases = (purchases || [])
       .filter((p) => p && typeof p === "object")
       .map((p) => {
         const n = { ...p };
-        const raw = n.pricePerUnit;
-        const price = Number(raw);
-        if (!Number.isFinite(price) || price < 0) {
-          n.pricePerUnit = 0;
-        } else {
-          n.pricePerUnit = price;
-        }
+        const v = Number(n.pricePerUnit);
+        n.pricePerUnit = Number.isFinite(v) && v >= 0 ? v : 0;
         return n;
       });
     safeSave(KEYS.purchases, purchases);
@@ -77,6 +72,33 @@
 
   window.loadSettings = loadSettings;
   window.saveSettings = saveSettings;
+
+  // ===========================
+  // Formatting helpers (currency + locale)
+  // ===========================
+  function getFormatting() {
+    const s = loadSettings();
+    const currency = s.currency || "EUR";
+    const locale = s.locale === "us" ? "en-US" : "de-DE";
+    const symbolMap = {
+      EUR: "€",
+      RON: "lei",
+      USD: "$",
+      GBP: "£",
+    };
+    const symbol = symbolMap[currency] || currency;
+    return { currency, symbol, locale };
+  }
+
+  function formatMoney(value, decimals) {
+    const { symbol, locale } = getFormatting();
+    const n = Number(value) || 0;
+    const formatted = n.toLocaleString(locale, {
+      minimumFractionDigits: decimals,
+      maximumFractionDigits: decimals,
+    });
+    return `${formatted} ${symbol}`;
+  }
 
   // ===========================
   // Shared unit helpers
@@ -218,6 +240,7 @@
         purchaseForm.reset();
       }
     }
+
     window.toggleAddForm = toggleAddForm;
 
     // Pack helper
@@ -261,12 +284,6 @@
       }
     }
 
-    function getSafePrice(item) {
-      const p = Number(item.pricePerUnit);
-      if (!Number.isFinite(p) || p <= 0) return 0;
-      return p;
-    }
-
     function renderRecent() {
       if (!recentList) return;
 
@@ -291,11 +308,12 @@
         const card = document.createElement("div");
         card.className = "card-updated";
 
-        const price = getSafePrice(item);
         const priceLabel =
-          price > 0 ? price.toFixed(4) + " €/ " + (item.unit || "") : "-";
+          formatMoney(item.pricePerUnit, 4) +
+          " / " +
+          (item.unit || "");
 
-        const line1 = item.name + " – " + priceLabel;
+        const line1 = `${item.name} – ${priceLabel}`;
         const line2 =
           "Updated " +
           formatDate(item.updatedAt) +
@@ -332,14 +350,16 @@
             tr.appendChild(td);
           }
 
-          const price = getSafePrice(item);
-          const priceLabel =
-            price > 0 ? price.toFixed(4) + " €/ " + (item.unit || "") : "-";
-
           addCell(item.name);
           addCell(item.category || "");
           addCell(item.subtype || "");
           addCell(item.unit || "");
+
+          const priceLabel =
+            formatMoney(item.pricePerUnit, 4) +
+            " / " +
+            (item.unit || "");
+
           addCell(priceLabel);
           addCell(formatDate(item.updatedAt));
 
@@ -383,8 +403,7 @@
       subtypeInput.value = item.subtype || "";
       supplierInput.value = item.supplier || "";
       unitInput.value = item.unit || "";
-      const price = getSafePrice(item);
-      priceInput.value = price > 0 ? price.toFixed(4) : "";
+      priceInput.value = item.pricePerUnit.toFixed(4);
       notesInput.value = item.notes || "";
 
       addFormWrapper.classList.remove("hidden");
@@ -468,5 +487,6 @@
   // ===========================
   document.addEventListener("DOMContentLoaded", function () {
     initPurchasesPage();
+    // Recipes and Settings are initialized in their own JS
   });
 })();
