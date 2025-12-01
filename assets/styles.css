@@ -145,12 +145,15 @@ button.btn-primary {
 
 .card-updated {
   background: #fff;
-  padding: 20px;
-  border-radius: 18px;
+  padding: 10px 14px;         /* reduced padding */
+  border-radius: 10px;        /* smaller rounded corner */
   border: 1px solid #d9dee3;
-  margin-bottom: 20px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  margin-bottom: 10px;        /* reduced spacing between cards */
+  box-shadow: 0 1px 2px rgba(0,0,0,0.04); /* lighter shadow */
+  font-size: 14px;            /* slightly smaller text */
+  line-height: 1.25;          /* compact line spacing */
 }
+
 
 .card-updated-title {
   font-weight: 600;
