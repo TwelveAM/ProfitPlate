@@ -14,6 +14,7 @@
   const recipeIdInput = document.getElementById("recipe-id");
   const ingredientsContainer = document.getElementById("ingredients-container");
   const recipesList = document.getElementById("recipes-list");
+  const showArchivedToggle = document.getElementById("show-archived-toggle");
 
   // Purchases cached for dropdowns & snapshots
   let purchases = [];
@@ -272,6 +273,7 @@
       portions,
       sellingPrice,
       ingredients,
+      archived: false,
     };
   }
 
@@ -372,27 +374,47 @@
     return true;
   }
 
+  // ======== Archive / Unarchive ========
+  function toggleArchive(id) {
+    const store = getStore();
+    if (!store) return;
+
+    const all = store.getRecipes();
+    const idx = all.findIndex((r) => r.id === id);
+    if (idx === -1) return;
+
+    const existing = all[idx];
+    const updated = { ...existing, archived: !existing.archived };
+    store.upsertRecipe(updated);
+    renderRecipes();
+  }
+
   // ======== Render recipes ========
   function renderRecipes() {
     const store = getStore();
     if (!store) return;
 
-    const recipes = store.getRecipes();
+    let recipes = store.getRecipes();
 
     ensureSnapshotsIfNeeded(recipes);
 
+    const showArchived = showArchivedToggle ? showArchivedToggle.checked : false;
+
+    const visible = recipes.filter((r) => showArchived || !r.archived);
+
     recipesList.innerHTML = "";
 
-    if (!recipes.length) {
+    if (!visible.length) {
       const p = document.createElement("p");
       p.className = "text-muted";
-      p.textContent =
-        "No recipes yet. Click “Add recipe” to create your first one.";
+      p.textContent = showArchived
+        ? "No archived recipes yet."
+        : "No active recipes yet. Click “Add recipe” to create your first one.";
       recipesList.appendChild(p);
       return;
     }
 
-    recipes.forEach((recipe) => {
+    visible.forEach((recipe) => {
       const card = document.createElement("div");
       card.className = "recipe-box";
 
@@ -413,13 +435,24 @@
       meta.className = "recipe-summary";
       meta.textContent = `${recipe.portions || 0} portions per batch`;
 
+      if (recipe.archived) {
+        const archivedTag = document.createElement("span");
+        archivedTag.textContent = "Archived";
+        archivedTag.style.fontSize = "11px";
+        archivedTag.style.color = "#aa2e25";
+        archivedTag.style.marginLeft = "8px";
+        archivedTag.style.textTransform = "uppercase";
+        archivedTag.style.letterSpacing = "0.08em";
+        meta.appendChild(archivedTag);
+      }
+
       left.appendChild(title);
       left.appendChild(meta);
 
       const right = document.createElement("div");
       right.style.display = "flex";
       right.style.alignItems = "center";
-      right.style.gap = "10px";
+      right.style.gap = "8px";
 
       const badge = document.createElement("span");
       badge.className = "recipe-cost-badge";
@@ -433,6 +466,12 @@
         2
       )} /portion`;
 
+      const archiveBtn = document.createElement("button");
+      archiveBtn.type = "button";
+      archiveBtn.className = "btn-secondary";
+      archiveBtn.textContent = recipe.archived ? "Unarchive" : "Archive";
+      archiveBtn.addEventListener("click", () => toggleArchive(recipe.id));
+
       const editBtn = document.createElement("button");
       editBtn.type = "button";
       editBtn.className = "btn-secondary";
@@ -440,6 +479,7 @@
       editBtn.addEventListener("click", () => showRecipeForm(recipe.id));
 
       right.appendChild(badge);
+      right.appendChild(archiveBtn);
       right.appendChild(editBtn);
 
       header.appendChild(left);
@@ -539,8 +579,15 @@
     const store = getStore();
     if (!store) return;
 
-    const recipe = readFormToRecipe();
+    let recipe = readFormToRecipe();
     if (!recipe) return;
+
+    // Preserve archived flag when editing
+    const existingId = recipe.id;
+    const existing = store.getRecipes().find((r) => r.id === existingId);
+    if (existing && existing.archived) {
+      recipe.archived = true;
+    }
 
     store.upsertRecipe(recipe);
     hideRecipeForm();
@@ -552,6 +599,20 @@
     const store = getStore();
     if (!store) return;
     purchases = store.getPurchases();
+
+    if (showArchivedToggle) {
+      showArchivedToggle.addEventListener("change", renderRecipes);
+    }
+
+    // ESC closes recipe form
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") {
+        if (!formWrapper.classList.contains("hidden")) {
+          hideRecipeForm();
+        }
+      }
+    });
+
     renderRecipes();
   }
 
