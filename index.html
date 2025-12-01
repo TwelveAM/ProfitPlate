@@ -40,77 +40,15 @@
     .header-inner {
       max-width: 960px;
       margin: 0 auto;
-      padding: 10px 20px 0;
+      padding: 12px 20px 10px;
     }
 
-    .brand-row {
-      display: flex;
-      align-items: baseline;
-      gap: 8px;
-      margin-bottom: 8px;
-    }
-
-    .brand-short {
-      font-weight: 700;
-      font-size: 14px;
-      letter-spacing: 0.08em;
-      color: var(--green-dark);
-    }
-
-    .brand-main {
-      line-height: 1.2;
-    }
-
-    .brand-main-title {
-      font-weight: 600;
-      font-size: 16px;
-    }
-
-    .brand-main-subtitle {
-      font-size: 13px;
-      color: var(--text-muted);
-    }
-
-    nav {
-      margin-top: 6px;
-      margin-bottom: 10px;
-    }
-
-    .nav-list {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-      display: flex;
-      gap: 32px;
-      align-items: center;
-    }
-
-    .nav-link {
-      text-decoration: none;
-      font-size: 14px;
-      color: #222222;
-      position: relative;
-      padding: 6px 12px;
-      border-radius: 999px;
-      transition: background-color 0.15s ease, color 0.15s ease;
-    }
-
-    .nav-link:hover {
-      background-color: rgba(11, 93, 63, 0.1);
-    }
-
-    .nav-link.active {
-      background-color: var(--green-main);
-      color: #ffffff;
-      font-weight: 500;
-    }
-
-    /* Hero banner (630 x 130 look) */
+    /* Hero banner now lives inside header, above nav */
     .hero-banner {
       width: 630px;
       max-width: 100%;
       height: 130px;
-      margin: 28px auto 32px;
+      margin: 4px auto 16px;
       border-radius: 14px;
       background: linear-gradient(135deg, var(--green-main), var(--green-dark));
       display: flex;
@@ -145,7 +83,40 @@
       font-weight: 400;
     }
 
-    /* Main content */
+    nav {
+      margin-top: 6px;
+      margin-bottom: 6px;
+    }
+
+    .nav-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      gap: 32px;
+      align-items: center;
+    }
+
+    .nav-link {
+      text-decoration: none;
+      font-size: 14px;
+      color: #222222;
+      position: relative;
+      padding: 6px 12px;
+      border-radius: 999px;
+      transition: background-color 0.15s ease, color 0.15s ease;
+    }
+
+    .nav-link:hover {
+      background-color: rgba(11, 93, 63, 0.1);
+    }
+
+    .nav-link.active {
+      background-color: var(--green-main);
+      color: #ffffff;
+      font-weight: 500;
+    }
+
     main {
       text-align: center;
     }
@@ -162,11 +133,12 @@
       color: var(--text-muted);
     }
 
+    /* CTA buttons */
     .cta-row {
       display: flex;
       justify-content: center;
       gap: 12px;
-      margin-bottom: 38px;
+      margin: 28px 0 32px;
       flex-wrap: wrap;
     }
 
@@ -271,36 +243,28 @@
 <body>
   <header>
     <div class="header-inner">
-      <div class="brand-row">
-        <div class="brand-short">PP</div>
-        <div class="brand-main">
-          <div class="brand-main-title">ProfitPlate</div>
-          <div class="brand-main-subtitle">Know your profit per plate.</div>
+      <!-- Banner moved to the very top -->
+      <div class="hero-banner">
+        <div class="hero-icons">⚖️</div>
+        <div class="hero-title-block">
+          <div class="hero-title">PROFITPLATE</div>
+          <div class="hero-subtitle">Know your profit per plate.</div>
         </div>
+        <div class="hero-icons">🥩</div>
       </div>
 
       <nav>
         <ul class="nav-list">
-          <li><a class="nav-link active" href="#">Home</a></li>
-          <li><a class="nav-link" href="#">Purchases</a></li>
-          <li><a class="nav-link" href="#">Recipes</a></li>
-          <li><a class="nav-link" href="#">Settings</a></li>
+          <li><a class="nav-link active" href="index.html">Home</a></li>
+          <li><a class="nav-link" href="purchases.html">Purchases</a></li>
+          <li><a class="nav-link" href="recipes.html">Recipes</a></li>
+          <li><a class="nav-link" href="settings.html">Settings</a></li>
         </ul>
       </nav>
     </div>
   </header>
 
   <div class="page">
-    <!-- Hero banner -->
-    <div class="hero-banner">
-      <div class="hero-icons">⚖️</div>
-      <div class="hero-title-block">
-        <div class="hero-title">ProfitPlate</div>
-        <div class="hero-subtitle">Know your profit per plate.</div>
-      </div>
-      <div class="hero-icons">🥩</div>
-    </div>
-
     <main>
       <h1>Stop guessing. Know your dish cost.</h1>
       <p class="lead">
@@ -342,13 +306,16 @@
           <p>A quick rhythm that matches how you actually work:</p>
           <ol class="how-steps">
             <li>
-              <strong>Update your Purchases.</strong> Add or edit items from your latest invoices – butter, pancetta, fries, flour. Set category, sub-type, unit and price (or use the pack helper if the invoice is weird).
+              <strong>Update your Purchases.</strong> Add or edit items from your latest invoices – butter, pancetta, fries, flour.
+              Set category, sub-type, unit and price (or use the pack helper if the invoice is weird).
             </li>
             <li>
-              <strong>Build your Recipes.</strong> Pick ingredients from Purchases, set the quantities and units you actually use in the dish. ProfitPlate calculates batch cost and cost per portion automatically.
+              <strong>Build your Recipes.</strong> Pick ingredients from Purchases, set the quantities and units you actually use in the dish.
+              ProfitPlate calculates batch cost and cost per portion automatically.
             </li>
             <li>
-              <strong>Check margin &amp; export.</strong> Adjust selling price until the margin looks healthy. When you’re happy, export a clean PDF or keep it in ProfitPlate for later.
+              <strong>Check margin &amp; export.</strong> Adjust selling price until the margin looks healthy.
+              When you’re happy, export a clean PDF or keep it in ProfitPlate for later.
             </li>
           </ol>
         </div>
