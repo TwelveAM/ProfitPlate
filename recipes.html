@@ -60,20 +60,38 @@
             justify-content:center;
           "
         >
-          <li><a class="nav-link" href="index.html">Home</a></li>
-          <li><a class="nav-link" href="purchases.html">Purchases</a></li>
-          <li><a class="nav-link active" href="recipes.html"
-            style="
-              text-decoration:none;
-              font-size:14px;
-              color:#fff;
-              padding:6px 12px;
-              border-radius:999px;
-              background:#0b5d3f;
-              font-weight:500;
-            "
-          >Recipes</a></li>
-          <li><a class="nav-link" href="settings.html">Settings</a></li>
+          <li>
+            <a class="nav-link" href="index.html"
+               style="text-decoration:none;font-size:14px;color:#222;padding:6px 12px;border-radius:999px;">
+              Home
+            </a>
+          </li>
+          <li>
+            <a class="nav-link" href="purchases.html"
+               style="text-decoration:none;font-size:14px;color:#222;padding:6px 12px;border-radius:999px;">
+              Purchases
+            </a>
+          </li>
+          <li>
+            <a class="nav-link active" href="recipes.html"
+               style="
+                 text-decoration:none;
+                 font-size:14px;
+                 color:#fff;
+                 padding:6px 12px;
+                 border-radius:999px;
+                 background:#0b5d3f;
+                 font-weight:500;
+               ">
+              Recipes
+            </a>
+          </li>
+          <li>
+            <a class="nav-link" href="settings.html"
+               style="text-decoration:none;font-size:14px;color:#222;padding:6px 12px;border-radius:999px;">
+              Settings
+            </a>
+          </li>
         </ul>
       </nav>
     </div>
@@ -157,7 +175,29 @@
       unless you turn off auto-recalculation in Settings.
     </p>
 
-    <div id="recipes-list" style="margin-top:20px;">
+    <div
+      style="
+        display:flex;
+        align-items:center;
+        justify-content:space-between;
+        gap:12px;
+        margin-top:8px;
+        margin-bottom:8px;
+      "
+    >
+      <span style="font-size:13px;color:#777;">
+        Only active recipes are shown. Archived recipes stay in your browser but are hidden from the menu.
+      </span>
+      <label
+        for="show-archived-toggle"
+        style="font-size:13px;display:flex;align-items:center;gap:6px;white-space:nowrap;"
+      >
+        <input type="checkbox" id="show-archived-toggle" />
+        Show archived recipes
+      </label>
+    </div>
+
+    <div id="recipes-list" style="margin-top:12px;">
       <!-- Filled by recipes.js -->
     </div>
   </div>
@@ -165,6 +205,6 @@
   <!-- app.js provides ppStore + shared helpers -->
   <script src="assets/app.js"></script>
   <!-- recipes.js handles Recipes page logic using ppStore -->
-  <script src="assets/recipes.js?v=3"></script>
+  <script src="assets/recipes.js?v=4"></script>
 </body>
 </html>
