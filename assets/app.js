@@ -73,6 +73,7 @@
     let q = Number(qty) || 0;
     const from = normalizeUnit(fromUnit);
     const to = normalizeUnit(toUnit);
+
     if (!from || !to || from === to) return q;
 
     // g <-> kg
@@ -161,6 +162,7 @@
     function populateSubtypeSelect(category) {
       const list = categorySubtypes[category] || [];
       subtypeInput.innerHTML = "";
+
       const placeholder = document.createElement("option");
       placeholder.value = "";
       placeholder.textContent = list.length ? "Select..." : "No sub-type";
@@ -174,40 +176,52 @@
       });
     }
 
-    categoryInput.addEventListener("change", (e) => {
-      populateSubtypeSelect(e.target.value);
-    });
+    if (categoryInput) {
+      categoryInput.addEventListener("change", function (e) {
+        populateSubtypeSelect(e.target.value);
+      });
+    }
 
     // Toggle form visibility
     function toggleAddForm() {
+      if (!addFormWrapper || !purchaseForm) return;
+
       const isHidden = addFormWrapper.classList.contains("hidden");
       if (isHidden) {
         addFormWrapper.classList.remove("hidden");
-        window.scrollTo({ top: addFormWrapper.offsetTop - 40, behavior: "smooth" });
+        window.scrollTo({
+          top: addFormWrapper.offsetTop - 40,
+          behavior: "smooth",
+        });
       } else {
         addFormWrapper.classList.add("hidden");
         editingId = null;
         purchaseForm.reset();
       }
     }
-
     window.toggleAddForm = toggleAddForm;
 
     // Pack helper
     function fillPriceFromPack() {
       const baseUnit = unitInput.value;
-      const packQty = Number((packQtyInput.value || "").toString().replace(",", ".")) || 0;
+      const packQty =
+        Number(String(packQtyInput.value || "").replace(",", ".")) || 0;
       const packUnit = packUnitSelect.value;
-      const packPrice = Number((packPriceInput.value || "").toString().replace(",", ".")) || 0;
+      const packPrice =
+        Number(String(packPriceInput.value || "").replace(",", ".")) || 0;
 
       if (!baseUnit || !packUnit || !packQty || !packPrice) {
-        alert("Fill pack quantity, unit, and pack price first.");
+        alert(
+          "Fill pack quantity, pack unit and pack price before using the helper."
+        );
         return;
       }
 
       const qtyInBase = convertQty(packQty, packUnit, baseUnit);
       if (!qtyInBase || qtyInBase <= 0) {
-        alert("Units not compatible. Use g/kg or ml/L or same unit.");
+        alert(
+          "Units not compatible. Use g/kg or ml/L or the same unit for the pack and recipe."
+        );
         return;
       }
 
@@ -223,39 +237,52 @@
       try {
         const d = new Date(iso);
         return d.toISOString().slice(0, 10);
-      } catch {
+      } catch (e) {
         return "-";
       }
     }
 
     function renderRecent() {
+      if (!recentList) return;
+
       recentList.innerHTML = "";
       if (!purchases.length) {
         const p = document.createElement("p");
         p.className = "text-muted";
-        p.textContent = "No items yet. Add your first ingredient above.";
+        p.textContent =
+          "No items yet. Add your first ingredient above.";
         recentList.appendChild(p);
         return;
       }
 
       const latest = purchases
         .slice()
-        .sort((a, b) => new Date(b.updatedAt || 0) - new Date(a.updatedAt || 0))
+        .sort(
+          (a, b) =>
+            new Date(b.updatedAt || 0) - new Date(a.updatedAt || 0)
+        )
         .slice(0, 3);
 
       latest.forEach((item) => {
         const card = document.createElement("div");
         card.className = "card-updated";
-        card.innerHTML = `
-          <div class="card-updated-title">
-            ${item.name} – ${item.pricePerUnit.toFixed(4)} €/ ${item.unit}
-          </div>
-          <small>
-            Updated ${formatDate(item.updatedAt)} • ${item.category || ""}${
-          item.subtype ? " (" + item.subtype + ")" : ""
-        }
-          </small>
-        `;
+
+        const line1 =
+          item.name +
+          " – " +
+          item.pricePerUnit.toFixed(4) +
+          " €/ " +
+          (item.unit || "");
+        const line2 =
+          "Updated " +
+          formatDate(item.updatedAt) +
+          " • " +
+          (item.category || "") +
+          (item.subtype ? " (" + item.subtype + ")" : "");
+
+        card.innerHTML =
+          line1 + "<br/><span class=\"text-muted\">" + line2 + "</span>";
+
         recentList.appendChild(card);
       });
     }
@@ -275,34 +302,49 @@
         })
         .forEach((item) => {
           const tr = document.createElement("tr");
-          tr.innerHTML = `
-            <td>${item.name}</td>
-            <td>${item.category || ""}</td>
-            <td>${item.subtype || ""}</td>
-            <td>${item.unit || ""}</td>
-            <td>${item.pricePerUnit.toFixed(4)} €/ ${item.unit}</td>
-            <td>${formatDate(item.updatedAt)}</td>
-            <td>
-              <button class="btn-secondary" data-edit="${item.id}">Edit</button>
-            </td>
-          `;
+
+          function addCell(text) {
+            const td = document.createElement("td");
+            td.textContent = text;
+            tr.appendChild(td);
+          }
+
+          addCell(item.name);
+          addCell(item.category || "");
+          addCell(item.subtype || "");
+          addCell(item.unit || "");
+          addCell(item.pricePerUnit.toFixed(4) + " €/ " + (item.unit || ""));
+          addCell(formatDate(item.updatedAt));
+
+          const actionsTd = document.createElement("td");
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.textContent = "Edit";
+          btn.dataset.edit = item.id;
+          btn.className = "btn-secondary small";
+          actionsTd.appendChild(btn);
+          tr.appendChild(actionsTd);
+
           tableBody.appendChild(tr);
         });
     }
 
-    // Load existing
+    // Initial render
     renderRecent();
     renderTable("");
 
     // Search
-    searchInput.addEventListener("input", (e) => {
-      renderTable(e.target.value);
-    });
+    if (searchInput) {
+      searchInput.addEventListener("input", function (e) {
+        renderTable(e.target.value);
+      });
+    }
 
-    // Edit
-    tableBody.addEventListener("click", (e) => {
+    // Edit click
+    tableBody.addEventListener("click", function (e) {
       const btn = e.target.closest("button[data-edit]");
       if (!btn) return;
+
       const id = btn.dataset.edit;
       const item = purchases.find((p) => p.id === id);
       if (!item) return;
@@ -318,11 +360,14 @@
       notesInput.value = item.notes || "";
 
       addFormWrapper.classList.remove("hidden");
-      window.scrollTo({ top: addFormWrapper.offsetTop - 40, behavior: "smooth" });
+      window.scrollTo({
+        top: addFormWrapper.offsetTop - 40,
+        behavior: "smooth",
+      });
     });
 
     // Submit form
-    purchaseForm.addEventListener("submit", (e) => {
+    purchaseForm.addEventListener("submit", function (e) {
       e.preventDefault();
 
       const name = nameInput.value.trim();
@@ -330,7 +375,8 @@
       const subtype = subtypeInput.value;
       const supplier = supplierInput.value.trim();
       const unit = unitInput.value;
-      const price = Number(priceInput.value.replace(",", ".")) || 0;
+      const price =
+        Number(String(priceInput.value || "").replace(",", ".")) || 0;
       const notes = notesInput.value.trim();
 
       if (!name) {
@@ -352,10 +398,12 @@
 
       const now = new Date().toISOString();
       let id = editingId;
-
       if (!id) {
         id = "p_" + Date.now();
       }
+
+      const existing = purchases.find((p) => p.id === id);
+      const createdAt = existing ? existing.createdAt : now;
 
       const obj = {
         id,
@@ -366,32 +414,32 @@
         unit,
         pricePerUnit: price,
         notes,
-        createdAt: purchases.find((p) => p.id === id)?.createdAt || now,
+        createdAt,
         updatedAt: now,
       };
 
-      // Update cache & store
-      const idx = purchases.findIndex((p) => p.id === id);
-      if (idx === -1) purchases.push(obj);
-      else purchases[idx] = obj;
-
-      safeSave(KEYS.purchases, purchases);
+      // Persist through store
       ppStore.upsertPurchase(obj);
+      purchases = ppStore.getPurchases();
 
-      alert("Item saved locally. It will be available in Recipes.");
+      alert(
+        "Item saved locally. It will be available to use on the Recipes page."
+      );
+
       editingId = null;
       purchaseForm.reset();
-      renderRecent();
-      renderTable(searchInput.value);
       addFormWrapper.classList.add("hidden");
+
+      renderRecent();
+      renderTable(searchInput ? searchInput.value : "");
     });
   }
 
   // ===========================
   // Init on DOMContentLoaded
   // ===========================
-  document.addEventListener("DOMContentLoaded", () => {
+  document.addEventListener("DOMContentLoaded", function () {
     initPurchasesPage();
-    // Recipes and Settings are initialized in their own JS (recipes.js) or page logic
+    // Recipes and Settings are initialized in their own JS (recipes.js or page-specific logic)
   });
 })();
