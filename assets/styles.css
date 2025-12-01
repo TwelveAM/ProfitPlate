@@ -158,11 +158,14 @@ button.btn-primary {
 .card-updated-title {
   font-weight: 600;
   color: #0b6e46;
+  font-size: 14px;
 }
 
 .card-updated small {
   color: #666;
+  font-size: 12px;
 }
+
 
 /* ================================
    Tables
