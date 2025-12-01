@@ -43,6 +43,25 @@
     showAdvanced: true,
   });
 
+  // --- sanitize old / broken purchase entries (from earlier versions)
+  function sanitizePurchases() {
+    purchases = (purchases || [])
+      .filter((p) => p && typeof p === "object")
+      .map((p) => {
+        const n = { ...p };
+        const raw = n.pricePerUnit;
+        const price = Number(raw);
+        if (!Number.isFinite(price) || price < 0) {
+          n.pricePerUnit = 0;
+        } else {
+          n.pricePerUnit = price;
+        }
+        return n;
+      });
+    safeSave(KEYS.purchases, purchases);
+  }
+  sanitizePurchases();
+
   // ===========================
   // Settings helper API
   // ===========================
@@ -103,7 +122,7 @@
       } else {
         purchases[idx] = purchase;
       }
-      safeSave(KEYS.purchases, purchases);
+      sanitizePurchases();
     },
 
     // Recipes
@@ -242,6 +261,12 @@
       }
     }
 
+    function getSafePrice(item) {
+      const p = Number(item.pricePerUnit);
+      if (!Number.isFinite(p) || p <= 0) return 0;
+      return p;
+    }
+
     function renderRecent() {
       if (!recentList) return;
 
@@ -266,12 +291,11 @@
         const card = document.createElement("div");
         card.className = "card-updated";
 
-        const line1 =
-          item.name +
-          " – " +
-          item.pricePerUnit.toFixed(4) +
-          " €/ " +
-          (item.unit || "");
+        const price = getSafePrice(item);
+        const priceLabel =
+          price > 0 ? price.toFixed(4) + " €/ " + (item.unit || "") : "-";
+
+        const line1 = item.name + " – " + priceLabel;
         const line2 =
           "Updated " +
           formatDate(item.updatedAt) +
@@ -308,11 +332,15 @@
             tr.appendChild(td);
           }
 
+          const price = getSafePrice(item);
+          const priceLabel =
+            price > 0 ? price.toFixed(4) + " €/ " + (item.unit || "") : "-";
+
           addCell(item.name);
           addCell(item.category || "");
           addCell(item.subtype || "");
           addCell(item.unit || "");
-          addCell(item.pricePerUnit.toFixed(4) + " €/ " + (item.unit || ""));
+          addCell(priceLabel);
           addCell(formatDate(item.updatedAt));
 
           const actionsTd = document.createElement("td");
@@ -355,7 +383,8 @@
       subtypeInput.value = item.subtype || "";
       supplierInput.value = item.supplier || "";
       unitInput.value = item.unit || "";
-      priceInput.value = item.pricePerUnit.toFixed(4);
+      const price = getSafePrice(item);
+      priceInput.value = price > 0 ? price.toFixed(4) : "";
       notesInput.value = item.notes || "";
 
       addFormWrapper.classList.remove("hidden");
@@ -439,6 +468,5 @@
   // ===========================
   document.addEventListener("DOMContentLoaded", function () {
     initPurchasesPage();
-    // Recipes and Settings are initialized in their own JS (recipes.js or page-specific logic)
   });
 })();
