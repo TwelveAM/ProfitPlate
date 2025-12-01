@@ -15,7 +15,7 @@
   const ingredientsContainer = document.getElementById("ingredients-container");
   const recipesList = document.getElementById("recipes-list");
 
-  // Purchases cached for dropdowns
+  // Purchases cached for dropdowns & snapshots
   let purchases = [];
 
   // Settings (currency, locale, behaviour)
@@ -29,8 +29,8 @@
           showAdvanced: true,
         };
 
-  const showAdvanced =
-    settings.showAdvanced !== false; // default true if missing
+  const autoRecalc = settings.autoRecalc !== false; // default true
+  const showAdvanced = settings.showAdvanced !== false; // default true
 
   // ======== Formatting helpers (match app.js) ========
   function getFormatting() {
@@ -56,18 +56,18 @@
     return `${formatted} ${symbol}`;
   }
 
-  // ======== Unit helpers (same logic as purchases/app) ========
+  // ======== Unit helpers (same logic as app.js) ========
   function normalizeUnit(u) {
     if (!u) return "";
-    u = String(u).toLowerCase();
-    if (u === "gr") u = "g";
-    return u;
+    const s = String(u).toLowerCase();
+    if (s === "gr") return "g";
+    return s;
   }
 
   function convertQuantity(qty, fromUnit, toUnit) {
     let q = Number(qty) || 0;
-    let from = normalizeUnit(fromUnit);
-    let to = normalizeUnit(toUnit);
+    const from = normalizeUnit(fromUnit);
+    const to = normalizeUnit(toUnit);
 
     if (!from || !to || from === to) return q;
 
@@ -156,6 +156,10 @@
     row.appendChild(unitSelect);
     row.appendChild(removeBtn);
 
+    if (existing && existing.pricePerUnitSnapshot != null) {
+      row.dataset.snapshot = String(existing.pricePerUnitSnapshot);
+    }
+
     ingredientsContainer.appendChild(row);
   }
 
@@ -239,10 +243,19 @@
 
       if (!purchaseId || !qty || qty <= 0) continue; // skip incomplete
 
+      let pricePerUnitSnapshot = null;
+      if (!autoRecalc) {
+        const p = purchases.find((x) => x.id === purchaseId);
+        if (p && typeof p.pricePerUnit === "number") {
+          pricePerUnitSnapshot = p.pricePerUnit;
+        }
+      }
+
       ingredients.push({
         purchaseId,
         quantity: qty,
         unit,
+        pricePerUnitSnapshot,
       });
     }
 
@@ -271,30 +284,43 @@
     let batchCost = 0;
     const ingredientsDetailed = [];
 
+    const useLivePrices = autoRecalc;
+
     (recipe.ingredients || []).forEach((ing) => {
       const p = findPurchase(ing.purchaseId);
-      if (!p) return;
+      if (!p && ing.pricePerUnitSnapshot == null) return;
 
-      const basePrice = Number(p.pricePerUnit) || 0; // price per purchase.unit
-      const purchaseUnit = p.unit || ing.unit;
+      let pricePerUnit = 0;
 
-      // convert ingredient quantity to purchase unit if needed
+      if (useLivePrices) {
+        pricePerUnit = Number(p && p.pricePerUnit) || 0;
+      } else {
+        if (ing.pricePerUnitSnapshot != null) {
+          pricePerUnit = Number(ing.pricePerUnitSnapshot) || 0;
+        } else if (p) {
+          pricePerUnit = Number(p.pricePerUnit) || 0;
+        } else {
+          pricePerUnit = 0;
+        }
+      }
+
+      const purchaseUnit = p ? p.unit || ing.unit : ing.unit;
       const qtyInPurchaseUnit = convertQuantity(
         ing.quantity,
         ing.unit,
         purchaseUnit
       );
 
-      const costInRecipe = qtyInPurchaseUnit * basePrice;
+      const costInRecipe = qtyInPurchaseUnit * pricePerUnit;
       batchCost += costInRecipe;
 
       ingredientsDetailed.push({
-        ingredientName: p.name,
-        category: p.category || "",
-        subtype: p.subtype || "",
+        ingredientName: p ? p.name : "(missing ingredient)",
+        category: p ? p.category || "" : "",
+        subtype: p ? p.subtype || "" : "",
         quantity: ing.quantity,
         unit: ing.unit,
-        pricePerUnit: basePrice,
+        pricePerUnit,
         costInRecipe,
       });
     });
@@ -321,17 +347,47 @@
     };
   }
 
+  // ======== Snapshot helper when autoRecalc is OFF ========
+  function ensureSnapshotsIfNeeded(recipes) {
+    if (autoRecalc) return false;
+
+    let changed = false;
+
+    recipes.forEach((recipe) => {
+      (recipe.ingredients || []).forEach((ing) => {
+        if (ing.pricePerUnitSnapshot != null) return;
+        const p = findPurchase(ing.purchaseId);
+        if (!p) return;
+        ing.pricePerUnitSnapshot = Number(p.pricePerUnit) || 0;
+        changed = true;
+      });
+    });
+
+    if (!changed) return false;
+
+    const store = getStore();
+    if (!store) return false;
+
+    recipes.forEach((r) => store.upsertRecipe(r));
+    return true;
+  }
+
+  // ======== Render recipes ========
   function renderRecipes() {
     const store = getStore();
     if (!store) return;
 
     const recipes = store.getRecipes();
+
+    ensureSnapshotsIfNeeded(recipes);
+
     recipesList.innerHTML = "";
 
     if (!recipes.length) {
       const p = document.createElement("p");
       p.className = "text-muted";
-      p.textContent = "No recipes yet. Click “Add recipe” to create your first one.";
+      p.textContent =
+        "No recipes yet. Click “Add recipe” to create your first one.";
       recipesList.appendChild(p);
       return;
     }
@@ -342,7 +398,6 @@
 
       const costs = computeRecipeCosts(recipe);
 
-      // Header
       const header = document.createElement("div");
       header.style.display = "flex";
       header.style.justifyContent = "space-between";
@@ -373,7 +428,6 @@
       badge.style.background = "#e3f5eb";
       badge.style.color = "#0b6e46";
       badge.style.fontSize = "14px";
-
       badge.textContent = `${formatMoney(
         costs.costPerPortion,
         2
@@ -392,7 +446,6 @@
       header.appendChild(right);
       card.appendChild(header);
 
-      // Summary row (cost + margin)
       const summary = document.createElement("div");
       summary.className = "recipe-summary";
 
@@ -419,7 +472,6 @@
           }
         }
       } else {
-        // Simple view – no batch cost, no margin, no breakdown line
         summaryText = `Cost per portion: ${formatMoney(
           costs.costPerPortion,
           2
@@ -436,7 +488,6 @@
       summary.textContent = summaryText;
       card.appendChild(summary);
 
-      // Ingredients table (only if advanced)
       if (showAdvanced) {
         const tableWrapper = document.createElement("div");
         tableWrapper.style.marginTop = "12px";
