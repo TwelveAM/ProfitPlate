@@ -1,251 +1,570 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <title>Recipes – ProfitPlate</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+// recipes.js – logic for Recipes page
 
-  <!-- Shared rounded inputs/buttons/recipe styles -->
-  <link rel="stylesheet" href="assets/styles.css" />
+(function () {
+  // Guard: only run on recipes.html
+  if (!document.getElementById("recipes-list")) return;
 
-  <style>
-    :root {
-      --green-main: #0b5d3f;
-      --green-dark: #06412a;
-      --bg: #f5f5f5;
-      --text-main: #222;
-      --text-muted: #555;
+  // ======== DOM references ========
+  const formWrapper = document.getElementById("recipe-form-wrapper");
+  const formTitle = document.getElementById("recipe-form-title");
+  const formEl = document.getElementById("recipe-form");
+  const nameInput = document.getElementById("recipe-name");
+  const portionsInput = document.getElementById("recipe-portions");
+  const priceInput = document.getElementById("recipe-price");
+  const recipeIdInput = document.getElementById("recipe-id");
+  const ingredientsContainer = document.getElementById("ingredients-container");
+  const recipesList = document.getElementById("recipes-list");
+
+  // Purchases cached for dropdowns & snapshots
+  let purchases = [];
+
+  // Settings (currency, locale, behaviour)
+  const settings =
+    typeof window.loadSettings === "function"
+      ? window.loadSettings()
+      : {
+          currency: "EUR",
+          locale: "eu",
+          autoRecalc: true,
+          showAdvanced: true,
+        };
+
+  const autoRecalc = settings.autoRecalc !== false; // default true
+  const showAdvanced = settings.showAdvanced !== false; // default true
+
+  // ======== Formatting helpers (match app.js) ========
+  function getFormatting() {
+    const currency = settings.currency || "EUR";
+    const locale = settings.locale === "us" ? "en-US" : "de-DE";
+    const symbolMap = {
+      EUR: "€",
+      RON: "lei",
+      USD: "$",
+      GBP: "£",
+    };
+    const symbol = symbolMap[currency] || currency;
+    return { currency, symbol, locale };
+  }
+
+  function formatMoney(value, decimals) {
+    const { symbol, locale } = getFormatting();
+    const n = Number(value) || 0;
+    const formatted = n.toLocaleString(locale, {
+      minimumFractionDigits: decimals,
+      maximumFractionDigits: decimals,
+    });
+    return `${formatted} ${symbol}`;
+  }
+
+  // ======== Unit helpers (same logic as app.js) ========
+  function normalizeUnit(u) {
+    if (!u) return "";
+    u = String(u).toLowerCase();
+    if (u === "gr") u = "g";
+    return u;
+  }
+
+  function convertQuantity(qty, fromUnit, toUnit) {
+    let q = Number(qty) || 0;
+    let from = normalizeUnit(fromUnit);
+    let to = normalizeUnit(toUnit);
+
+    if (!from || !to || from === to) return q;
+
+    // grams <-> kg
+    if (from === "g" && to === "kg") return q / 1000;
+    if (from === "kg" && to === "g") return q * 1000;
+
+    // ml <-> l
+    if (from === "ml" && to === "l") return q / 1000;
+    if (from === "l" && to === "ml") return q * 1000;
+
+    // incompatible: just return original as a fallback
+    return q;
+  }
+
+  // ======== Helper: get store =========
+  function getStore() {
+    if (!window.ppStore) {
+      console.error("ppStore (from app.js) not found.");
+      return null;
+    }
+    return window.ppStore;
+  }
+
+  // ======== Ingredient row handling ========
+  function buildPurchaseOptions(selectedId) {
+    const frag = document.createDocumentFragment();
+
+    const optPlaceholder = document.createElement("option");
+    optPlaceholder.value = "";
+    optPlaceholder.textContent = "Select ingredient…";
+    frag.appendChild(optPlaceholder);
+
+    purchases
+      .slice()
+      .sort((a, b) => a.name.localeCompare(b.name))
+      .forEach((p) => {
+        const opt = document.createElement("option");
+        opt.value = p.id;
+        opt.textContent = p.name;
+        if (selectedId && selectedId === p.id) opt.selected = true;
+        frag.appendChild(opt);
+      });
+
+    return frag;
+  }
+
+  function addIngredientRow(existing) {
+    const row = document.createElement("div");
+    row.className = "recipe-ingredient-row";
+
+    const select = document.createElement("select");
+    select.className = "form-select";
+    select.appendChild(
+      buildPurchaseOptions(existing ? existing.purchaseId : null)
+    );
+
+    const qtyInput = document.createElement("input");
+    qtyInput.type = "number";
+    qtyInput.placeholder = "Qty";
+    qtyInput.value = existing ? existing.quantity : "";
+    qtyInput.className = "small-input";
+
+    const unitSelect = document.createElement("select");
+    unitSelect.className = "form-select";
+    ["kg", "gr", "L", "ml", "pcs", "tray", "box"].forEach((u) => {
+      const opt = document.createElement("option");
+      opt.value = u.toLowerCase();
+      opt.textContent = u;
+      if (existing && normalizeUnit(existing.unit) === opt.value) {
+        opt.selected = true;
+      }
+      unitSelect.appendChild(opt);
+    });
+
+    const removeBtn = document.createElement("button");
+    removeBtn.type = "button";
+    removeBtn.textContent = "Remove";
+    removeBtn.className = "btn-danger remove-btn";
+    removeBtn.addEventListener("click", () => {
+      row.remove();
+    });
+
+    row.appendChild(select);
+    row.appendChild(qtyInput);
+    row.appendChild(unitSelect);
+    row.appendChild(removeBtn);
+
+    // If we have a snapshot stored, keep it on the DOM row so it survives re-open
+    if (existing && existing.pricePerUnitSnapshot != null) {
+      row.dataset.snapshot = String(existing.pricePerUnitSnapshot);
     }
 
-    * { box-sizing: border-box; }
+    ingredientsContainer.appendChild(row);
+  }
 
-    body {
-      margin: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background-color: var(--bg);
-      color: var(--text-main);
+  // Expose globally for button in HTML
+  window.addIngredientRow = addIngredientRow;
+
+  // ======== Show / hide form ========
+  function clearRecipeForm() {
+    nameInput.value = "";
+    portionsInput.value = "";
+    priceInput.value = "";
+    recipeIdInput.value = "";
+    ingredientsContainer.innerHTML = "";
+  }
+
+  function showRecipeForm(editId) {
+    clearRecipeForm();
+
+    const store = getStore();
+    if (!store) return;
+
+    if (editId) {
+      const existing = store.getRecipes().find((r) => r.id === editId);
+      if (existing) {
+        formTitle.textContent = "Edit recipe";
+        recipeIdInput.value = existing.id;
+        nameInput.value = existing.name || "";
+        portionsInput.value = existing.portions || "";
+        if (existing.sellingPrice != null) {
+          priceInput.value = existing.sellingPrice;
+        }
+        (existing.ingredients || []).forEach((ing) => addIngredientRow(ing));
+      } else {
+        formTitle.textContent = "Add a new recipe";
+        addIngredientRow();
+      }
+    } else {
+      formTitle.textContent = "Add a new recipe";
+      addIngredientRow();
     }
 
-    .page {
-      max-width: 960px;
-      margin: 0 auto;
-      padding: 16px 20px 40px;
+    formWrapper.classList.remove("hidden");
+    window.scrollTo({
+      top: formWrapper.offsetTop - 40,
+      behavior: "smooth",
+    });
+  }
+
+  function hideRecipeForm() {
+    formWrapper.classList.add("hidden");
+  }
+
+  window.showRecipeForm = showRecipeForm;
+  window.hideRecipeForm = hideRecipeForm;
+
+  // ======== Read form -> recipe object ========
+  function readFormToRecipe() {
+    const name = nameInput.value.trim();
+    const portions = Number(portionsInput.value) || 0;
+    const sellingRaw = priceInput.value.trim();
+    const sellingPrice =
+      sellingRaw === "" ? null : Number(sellingRaw.replace(",", "."));
+
+    if (!name || !portions) {
+      alert("Please enter a name and portions per batch.");
+      return null;
     }
 
-    header {
-      background: #fff;
-      border-bottom: 1px solid #ddd;
+    const ingRows = Array.from(
+      ingredientsContainer.querySelectorAll(".recipe-ingredient-row")
+    );
+    const ingredients = [];
+
+    for (const row of ingRows) {
+      const selects = row.getElementsByTagName("select");
+      const inputs = row.getElementsByTagName("input");
+
+      const purchaseId = selects[0].value;
+      const qty = Number(inputs[0].value);
+      const unit = selects[1].value;
+
+      if (!purchaseId || !qty || qty <= 0) continue; // skip incomplete
+
+      // If autoRecalc is OFF, snapshot price now
+      let pricePerUnitSnapshot = null;
+      if (!autoRecalc) {
+        const p = purchases.find((x) => x.id === purchaseId);
+        if (p && typeof p.pricePerUnit === "number") {
+          pricePerUnitSnapshot = p.pricePerUnit;
+        }
+      }
+
+      ingredients.push({
+        purchaseId,
+        quantity: qty,
+        unit,
+        pricePerUnitSnapshot,
+      });
     }
 
-    .header-inner {
-      max-width: 960px;
-      margin: 0 auto;
-      padding: 12px 20px 10px;
+    if (!ingredients.length) {
+      alert("Add at least one ingredient to the recipe.");
+      return null;
     }
 
-    /* HERO BANNER */
-    .hero-banner {
-      width: 630px;
-      max-width: 100%;
-      height: 130px;
-      margin: 4px auto 16px;
-      border-radius: 14px;
-      background: linear-gradient(135deg, var(--green-main), var(--green-dark));
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 32px;
-      color: #fff;
-      box-shadow: 0 10px 24px rgba(0,0,0,0.16);
+    const id = recipeIdInput.value || `r_${Date.now()}`;
+
+    return {
+      id,
+      name,
+      portions,
+      sellingPrice,
+      ingredients,
+    };
+  }
+
+  // ======== Cost calculations & rendering ========
+  function findPurchase(id) {
+    return purchases.find((p) => p.id === id);
+  }
+
+  function computeRecipeCosts(recipe) {
+    let batchCost = 0;
+    const ingredientsDetailed = [];
+
+    const useLivePrices = autoRecalc;
+
+    (recipe.ingredients || []).forEach((ing) => {
+      const p = findPurchase(ing.purchaseId);
+      if (!p && ing.pricePerUnitSnapshot == null) return;
+
+      let pricePerUnit = 0;
+
+      if (useLivePrices) {
+        // Always use current purchase price
+        pricePerUnit = Number(p && p.pricePerUnit) || 0;
+      } else {
+        // Prefer snapshot; if missing, fall back to current and treat that as snapshot
+        if (ing.pricePerUnitSnapshot != null) {
+          pricePerUnit = Number(ing.pricePerUnitSnapshot) || 0;
+        } else if (p) {
+          pricePerUnit = Number(p.pricePerUnit) || 0;
+        } else {
+          pricePerUnit = 0;
+        }
+      }
+
+      const purchaseUnit = p ? p.unit || ing.unit : ing.unit;
+
+      // convert ingredient quantity to purchase unit if needed
+      const qtyInPurchaseUnit = convertQuantity(
+        ing.quantity,
+        ing.unit,
+        purchaseUnit
+      );
+
+      const costInRecipe = qtyInPurchaseUnit * pricePerUnit;
+      batchCost += costInRecipe;
+
+      ingredientsDetailed.push({
+        ingredientName: p ? p.name : "(missing ingredient)",
+        category: p ? p.category || "" : "",
+        subtype: p ? p.subtype || "" : "",
+        quantity: ing.quantity,
+        unit: ing.unit,
+        pricePerUnit,
+        costInRecipe,
+      });
+    });
+
+    const portions = recipe.portions || 0;
+    const costPerPortion = portions ? batchCost / portions : 0;
+
+    let marginPerPortion = null;
+    let marginPercent = null;
+
+    if (recipe.sellingPrice != null) {
+      marginPerPortion = recipe.sellingPrice - costPerPortion;
+      if (recipe.sellingPrice > 0) {
+        marginPercent = (marginPerPortion / recipe.sellingPrice) * 100;
+      }
     }
 
-    .hero-icons { font-size: 42px; opacity: 0.9; }
+    return {
+      batchCost,
+      costPerPortion,
+      marginPerPortion,
+      marginPercent,
+      ingredientsDetailed,
+    };
+  }
 
-    .hero-title-block {
-      text-align: center;
-      flex: 1;
-      margin: 0 24px;
+  // ======== Snapshot helper when autoRecalc is OFF ========
+  function ensureSnapshotsIfNeeded(recipes) {
+    if (autoRecalc) return false; // nothing to do
+
+    let changed = false;
+
+    recipes.forEach((recipe) => {
+      (recipe.ingredients || []).forEach((ing) => {
+        if (ing.pricePerUnitSnapshot != null) return;
+        const p = findPurchase(ing.purchaseId);
+        if (!p) return;
+        ing.pricePerUnitSnapshot = Number(p.pricePerUnit) || 0;
+        changed = true;
+      });
+    });
+
+    if (!changed) return false;
+
+    const store = getStore();
+    if (!store) return false;
+
+    recipes.forEach((r) => store.upsertRecipe(r));
+    return true;
+  }
+
+  // ======== Render recipes ========
+  function renderRecipes() {
+    const store = getStore();
+    if (!store) return;
+
+    const recipes = store.getRecipes();
+
+    // If autoRecalc is OFF, make sure everything has snapshots
+    ensureSnapshotsIfNeeded(recipes);
+
+    recipesList.innerHTML = "";
+
+    if (!recipes.length) {
+      const p = document.createElement("p");
+      p.className = "text-muted";
+      p.textContent = "No recipes yet. Click “Add recipe” to create your first one.";
+      recipesList.appendChild(p);
+      return;
     }
 
-    .hero-title {
-      font-size: 32px;
-      font-weight: 700;
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
-    }
+    recipes.forEach((recipe) => {
+      const card = document.createElement("div");
+      card.className = "recipe-box";
 
-    .hero-subtitle {
-      margin-top: 6px;
-      font-size: 16px;
-      font-weight: 400;
-    }
+      const costs = computeRecipeCosts(recipe);
 
-    /* NAV */
-    .nav-list {
-      list-style: none;
-      padding: 0;
-      margin: 10px 0 8px;
-      display: flex;
-      gap: 32px;
-      align-items: center;
-      justify-content: center;
-    }
+      // Header
+      const header = document.createElement("div");
+      header.style.display = "flex";
+      header.style.justifyContent = "space-between";
+      header.style.alignItems = "center";
+      header.style.marginBottom = "10px";
 
-    .nav-link {
-      text-decoration: none;
-      font-size: 14px;
-      color: #222;
-      padding: 6px 12px;
-      border-radius: 999px;
-      transition: 0.15s;
-    }
+      const left = document.createElement("div");
+      const title = document.createElement("div");
+      title.className = "recipe-title";
+      title.textContent = recipe.name;
 
-    .nav-link:hover { background: rgba(11,93,63,0.1); }
-    .nav-link.active { background: var(--green-main); color: #fff; font-weight: 500; }
+      const meta = document.createElement("div");
+      meta.className = "recipe-summary";
+      meta.textContent = `${recipe.portions || 0} portions per batch`;
 
-    h1 { font-size: 30px; margin-bottom: 10px; }
-    h2 { font-size: 22px; margin-top: 24px; margin-bottom: 8px; }
-    p  { font-size: 14px; color: var(--text-muted); }
+      left.appendChild(title);
+      left.appendChild(meta);
 
-    .mt-20 { margin-top: 20px; }
+      const right = document.createElement("div");
+      right.style.display = "flex";
+      right.style.alignItems = "center";
+      right.style.gap = "10px";
 
-    /* Form layout tweaks reusing styles.css classes */
-    .recipe-form-row {
-      display: flex;
-      gap: 12px;
-      margin-bottom: 14px;
-    }
-    .recipe-form-row .half { flex: 1; }
+      const badge = document.createElement("span");
+      badge.className = "recipe-cost-badge";
+      badge.style.padding = "6px 12px";
+      badge.style.borderRadius = "999px";
+      badge.style.background = "#e3f5eb";
+      badge.style.color = "#0b6e46";
+      badge.style.fontSize = "14px";
 
-    .recipe-form-card {
-      background: #fff;
-      border-radius: 18px;
-      border: 1px solid #dde2e6;
-      padding: 24px;
-    }
+      badge.textContent = `${formatMoney(
+        costs.costPerPortion,
+        2
+      )} /portion`;
 
-    .actions-row {
-      display: flex;
-      justify-content: flex-end;
-      gap: 10px;
-      margin-top: 18px;
-    }
-  </style>
-</head>
+      const editBtn = document.createElement("button");
+      editBtn.type = "button";
+      editBtn.className = "btn-secondary";
+      editBtn.textContent = "Edit";
+      editBtn.addEventListener("click", () => showRecipeForm(recipe.id));
 
-<body>
-<header>
-  <div class="header-inner">
+      right.appendChild(badge);
+      right.appendChild(editBtn);
 
-    <!-- Banner -->
-    <div class="hero-banner">
-      <div class="hero-icons">⚖️</div>
-      <div class="hero-title-block">
-        <div class="hero-title">PROFITPLATE</div>
-        <div class="hero-subtitle">Know your profit per plate.</div>
-      </div>
-      <div class="hero-icons">🥩</div>
-    </div>
+      header.appendChild(left);
+      header.appendChild(right);
+      card.appendChild(header);
 
-    <!-- Nav -->
-    <nav>
-      <ul class="nav-list">
-        <li><a class="nav-link" href="index.html">Home</a></li>
-        <li><a class="nav-link" href="purchases.html">Purchases</a></li>
-        <li><a class="nav-link active" href="recipes.html">Recipes</a></li>
-        <li><a class="nav-link" href="settings.html">Settings</a></li>
-      </ul>
-    </nav>
+      // Summary row (cost + margin)
+      const summary = document.createElement("div");
+      summary.className = "recipe-summary";
 
-  </div>
-</header>
+      let summaryText;
 
-<div class="page">
-  <h1>Recipes</h1>
-  <p>
-    See cost per portion and profit margin for each dish on your menu.
-    Adjust selling price and keep an eye on how ingredient changes in Purchases
-    affect your bottom line.
-  </p>
+      if (showAdvanced) {
+        summaryText =
+          `Total batch cost: ${formatMoney(costs.batchCost, 2)}` +
+          ` • Cost per portion: ${formatMoney(costs.costPerPortion, 2)}`;
 
-  <!-- Top buttons -->
-  <div class="mt-20">
-    <button type="button" class="btn btn-primary" onclick="showRecipeForm()">Add recipe</button>
-    <button type="button" class="btn btn-secondary">Export all to PDF (future)</button>
-  </div>
+        if (recipe.sellingPrice != null) {
+          summaryText +=
+            ` • Selling price: ${formatMoney(
+              recipe.sellingPrice,
+              2
+            )} /portion`;
 
-  <hr class="mt-20" />
+          if (costs.marginPerPortion != null) {
+            summaryText +=
+              ` • Margin: ${formatMoney(
+                costs.marginPerPortion,
+                2
+              )} (${(costs.marginPercent || 0).toFixed(0)}%)`;
+          }
+        }
+      } else {
+        // Simple view – no batch cost, no margin, no breakdown line
+        summaryText = `Cost per portion: ${formatMoney(
+          costs.costPerPortion,
+          2
+        )}`;
+        if (recipe.sellingPrice != null) {
+          summaryText +=
+            ` • Selling price: ${formatMoney(
+              recipe.sellingPrice,
+              2
+            )} /portion`;
+        }
+      }
 
-  <!-- Add / Edit recipe form -->
-  <div id="recipe-form-wrapper" class="mt-20 hidden">
-    <div class="recipe-form-card">
-      <h2 id="recipe-form-title">Add a new recipe</h2>
+      summary.textContent = summaryText;
+      card.appendChild(summary);
 
-      <p style="margin-bottom: 18px;">
-        Give the recipe a name, set how many portions it makes, then add ingredients from your Purchases.
-        ProfitPlate will calculate cost per portion automatically.
-      </p>
+      // Ingredients table (only if advanced)
+      if (showAdvanced) {
+        const tableWrapper = document.createElement("div");
+        tableWrapper.style.marginTop = "12px";
 
-      <form id="recipe-form">
-        <input type="hidden" id="recipe-id" />
+        const table = document.createElement("table");
 
-        <div class="recipe-form-row">
-          <div class="half">
-            <label for="recipe-name">Recipe name</label>
-            <input id="recipe-name" type="text" placeholder="e.g. Pasta Carbonara" />
-          </div>
-        </div>
+        const thead = document.createElement("thead");
+        thead.innerHTML = `
+          <tr>
+            <th>Ingredient</th>
+            <th>Category</th>
+            <th>Sub-type</th>
+            <th>Quantity</th>
+            <th>Unit</th>
+            <th>Price/unit</th>
+            <th>Cost in recipe</th>
+          </tr>
+        `;
+        table.appendChild(thead);
 
-        <div class="recipe-form-row">
-          <div class="half">
-            <label for="recipe-portions">Portions per batch</label>
-            <input id="recipe-portions" type="number" placeholder="e.g. 10" />
-          </div>
-          <div class="half">
-            <label for="recipe-price">Selling price per portion (optional)</label>
-            <input id="recipe-price" type="number" step="0.01" placeholder="e.g. 12.50" />
-          </div>
-        </div>
+        const tbody = document.createElement("tbody");
 
-        <hr />
+        costs.ingredientsDetailed.forEach((ing) => {
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td>${ing.ingredientName}</td>
+            <td>${ing.category}</td>
+            <td>${ing.subtype}</td>
+            <td>${ing.quantity}</td>
+            <td>${ing.unit}</td>
+            <td>${formatMoney(ing.pricePerUnit, 4)}/unit</td>
+            <td>${formatMoney(ing.costInRecipe, 2)}</td>
+          `;
+          tbody.appendChild(tr);
+        });
 
-        <h2 style="font-size:18px;margin-top:6px;">Ingredients</h2>
-        <p style="margin-bottom: 12px;">
-          Choose items from your Purchases list, set the quantity and unit actually used in this recipe.
-          ProfitPlate will use the latest purchase price to compute the cost.
-        </p>
+        table.appendChild(tbody);
+        tableWrapper.appendChild(table);
+        card.appendChild(tableWrapper);
+      }
 
-        <div id="ingredients-container"></div>
+      recipesList.appendChild(card);
+    });
+  }
 
-        <button type="button" class="btn btn-secondary mt-20" onclick="addIngredientRow()">
-          + Add ingredient
-        </button>
+  // ======== Form submit ========
+  formEl.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const store = getStore();
+    if (!store) return;
 
-        <div class="actions-row">
-          <button type="button" class="btn btn-secondary" onclick="hideRecipeForm()">Cancel</button>
-          <button type="submit" class="btn btn-primary">Save recipe</button>
-        </div>
-      </form>
-    </div>
-  </div>
+    const recipe = readFormToRecipe();
+    if (!recipe) return;
 
-  <hr class="mt-20" />
+    store.upsertRecipe(recipe);
+    hideRecipeForm();
+    renderRecipes();
+  });
 
-  <!-- Menu overview / recipe list -->
-  <h2>Menu overview</h2>
-  <p>
-    Recipe data is stored locally in your browser using ProfitPlate's tiny brain.
-    Changing ingredient prices in Purchases will change costs here the next time you open the page.
-  </p>
+  // ======== Init ========
+  function initRecipesPage() {
+    const store = getStore();
+    if (!store) return;
+    purchases = store.getPurchases();
+    renderRecipes();
+  }
 
-  <div id="recipes-list" class="mt-20">
-    <!-- Filled by recipes.js -->
-  </div>
-</div>
-
-<!-- app.js provides ppStore + shared helpers -->
-<script src="assets/app.js"></script>
-<!-- recipes.js handles Recipes page logic using ppStore -->
-<script src="assets/recipes.js"></script>
-</body>
-</html>
+  document.addEventListener("DOMContentLoaded", initRecipesPage);
+})();
