@@ -1,131 +1,251 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <title>Recipes – ProfitPlate</title>
+<head>
+  <meta charset="UTF-8" />
+  <title>Recipes – ProfitPlate</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <link rel="stylesheet" href="assets/styles.css" />
-  </head>
+  <!-- Shared rounded inputs/buttons/recipe styles -->
+  <link rel="stylesheet" href="assets/styles.css" />
 
-  <body>
-    <div class="container">
-      <!-- Navigation -->
-      <nav class="nav">
-        <a href="index.html" class="nav-link">Home</a>
-        <a href="purchases.html" class="nav-link">Purchases</a>
-        <a href="recipes.html" class="nav-link nav-link-active">Recipes</a>
-        <a href="settings.html" class="nav-link">Settings</a>
-      </nav>
+  <style>
+    :root {
+      --green-main: #0b5d3f;
+      --green-dark: #06412a;
+      --bg: #f5f5f5;
+      --text-main: #222;
+      --text-muted: #555;
+    }
 
-      <h1>Recipes</h1>
-      <p>
-        See cost per portion and profit margin for each dish on your menu.
-        Adjust selling price and keep an eye on how ingredient changes in
-        Purchases affect your bottom line.
-      </p>
+    * { box-sizing: border-box; }
 
-      <!-- Top actions -->
-      <div style="margin: 22px 0;">
-        <button class="btn-primary" type="button" onclick="showRecipeForm()">
-          Add recipe
-        </button>
-        <button class="btn-secondary" type="button">
-          Export all to PDF (future)
-        </button>
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: var(--bg);
+      color: var(--text-main);
+    }
+
+    .page {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 16px 20px 40px;
+    }
+
+    header {
+      background: #fff;
+      border-bottom: 1px solid #ddd;
+    }
+
+    .header-inner {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 12px 20px 10px;
+    }
+
+    /* HERO BANNER */
+    .hero-banner {
+      width: 630px;
+      max-width: 100%;
+      height: 130px;
+      margin: 4px auto 16px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, var(--green-main), var(--green-dark));
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 32px;
+      color: #fff;
+      box-shadow: 0 10px 24px rgba(0,0,0,0.16);
+    }
+
+    .hero-icons { font-size: 42px; opacity: 0.9; }
+
+    .hero-title-block {
+      text-align: center;
+      flex: 1;
+      margin: 0 24px;
+    }
+
+    .hero-title {
+      font-size: 32px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .hero-subtitle {
+      margin-top: 6px;
+      font-size: 16px;
+      font-weight: 400;
+    }
+
+    /* NAV */
+    .nav-list {
+      list-style: none;
+      padding: 0;
+      margin: 10px 0 8px;
+      display: flex;
+      gap: 32px;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .nav-link {
+      text-decoration: none;
+      font-size: 14px;
+      color: #222;
+      padding: 6px 12px;
+      border-radius: 999px;
+      transition: 0.15s;
+    }
+
+    .nav-link:hover { background: rgba(11,93,63,0.1); }
+    .nav-link.active { background: var(--green-main); color: #fff; font-weight: 500; }
+
+    h1 { font-size: 30px; margin-bottom: 10px; }
+    h2 { font-size: 22px; margin-top: 24px; margin-bottom: 8px; }
+    p  { font-size: 14px; color: var(--text-muted); }
+
+    .mt-20 { margin-top: 20px; }
+
+    /* Form layout tweaks reusing styles.css classes */
+    .recipe-form-row {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+    .recipe-form-row .half { flex: 1; }
+
+    .recipe-form-card {
+      background: #fff;
+      border-radius: 18px;
+      border: 1px solid #dde2e6;
+      padding: 24px;
+    }
+
+    .actions-row {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 18px;
+    }
+  </style>
+</head>
+
+<body>
+<header>
+  <div class="header-inner">
+
+    <!-- Banner -->
+    <div class="hero-banner">
+      <div class="hero-icons">⚖️</div>
+      <div class="hero-title-block">
+        <div class="hero-title">PROFITPLATE</div>
+        <div class="hero-subtitle">Know your profit per plate.</div>
       </div>
-
-      <!-- Add / Edit recipe form -->
-      <div id="recipe-form-wrapper" class="settings-box hidden">
-        <h2 class="settings-title" id="recipe-form-title">Add a new recipe</h2>
-        <p class="settings-note">
-          Give the recipe a name, set how many portions it makes, then add
-          ingredients from your Purchases. ProfitPlate will calculate cost per
-          portion automatically.
-        </p>
-
-        <form id="recipe-form">
-          <label for="recipe-name">Recipe name</label>
-          <input
-            id="recipe-name"
-            name="name"
-            placeholder="e.g. Pasta Carbonara"
-            required
-          />
-
-          <div class="recipe-form-row" style="margin-top: 12px;">
-            <div class="half">
-              <label for="recipe-portions">Portions per batch</label>
-              <input
-                id="recipe-portions"
-                name="portions"
-                placeholder="e.g. 10"
-                required
-              />
-            </div>
-
-            <div class="half">
-              <label for="recipe-price">Selling price per portion (optional)</label>
-              <input
-                id="recipe-price"
-                name="sellingPrice"
-                placeholder="e.g. 12.50"
-              />
-            </div>
-          </div>
-
-          <hr />
-
-          <h3 style="margin-bottom: 8px;">Ingredients</h3>
-          <p class="settings-note">
-            Choose items from your Purchases list, set the quantity and unit
-            actually used in this recipe. ProfitPlate will use the latest
-            purchase price to compute the cost.
-          </p>
-
-          <div id="ingredients-container" style="margin-top: 10px;"></div>
-
-          <button
-            type="button"
-            class="btn-secondary"
-            style="margin-top: 10px;"
-            onclick="addIngredientRow()"
-          >
-            + Add ingredient
-          </button>
-
-          <div style="margin-top: 22px; display:flex; gap:14px;">
-            <button
-              type="button"
-              class="btn-secondary"
-              onclick="hideRecipeForm()"
-            >
-              Cancel
-            </button>
-            <button type="submit" class="btn-primary">
-              Save recipe
-            </button>
-          </div>
-
-          <!-- Hidden field to know if we edit an existing recipe -->
-          <input type="hidden" id="recipe-id" />
-        </form>
-      </div>
-
-      <hr />
-
-      <!-- Menu overview -->
-      <h2 style="margin-top: 24px;">Menu overview</h2>
-      <p class="settings-note">
-        Recipe data is stored locally in your browser using ProfitPlate's tiny
-        brain. Changing ingredient prices in Purchases will change costs here
-        the next time you open the page.
-      </p>
-
-      <div id="recipes-list" style="margin-top: 16px;"></div>
+      <div class="hero-icons">🥩</div>
     </div>
 
-    <!-- Data store + recipe logic -->
-    <script src="assets/app.js"></script>
-    <script src="assets/recipes.js"></script>
-  </body>
+    <!-- Nav -->
+    <nav>
+      <ul class="nav-list">
+        <li><a class="nav-link" href="index.html">Home</a></li>
+        <li><a class="nav-link" href="purchases.html">Purchases</a></li>
+        <li><a class="nav-link active" href="recipes.html">Recipes</a></li>
+        <li><a class="nav-link" href="settings.html">Settings</a></li>
+      </ul>
+    </nav>
+
+  </div>
+</header>
+
+<div class="page">
+  <h1>Recipes</h1>
+  <p>
+    See cost per portion and profit margin for each dish on your menu.
+    Adjust selling price and keep an eye on how ingredient changes in Purchases
+    affect your bottom line.
+  </p>
+
+  <!-- Top buttons -->
+  <div class="mt-20">
+    <button type="button" class="btn btn-primary" onclick="showRecipeForm()">Add recipe</button>
+    <button type="button" class="btn btn-secondary">Export all to PDF (future)</button>
+  </div>
+
+  <hr class="mt-20" />
+
+  <!-- Add / Edit recipe form -->
+  <div id="recipe-form-wrapper" class="mt-20 hidden">
+    <div class="recipe-form-card">
+      <h2 id="recipe-form-title">Add a new recipe</h2>
+
+      <p style="margin-bottom: 18px;">
+        Give the recipe a name, set how many portions it makes, then add ingredients from your Purchases.
+        ProfitPlate will calculate cost per portion automatically.
+      </p>
+
+      <form id="recipe-form">
+        <input type="hidden" id="recipe-id" />
+
+        <div class="recipe-form-row">
+          <div class="half">
+            <label for="recipe-name">Recipe name</label>
+            <input id="recipe-name" type="text" placeholder="e.g. Pasta Carbonara" />
+          </div>
+        </div>
+
+        <div class="recipe-form-row">
+          <div class="half">
+            <label for="recipe-portions">Portions per batch</label>
+            <input id="recipe-portions" type="number" placeholder="e.g. 10" />
+          </div>
+          <div class="half">
+            <label for="recipe-price">Selling price per portion (optional)</label>
+            <input id="recipe-price" type="number" step="0.01" placeholder="e.g. 12.50" />
+          </div>
+        </div>
+
+        <hr />
+
+        <h2 style="font-size:18px;margin-top:6px;">Ingredients</h2>
+        <p style="margin-bottom: 12px;">
+          Choose items from your Purchases list, set the quantity and unit actually used in this recipe.
+          ProfitPlate will use the latest purchase price to compute the cost.
+        </p>
+
+        <div id="ingredients-container"></div>
+
+        <button type="button" class="btn btn-secondary mt-20" onclick="addIngredientRow()">
+          + Add ingredient
+        </button>
+
+        <div class="actions-row">
+          <button type="button" class="btn btn-secondary" onclick="hideRecipeForm()">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save recipe</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <hr class="mt-20" />
+
+  <!-- Menu overview / recipe list -->
+  <h2>Menu overview</h2>
+  <p>
+    Recipe data is stored locally in your browser using ProfitPlate's tiny brain.
+    Changing ingredient prices in Purchases will change costs here the next time you open the page.
+  </p>
+
+  <div id="recipes-list" class="mt-20">
+    <!-- Filled by recipes.js -->
+  </div>
+</div>
+
+<!-- app.js provides ppStore + shared helpers -->
+<script src="assets/app.js"></script>
+<!-- recipes.js handles Recipes page logic using ppStore -->
+<script src="assets/recipes.js"></script>
+</body>
 </html>
