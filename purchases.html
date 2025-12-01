@@ -219,6 +219,29 @@
             ></textarea>
           </div>
 
+          <!-- Price history block -->
+          <div
+            id="price-history-block"
+            class="settings-box hidden"
+            style="margin-top:16px;background:#fafafa;border:1px dashed #ddd;"
+          >
+            <h3 class="section-title" style="font-size:15px;margin-bottom:8px;">Price history</h3>
+            <p class="settings-help" style="margin-top:0;margin-bottom:8px;">
+              Last 10 recorded price changes for this ingredient (newest first).
+            </p>
+            <div style="overflow-x:auto;">
+              <table class="table" style="font-size:13px;">
+                <thead>
+                  <tr>
+                    <th style="width:40%;">Date</th>
+                    <th>Price / unit</th>
+                  </tr>
+                </thead>
+                <tbody id="price-history-body"></tbody>
+              </table>
+            </div>
+          </div>
+
           <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:18px;">
             <button type="button" class="btn btn-secondary" onclick="toggleAddForm()">Cancel</button>
             <button type="submit" class="btn btn-primary">Save item</button>
