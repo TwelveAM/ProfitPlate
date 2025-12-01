@@ -3,39 +3,48 @@
 <head>
   <meta charset="utf-8" />
   <title>Purchases – ProfitPlate</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="stylesheet" href="assets/styles.css" />
 </head>
 <body>
-  <div class="container">
-    <header>
-      <div style="font-size: 28px; margin-bottom: 4px;">⚖️</div>
-      <div style="font-size: 22px; font-weight: 700; letter-spacing: 0.08em;">
-        PROFITPLATE
+  <!-- Shared header with hero banner (same style as index / recipes) -->
+  <header>
+    <div class="header-inner">
+      <!-- Banner -->
+      <div class="hero-banner">
+        <div class="hero-icons">⚖️</div>
+        <div class="hero-title-block">
+          <div class="hero-title">PROFITPLATE</div>
+          <div class="hero-subtitle">Know your profit per plate.</div>
+        </div>
+        <div class="hero-icons">🥩</div>
       </div>
-      <div style="margin-top: 4px; color: #666;">
-        Know your profit per plate.
-      </div>
-    </header>
 
-    <nav class="nav">
-      <a href="index.html" class="nav-link">Home</a>
-      <a href="purchases.html" class="nav-link nav-link-active">Purchases</a>
-      <a href="recipes.html" class="nav-link">Recipes</a>
-      <a href="settings.html" class="nav-link">Settings</a>
-    </nav>
+      <!-- Nav -->
+      <nav>
+        <ul class="nav-list">
+          <li><a class="nav-link" href="index.html">Home</a></li>
+          <li><a class="nav-link active" href="purchases.html">Purchases</a></li>
+          <li><a class="nav-link" href="recipes.html">Recipes</a></li>
+          <li><a class="nav-link" href="settings.html">Settings</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
 
-    <main>
+  <main>
+    <div class="container">
       <h1>Purchases</h1>
       <p>
-        This is your ingredient base. Add items you buy, organize them by
-        category, and keep supplier prices up to date. Recipes will use
-        everything you add here.
+        This is your ingredient base. Add items you buy, organize them by category,
+        and keep supplier prices up to date. Recipes will use everything you add here.
       </p>
 
       <button type="button" class="btn-primary mt-20" onclick="toggleAddForm()">
         Add item manually
       </button>
 
+      <!-- Add / Edit item form -->
       <div id="add-item-form" class="mt-20 hidden">
         <h2>Add a new purchase item</h2>
 
@@ -208,6 +217,7 @@
 
       <hr />
 
+      <!-- Recently updated -->
       <section>
         <h2>Recently updated</h2>
         <div id="recent-list" class="mt-20"></div>
@@ -215,6 +225,7 @@
 
       <hr />
 
+      <!-- All ingredients -->
       <section>
         <h2>All ingredients</h2>
 
@@ -244,8 +255,8 @@
           <tbody id="purchase-table"></tbody>
         </table>
       </section>
-    </main>
-  </div>
+    </div>
+  </main>
 
   <script src="assets/app.js"></script>
 </body>
