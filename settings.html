@@ -2,8 +2,17 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Settings – ProfitPlate</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ProfitPlate – Settings</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta
+    name="description"
+    content="Adjust how ProfitPlate behaves in your kitchen – currency, number format, behaviour and data controls."
+  />
+
+  <!-- Shared styles (settings-box, labels, buttons, etc.) -->
+  <link rel="stylesheet" href="assets/styles.css" />
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-plate-32.png" />
+
   <style>
     :root {
       --green-main: #0b5d3f;
@@ -13,21 +22,13 @@
       --text-muted: #555555;
     }
 
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     body {
       margin: 0;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       background-color: var(--bg);
       color: var(--text-main);
-    }
-
-    .page {
-      max-width: 960px;
-      margin: 0 auto;
-      padding: 16px 20px 40px;
     }
 
     header {
@@ -41,7 +42,13 @@
       padding: 12px 20px 10px;
     }
 
-    /* Hero banner */
+    .page {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 16px 20px 40px;
+    }
+
+    /* HERO BANNER (same as other tabs) */
     .hero-banner {
       width: 630px;
       max-width: 100%;
@@ -68,19 +75,20 @@
       margin: 0 24px;
     }
 
-    .hero-title {
+    .hero-title-banner {
       font-size: 32px;
       font-weight: 700;
       letter-spacing: 0.04em;
       text-transform: uppercase;
     }
 
-    .hero-subtitle {
+    .hero-subtitle-banner {
       margin-top: 6px;
       font-size: 16px;
       font-weight: 400;
     }
 
+    /* NAV – centered pills */
     nav {
       margin-top: 6px;
       margin-bottom: 6px;
@@ -93,6 +101,7 @@
       display: flex;
       gap: 32px;
       align-items: center;
+      justify-content: center;
     }
 
     .nav-link {
@@ -101,7 +110,7 @@
       color: #222222;
       padding: 6px 12px;
       border-radius: 999px;
-      transition: background-color 0.15s ease;
+      transition: background-color 0.15s ease, color 0.15s ease;
     }
 
     .nav-link:hover {
@@ -114,14 +123,46 @@
       font-weight: 500;
     }
 
-    h1 {
+    /* SETTINGS PAGE TYPOGRAPHY */
+    .settings-intro h1 {
       font-size: 30px;
-      margin-bottom: 20px;
+      margin-bottom: 8px;
     }
 
-    p {
+    .settings-intro p {
       font-size: 14px;
       color: var(--text-muted);
+      max-width: 720px;
+    }
+
+    .settings-footer-note {
+      margin-top: 24px;
+      font-size: 13px;
+      color: var(--text-muted);
+      max-width: 720px;
+    }
+
+    @media (max-width: 640px) {
+      .nav-list {
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+
+      .hero-banner {
+        padding: 0 16px;
+      }
+
+      .hero-icons {
+        display: none;
+      }
+
+      .hero-title-banner {
+        font-size: 26px;
+      }
+
+      .hero-subtitle-banner {
+        font-size: 14px;
+      }
     }
   </style>
 </head>
@@ -129,13 +170,12 @@
 <body>
   <header>
     <div class="header-inner">
-
       <!-- Banner -->
       <div class="hero-banner">
         <div class="hero-icons">⚖️</div>
         <div class="hero-title-block">
-          <div class="hero-title">PROFITPLATE</div>
-          <div class="hero-subtitle">Know your profit per plate.</div>
+          <div class="hero-title-banner">PROFITPLATE</div>
+          <div class="hero-subtitle-banner">Know your profit per plate.</div>
         </div>
         <div class="hero-icons">🥩</div>
       </div>
@@ -149,16 +189,185 @@
           <li><a class="nav-link active" href="settings.html">Settings</a></li>
         </ul>
       </nav>
-
     </div>
   </header>
 
   <div class="page">
-    <h1>Settings</h1>
+    <main>
+      <section class="settings-intro">
+        <h1 class="hero-title">Settings</h1>
+        <p class="hero-subtitle">
+          Adjust how ProfitPlate behaves in your kitchen – currency, display options and data controls.
+          In the real app, these settings would be stored in your account and synced across devices.
+        </p>
+      </section>
 
-    <p>Settings and preferences will be added here.</p>
-    <p>This page will eventually include export options, currency settings, backup/import, and account preferences.</p>
+      <!-- General -->
+      <section class="settings-box">
+        <h2 class="section-title">General</h2>
+
+        <div class="settings-field">
+          <label for="setting-language" class="settings-label">Language</label>
+          <select id="setting-language" class="settings-select">
+            <option value="en">English</option>
+            <option value="ro">Română (future)</option>
+            <option value="fr">Français (future)</option>
+            <option value="it">Italiano (future)</option>
+          </select>
+          <p class="settings-help">
+            UI language is fixed to English in this prototype. Other languages are placeholders for the future app.
+          </p>
+        </div>
+
+        <div class="settings-field">
+          <label for="setting-currency" class="settings-label">Currency</label>
+          <select id="setting-currency" class="settings-select">
+            <option value="EUR">€ – Euro</option>
+            <option value="RON">lei – Romanian leu</option>
+            <option value="USD">$ – US Dollar</option>
+            <option value="GBP">£ – British Pound</option>
+          </select>
+        </div>
+
+        <div class="settings-field">
+          <label for="setting-locale" class="settings-label">Number format</label>
+          <select id="setting-locale" class="settings-select">
+            <option value="eu">1.234,56 (EU style)</option>
+            <option value="us">1,234.56 (US/UK style)</option>
+          </select>
+        </div>
+      </section>
+
+      <!-- Behaviour -->
+      <section class="settings-box">
+        <h2 class="section-title">Behaviour</h2>
+
+        <div class="settings-field">
+          <div class="settings-checkbox">
+            <input
+              type="checkbox"
+              id="setting-autoRecalc"
+              class="settings-checkbox-input"
+            />
+            <label for="setting-autoRecalc" class="settings-checkbox-label">
+              Auto-recalculate recipes
+            </label>
+          </div>
+          <p class="settings-help">
+            When an ingredient price changes in Purchases, update recipe costs automatically.
+          </p>
+        </div>
+
+        <div class="settings-field">
+          <div class="settings-checkbox">
+            <input
+              type="checkbox"
+              id="setting-showAdvanced"
+              class="settings-checkbox-input"
+            />
+            <label for="setting-showAdvanced" class="settings-checkbox-label">
+              Show advanced details
+            </label>
+          </div>
+          <p class="settings-help">
+            Display margin %, batch cost and ingredient breakdown by default.
+            Turn off for a simpler view.
+          </p>
+        </div>
+      </section>
+
+      <!-- Data & local storage -->
+      <section class="settings-box">
+        <h2 class="section-title">Data &amp; local storage</h2>
+        <p>
+          ProfitPlate keeps everything in your browser for now.
+          <strong>No server, no cloud</strong> – just your device.
+        </p>
+        <p class="settings-help">
+          In the real app, this section would let you import / export data,
+          connect multiple devices and reset your account. For now you can clear
+          the local demo data from this browser.
+        </p>
+
+        <button id="btn-clear-data" class="btn-secondary" type="button">
+          Clear local demo data
+        </button>
+      </section>
+
+      <section class="settings-footer-note">
+        <p class="text-muted">
+          Settings are a visual prototype for now. In a future version, they’ll
+          be saved per account and synced across all your devices.
+        </p>
+      </section>
+    </main>
   </div>
 
+  <script src="assets/app.js"></script>
+  <script>
+    // Wire settings UI to the tiny brain in app.js
+    document.addEventListener("DOMContentLoaded", function () {
+      if (typeof loadSettings !== "function") return;
+
+      const langEl = document.getElementById("setting-language");
+      const curEl = document.getElementById("setting-currency");
+      const locEl = document.getElementById("setting-locale");
+      const autoEl = document.getElementById("setting-autoRecalc");
+      const advEl = document.getElementById("setting-showAdvanced");
+      const clearBtn = document.getElementById("btn-clear-data");
+
+      function applyToUI(s) {
+        if (!s) return;
+        if (langEl) langEl.value = s.language || "en";
+        if (curEl) curEl.value = s.currency || "EUR";
+        if (locEl) locEl.value = s.locale || "eu";
+        if (autoEl) autoEl.checked = !!s.autoRecalc;
+        if (advEl) advEl.checked = !!s.showAdvanced;
+      }
+
+      function currentSettingsFromUI() {
+        return {
+          language: langEl ? langEl.value : "en",
+          currency: curEl ? curEl.value : "EUR",
+          locale: locEl ? locEl.value : "eu",
+          autoRecalc: autoEl ? autoEl.checked : true,
+          showAdvanced: advEl ? advEl.checked : true,
+        };
+      }
+
+      // Initial load from app.js
+      applyToUI(loadSettings());
+
+      // Save on change
+      [langEl, curEl, locEl, autoEl, advEl].forEach((el) => {
+        if (!el) return;
+        el.addEventListener("change", () => {
+          const next = currentSettingsFromUI();
+          saveSettings(next);
+        });
+      });
+
+      // Clear local demo data
+      if (clearBtn) {
+        clearBtn.addEventListener("click", () => {
+          if (
+            !confirm(
+              "This will clear local Purchases, Recipes and Settings stored in this browser. Continue?"
+            )
+          ) {
+            return;
+          }
+          try {
+            localStorage.removeItem("pp_purchases");
+            localStorage.removeItem("pp_recipes");
+            localStorage.removeItem("pp_settings");
+            alert("Local demo data cleared. Reload the page to start fresh.");
+          } catch (e) {
+            alert("Could not clear local data. Check your browser settings.");
+          }
+        });
+      }
+    });
+  </script>
 </body>
 </html>
