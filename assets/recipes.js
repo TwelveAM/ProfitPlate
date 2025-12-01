@@ -1,5 +1,4 @@
 // recipes.js – logic for Recipes page
-
 (function () {
   // Guard: only run on recipes.html
   if (!document.getElementById("recipes-list")) return;
@@ -178,7 +177,6 @@
 
   function showRecipeForm(editId) {
     clearRecipeForm();
-
     const store = getStore();
     if (!store) return;
 
@@ -192,7 +190,9 @@
         if (existing.sellingPrice != null) {
           priceInput.value = existing.sellingPrice;
         }
-        (existing.ingredients || []).forEach((ing) => addIngredientRow(ing));
+        (existing.ingredients || []).forEach((ing) =>
+          addIngredientRow(ing)
+        );
       } else {
         formTitle.textContent = "Add a new recipe";
         addIngredientRow();
@@ -232,8 +232,8 @@
     const ingRows = Array.from(
       ingredientsContainer.querySelectorAll(".recipe-ingredient-row")
     );
-    const ingredients = [];
 
+    const ingredients = [];
     for (const row of ingRows) {
       const selects = row.getElementsByTagName("select");
       const inputs = row.getElementsByTagName("input");
@@ -285,7 +285,6 @@
   function computeRecipeCosts(recipe) {
     let batchCost = 0;
     const ingredientsDetailed = [];
-
     const useLivePrices = autoRecalc;
 
     (recipe.ingredients || []).forEach((ing) => {
@@ -293,7 +292,6 @@
       if (!p && ing.pricePerUnitSnapshot == null) return;
 
       let pricePerUnit = 0;
-
       if (useLivePrices) {
         pricePerUnit = Number(p && p.pricePerUnit) || 0;
       } else {
@@ -312,7 +310,6 @@
         ing.unit,
         purchaseUnit
       );
-
       const costInRecipe = qtyInPurchaseUnit * pricePerUnit;
       batchCost += costInRecipe;
 
@@ -320,6 +317,7 @@
         ingredientName: p ? p.name : "(missing ingredient)",
         category: p ? p.category || "" : "",
         subtype: p ? p.subtype || "" : "",
+        supplier: p ? p.supplier || "" : "",
         quantity: ing.quantity,
         unit: ing.unit,
         pricePerUnit,
@@ -394,13 +392,16 @@
     const store = getStore();
     if (!store) return;
 
-    let recipes = store.getRecipes();
+    let allRecipes = store.getRecipes();
+    ensureSnapshotsIfNeeded(allRecipes);
 
-    ensureSnapshotsIfNeeded(recipes);
+    const showArchived = showArchivedToggle
+      ? showArchivedToggle.checked
+      : false;
 
-    const showArchived = showArchivedToggle ? showArchivedToggle.checked : false;
-
-    const visible = recipes.filter((r) => showArchived || !r.archived);
+    const visible = allRecipes.filter(
+      (r) => showArchived || !r.archived
+    );
 
     recipesList.innerHTML = "";
 
@@ -409,7 +410,7 @@
       p.className = "text-muted";
       p.textContent = showArchived
         ? "No archived recipes yet."
-        : "No active recipes yet. Click “Add recipe” to create your first one.";
+        : 'No active recipes yet.\nClick “Add recipe” to create your first one.';
       recipesList.appendChild(p);
       return;
     }
@@ -461,22 +462,24 @@
       badge.style.background = "#e3f5eb";
       badge.style.color = "#0b6e46";
       badge.style.fontSize = "14px";
-      badge.textContent = `${formatMoney(
-        costs.costPerPortion,
-        2
-      )} /portion`;
+      badge.textContent =
+        formatMoney(costs.costPerPortion, 2) + " /portion";
 
       const archiveBtn = document.createElement("button");
       archiveBtn.type = "button";
       archiveBtn.className = "btn-secondary";
       archiveBtn.textContent = recipe.archived ? "Unarchive" : "Archive";
-      archiveBtn.addEventListener("click", () => toggleArchive(recipe.id));
+      archiveBtn.addEventListener("click", () =>
+        toggleArchive(recipe.id)
+      );
 
       const editBtn = document.createElement("button");
       editBtn.type = "button";
       editBtn.className = "btn-secondary";
       editBtn.textContent = "Edit";
-      editBtn.addEventListener("click", () => showRecipeForm(recipe.id));
+      editBtn.addEventListener("click", () =>
+        showRecipeForm(recipe.id)
+      );
 
       right.appendChild(badge);
       right.appendChild(archiveBtn);
@@ -490,11 +493,13 @@
       summary.className = "recipe-summary";
 
       let summaryText;
-
       if (showAdvanced) {
         summaryText =
           `Total batch cost: ${formatMoney(costs.batchCost, 2)}` +
-          ` • Cost per portion: ${formatMoney(costs.costPerPortion, 2)}`;
+          ` • Cost per portion: ${formatMoney(
+            costs.costPerPortion,
+            2
+          )}`;
 
         if (recipe.sellingPrice != null) {
           summaryText +=
@@ -502,7 +507,6 @@
               recipe.sellingPrice,
               2
             )} /portion`;
-
           if (costs.marginPerPortion != null) {
             summaryText +=
               ` • Margin: ${formatMoney(
@@ -540,6 +544,7 @@
             <th>Ingredient</th>
             <th>Category</th>
             <th>Sub-type</th>
+            <th>Supplier</th>
             <th>Quantity</th>
             <th>Unit</th>
             <th>Price/unit</th>
@@ -549,13 +554,13 @@
         table.appendChild(thead);
 
         const tbody = document.createElement("tbody");
-
         costs.ingredientsDetailed.forEach((ing) => {
           const tr = document.createElement("tr");
           tr.innerHTML = `
             <td>${ing.ingredientName}</td>
             <td>${ing.category}</td>
             <td>${ing.subtype}</td>
+            <td>${ing.supplier}</td>
             <td>${ing.quantity}</td>
             <td>${ing.unit}</td>
             <td>${formatMoney(ing.pricePerUnit, 4)}/unit</td>
@@ -563,8 +568,8 @@
           `;
           tbody.appendChild(tr);
         });
-
         table.appendChild(tbody);
+
         tableWrapper.appendChild(table);
         card.appendChild(tableWrapper);
       }
@@ -598,6 +603,7 @@
   function initRecipesPage() {
     const store = getStore();
     if (!store) return;
+
     purchases = store.getPurchases();
 
     if (showArchivedToggle) {
