@@ -249,8 +249,7 @@
       if (!purchases.length) {
         const p = document.createElement("p");
         p.className = "text-muted";
-        p.textContent =
-          "No items yet. Add your first ingredient above.";
+        p.textContent = "No items yet. Add your first ingredient above.";
         recentList.appendChild(p);
         return;
       }
