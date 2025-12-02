@@ -60,9 +60,7 @@
             .map((h) => ({
               date: h.date,
               pricePerUnit:
-                Number(h.pricePerUnit) > 0
-                  ? Number(h.pricePerUnit)
-                  : n.pricePerUnit,
+                Number(h.pricePerUnit) > 0 ? Number(h.pricePerUnit) : n.pricePerUnit,
             }));
         } else {
           n.priceHistory = [];
@@ -115,12 +113,10 @@
   function formatMoney(value, decimals) {
     const { symbol, locale } = getFormatting();
     const n = Number(value) || 0;
-
     const formatted = n.toLocaleString(locale, {
       minimumFractionDigits: decimals,
       maximumFractionDigits: decimals,
     });
-
     return `${formatted} ${symbol}`;
   }
 
@@ -149,12 +145,10 @@
     let q = Number(qty) || 0;
     const from = normalizeUnit(fromUnit);
     const to = normalizeUnit(toUnit);
-
     if (!from || !to || from === to) return q;
 
     if (from === "g" && to === "kg") return q / 1000;
     if (from === "kg" && to === "g") return q * 1000;
-
     if (from === "ml" && to === "l") return q / 1000;
     if (from === "l" && to === "ml") return q * 1000;
 
@@ -175,8 +169,7 @@
       const idx = purchases.findIndex((p) => p.id === purchase.id);
       const existing = idx !== -1 ? purchases[idx] : null;
 
-      const id =
-        purchase.id || (existing && existing.id) || "p_" + Date.now();
+      const id = purchase.id || (existing && existing.id) || "p_" + Date.now();
       const createdAt =
         (existing && existing.createdAt) || purchase.createdAt || nowIso;
 
@@ -268,9 +261,7 @@
     const categoryInput = document.getElementById("item-category");
     const subtypeInput = document.getElementById("item-subtype");
     const supplierInput = document.getElementById("item-supplier");
-    const invoiceNumberInput = document.getElementById(
-      "item-invoice-number"
-    );
+    const invoiceNumberInput = document.getElementById("item-invoice-number");
     const invoiceDateInput = document.getElementById("item-invoice-date");
     const unitInput = document.getElementById("item-unit");
     const priceInput = document.getElementById("item-price");
@@ -284,6 +275,7 @@
     const historyBody = document.getElementById("price-history-body");
 
     let editingId = null;
+    let categoryFilter = null;
 
     // Category -> subtype options
     const categorySubtypes = {
@@ -318,6 +310,34 @@
       });
     }
 
+    // Inject category filter next to search box (without touching HTML file)
+    if (searchInput && searchInput.parentElement) {
+      categoryFilter = document.createElement("select");
+      categoryFilter.id = "category-filter";
+      categoryFilter.className = "settings-select";
+      categoryFilter.style.maxWidth = "180px";
+
+      const categoryOptions = [
+        { value: "", label: "All categories" },
+        { value: "Meat & Fish", label: "Meat & Fish" },
+        { value: "Dairy & Eggs", label: "Dairy & Eggs" },
+        { value: "Vegetables & Fruit", label: "Vegetables & Fruit" },
+        { value: "Dry Goods", label: "Dry Goods" },
+        { value: "Spices & Condiments", label: "Spices & Condiments" },
+        { value: "Other", label: "Other" },
+      ];
+
+      categoryOptions.forEach((optDef) => {
+        const opt = document.createElement("option");
+        opt.value = optDef.value;
+        opt.textContent = optDef.label;
+        categoryFilter.appendChild(opt);
+      });
+
+      // Insert before the search input so the layout stays tidy
+      searchInput.parentElement.insertBefore(categoryFilter, searchInput);
+    }
+
     // Price history helpers
     function clearHistoryUI() {
       if (!historyBlock || !historyBody) return;
@@ -328,16 +348,13 @@
     function renderHistoryForItem(item) {
       if (!historyBlock || !historyBody) return;
 
-      const hist = Array.isArray(item.priceHistory)
-        ? item.priceHistory
-        : [];
+      const hist = Array.isArray(item.priceHistory) ? item.priceHistory : [];
       if (!hist.length) {
         clearHistoryUI();
         return;
       }
 
       historyBody.innerHTML = "";
-
       hist.forEach((entry) => {
         const tr = document.createElement("tr");
         const td1 = document.createElement("td");
@@ -480,16 +497,34 @@
 
     function renderTable(filterText) {
       const q = (filterText || "").toLowerCase();
+      const selectedCategory = categoryFilter ? categoryFilter.value : "";
+      const categoryFilterLower = (selectedCategory || "").toLowerCase();
+
       tableBody.innerHTML = "";
 
       purchases
         .filter((p) => {
+          // Category filter first
+          if (
+            categoryFilterLower &&
+            (p.category || "").toLowerCase() !== categoryFilterLower
+          ) {
+            return false;
+          }
+
+          // Text search
           if (!q) return true;
+
+          const name = (p.name || "").toLowerCase();
+          const category = (p.category || "").toLowerCase();
+          const supplier = (p.supplier || "").toLowerCase();
+          const invoiceNumber = (p.invoiceNumber || "").toLowerCase();
+
           return (
-            p.name.toLowerCase().includes(q) ||
-            (p.category || "").toLowerCase().includes(q) ||
-            (p.supplier || "").toLowerCase().includes(q) ||
-            (p.invoiceNumber || "").toLowerCase().includes(q)
+            name.includes(q) ||
+            category.includes(q) ||
+            supplier.includes(q) ||
+            invoiceNumber.includes(q)
           );
         })
         .forEach((item) => {
@@ -533,12 +568,19 @@
 
     // Initial render
     renderRecent();
-    renderTable("");
+    renderTable(searchInput ? searchInput.value : "");
 
     // Search
     if (searchInput) {
       searchInput.addEventListener("input", function (e) {
         renderTable(e.target.value);
+      });
+    }
+
+    // Category filter change
+    if (categoryFilter) {
+      categoryFilter.addEventListener("change", function () {
+        renderTable(searchInput ? searchInput.value : "");
       });
     }
 
@@ -552,16 +594,17 @@
       if (!item) return;
 
       editingId = id;
-
       nameInput.value = item.name || "";
       categoryInput.value = item.category || "";
       populateSubtypeSelect(item.category || "");
       subtypeInput.value = item.subtype || "";
       supplierInput.value = item.supplier || "";
+
       if (invoiceNumberInput)
         invoiceNumberInput.value = item.invoiceNumber || "";
       if (invoiceDateInput)
         invoiceDateInput.value = item.invoiceDate || "";
+
       unitInput.value = item.unit || "";
 
       const price = getSafePrice(item);
@@ -589,9 +632,7 @@
       const invoiceNumber = invoiceNumberInput
         ? invoiceNumberInput.value.trim()
         : "";
-      const invoiceDate = invoiceDateInput
-        ? invoiceDateInput.value
-        : "";
+      const invoiceDate = invoiceDateInput ? invoiceDateInput.value : "";
       const unit = unitInput.value;
       const price =
         Number(String(priceInput.value || "").replace(",", ".")) || 0;
@@ -650,6 +691,7 @@
       purchaseForm.reset();
       clearHistoryUI();
       addFormWrapper.classList.add("hidden");
+
       renderRecent();
       renderTable(searchInput ? searchInput.value : "");
     });
