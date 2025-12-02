@@ -1,262 +1,323 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
+  <meta charset="UTF-8" />
   <title>Purchases – ProfitPlate</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta
+    name="description"
+    content="Manage your ingredient base for ProfitPlate – purchases, categories, prices and suppliers."
+  />
   <link rel="stylesheet" href="assets/styles.css" />
 </head>
+
 <body>
-  <!-- Same header / banner pattern as index.html; only the active nav item changes -->
   <header>
-    <div class="header-inner">
+    <div class="header-inner" style="max-width:960px;margin:0 auto;padding:12px 20px 10px;">
       <!-- Banner -->
-      <div class="hero-banner">
-        <div class="hero-icons">⚖️</div>
-        <div class="hero-title-block">
-          <div class="hero-title">PROFITPLATE</div>
-          <div class="hero-subtitle">Know your profit per plate.</div>
+      <div
+        class="hero-banner"
+        style="
+          width:630px;
+          max-width:100%;
+          height:130px;
+          margin:4px auto 16px;
+          border-radius:14px;
+          background:linear-gradient(135deg,#0b5d3f,#06412a);
+          display:flex;
+          align-items:center;
+          justify-content:space-between;
+          padding:0 32px;
+          color:#fff;
+          box-shadow:0 10px 24px rgba(0,0,0,.16);
+        "
+      >
+        <div class="hero-icons" style="font-size:42px;opacity:.9;">⚖️</div>
+        <div class="hero-title-block" style="text-align:center;flex:1;margin:0 24px;">
+          <div class="hero-title" style="font-size:32px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;">
+            PROFITPLATE
+          </div>
+          <div class="hero-subtitle" style="margin-top:6px;font-size:16px;font-weight:400;">
+            Know your profit per plate.
+          </div>
         </div>
-        <div class="hero-icons">🥩</div>
+        <div class="hero-icons" style="font-size:42px;opacity:.9;">🥩</div>
       </div>
 
       <!-- Nav -->
-      <nav>
-        <ul class="nav-list">
-          <li><a class="nav-link" href="index.html">Home</a></li>
-          <li><a class="nav-link active" href="purchases.html">Purchases</a></li>
-          <li><a class="nav-link" href="recipes.html">Recipes</a></li>
-          <li><a class="nav-link" href="settings.html">Settings</a></li>
+      <nav style="margin-top:6px;margin-bottom:6px;">
+        <ul
+          class="nav-list"
+          style="
+            list-style:none;
+            padding:0;
+            margin:0;
+            display:flex;
+            gap:32px;
+            align-items:center;
+            justify-content:center;
+          "
+        >
+          <li>
+            <a class="nav-link" href="index.html"
+               style="text-decoration:none;font-size:14px;color:#222;padding:6px 12px;border-radius:999px;">
+              Home
+            </a>
+          </li>
+          <li>
+            <a class="nav-link active" href="purchases.html"
+               style="
+                 text-decoration:none;
+                 font-size:14px;
+                 color:#fff;
+                 padding:6px 12px;
+                 border-radius:999px;
+                 background:#0b5d3f;
+                 font-weight:500;
+               ">
+              Purchases
+            </a>
+          </li>
+          <li>
+            <a class="nav-link" href="recipes.html"
+               style="text-decoration:none;font-size:14px;color:#222;padding:6px 12px;border-radius:999px;">
+              Recipes
+            </a>
+          </li>
+          <li>
+            <a class="nav-link" href="settings.html"
+               style="text-decoration:none;font-size:14px;color:#222;padding:6px 12px;border-radius:999px;">
+              Settings
+            </a>
+          </li>
         </ul>
       </nav>
     </div>
   </header>
 
-  <main>
-    <div class="container">
-      <h1>Purchases</h1>
-      <p>
-        This is your ingredient base. Add items you buy, organize them by category,
-        and keep supplier prices up to date. Recipes will use everything you add here.
-      </p>
+  <div class="page" style="max-width:960px;margin:0 auto;padding:16px 20px 40px;">
+    <h1>Purchases</h1>
+    <p style="font-size:14px;color:#555;max-width:720px;">
+      This is your ingredient base. Add items you buy, organize them by category, and keep supplier prices
+      up to date. Recipes will use everything you add here.
+    </p>
 
-      <button type="button" class="btn-primary mt-20" onclick="toggleAddForm()">
-        Add item manually
-      </button>
+    <div style="margin-top:20px;margin-bottom:10px;">
+      <button type="button" class="btn btn-primary" onclick="toggleAddForm()">Add item manually</button>
+    </div>
 
-      <!-- Add / Edit item form -->
-      <div id="add-item-form" class="mt-20 hidden">
-        <h2>Add a new purchase item</h2>
+    <!-- Add / edit purchase form -->
+    <div id="add-item-form" class="hidden" style="margin-top:10px;">
+      <div class="settings-box">
+        <h2 class="section-title">Add a new purchase item</h2>
 
         <form id="purchase-form">
-          <!-- Name -->
-          <div class="mt-20">
-            <label for="item-name">Name</label>
-            <input id="item-name" type="text" required />
+          <div class="settings-field">
+            <label for="item-name" class="settings-label">Name</label>
+            <input id="item-name" type="text" placeholder="e.g. Butter 82% 1kg" />
           </div>
 
-          <!-- Category + Sub-type -->
-          <div class="mt-20">
-            <label for="item-category">Category</label>
-            <select id="item-category">
-              <option value="">Select...</option>
-              <option value="Meat & Fish">Meat &amp; Fish</option>
-              <option value="Dairy & Eggs">Dairy &amp; Eggs</option>
-              <option value="Vegetables & Fruit">Vegetables &amp; Fruit</option>
-              <option value="Dry Goods">Dry Goods</option>
-              <option value="Spices & Condiments">Spices &amp; Condiments</option>
-              <option value="Other">Other</option>
-            </select>
+          <div class="settings-field" style="display:flex;gap:12px;flex-wrap:wrap;">
+            <div style="flex:1;min-width:160px;">
+              <label for="item-category" class="settings-label">Category</label>
+              <select id="item-category" class="settings-select">
+                <option value="">Select...</option>
+                <option value="Meat &amp; Fish">Meat &amp; Fish</option>
+                <option value="Dairy & Eggs">Dairy &amp; Eggs</option>
+                <option value="Vegetables & Fruit">Vegetables &amp; Fruit</option>
+                <option value="Dry Goods">Dry Goods</option>
+                <option value="Spices & Condiments">Spices &amp; Condiments</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+
+            <div style="flex:1;min-width:160px;">
+              <label for="item-subtype" class="settings-label">Sub-type</label>
+              <select id="item-subtype" class="settings-select">
+                <option value="">Select...</option>
+              </select>
+            </div>
           </div>
 
-          <div class="mt-20">
-            <label for="item-subtype">Sub-type</label>
-            <select id="item-subtype">
-              <option value="">Select...</option>
-            </select>
+          <div class="settings-field">
+            <label for="item-supplier" class="settings-label">Supplier</label>
+            <input id="item-supplier" type="text" placeholder="e.g. Metro, local butcher..." />
           </div>
 
-          <!-- Supplier + Invoice -->
-          <div class="mt-20">
-            <label for="item-supplier">Supplier</label>
-            <input
-              id="item-supplier"
-              type="text"
-              placeholder="Metro, local butcher, dairy, etc."
-            />
-          </div>
-
-          <div class="mt-20">
-            <label for="item-invoice-number">Invoice number</label>
-            <input
-              id="item-invoice-number"
-              type="text"
-              placeholder="e.g. 2025-0456 or Ticket #32"
-            />
-          </div>
-
-          <div class="mt-20">
-            <label for="item-invoice-date">Invoice date</label>
-            <input id="item-invoice-date" type="date" />
-          </div>
-
-          <!-- Unit + base price -->
-          <div class="mt-20">
-            <label for="item-unit">Unit (for recipes)</label>
-            <select id="item-unit">
-              <option value="">Select...</option>
-              <option value="kg">kg</option>
-              <option value="g">gr</option>
-              <option value="l">L</option>
-              <option value="ml">ml</option>
-              <option value="pcs">pcs</option>
-            </select>
-          </div>
-
-          <div class="mt-20">
-            <label for="item-price">Purchase price (per recipe unit)</label>
-            <input
-              id="item-price"
-              type="number"
-              step="0.0001"
-              inputmode="decimal"
-            />
-          </div>
-
-          <hr />
-
-          <!-- Pack helper -->
-          <section>
-            <h3>Or use pack helper</h3>
-            <p>
-              Example: 100 gr for 5 € → auto-converts price per unit.
-            </p>
-
-            <div class="mt-20">
-              <label for="pack-qty">Pack quantity</label>
+          <!-- NEW: invoice number + date, wired to app.js -->
+          <div class="settings-field" style="display:flex;gap:12px;flex-wrap:wrap;">
+            <div style="flex:1;min-width:160px;">
+              <label for="item-invoice-number" class="settings-label">Invoice number</label>
               <input
-                id="pack-qty"
-                type="number"
-                step="0.0001"
-                inputmode="decimal"
+                id="item-invoice-number"
+                type="text"
+                placeholder="e.g. 2025-0456 or Ticket #32"
               />
             </div>
 
-            <div class="mt-20">
-              <label for="pack-unit">Pack unit</label>
-              <select id="pack-unit">
-                <option value="">unit</option>
-                <option value="g">gr</option>
+            <div style="flex:1;min-width:160px;">
+              <label for="item-invoice-date" class="settings-label">Invoice date</label>
+              <input id="item-invoice-date" type="date" />
+            </div>
+          </div>
+          <!-- END NEW -->
+
+          <div class="settings-field" style="display:flex;gap:12px;flex-wrap:wrap;">
+            <div style="flex:1;min-width:160px;">
+              <label for="item-unit" class="settings-label">Unit (for recipes)</label>
+              <select id="item-unit" class="settings-select">
+                <option value="">Select...</option>
                 <option value="kg">kg</option>
+                <option value="g">gr</option>
+                <option value="L">L</option>
                 <option value="ml">ml</option>
-                <option value="l">L</option>
                 <option value="pcs">pcs</option>
               </select>
             </div>
 
-            <div class="mt-20">
-              <label for="pack-price">Pack price (€)</label>
+            <div style="flex:1;min-width:160px;">
+              <label for="item-price" class="settings-label">Purchase price (per recipe unit)</label>
               <input
-                id="pack-price"
+                id="item-price"
                 type="number"
                 step="0.0001"
-                inputmode="decimal"
+                placeholder="e.g. 16.00"
               />
             </div>
+          </div>
 
-            <div class="mt-20">
+          <hr style="margin:16px 0;" />
+
+          <h3 style="margin:0 0 4px;font-size:15px;">Or use pack helper</h3>
+          <p class="settings-help" style="margin-top:2px;">
+            Example: 100 gr for 5 € → auto-converts price per unit.
+          </p>
+
+          <div class="settings-field" style="display:flex;gap:12px;flex-wrap:wrap;margin-top:10px;">
+            <div style="flex:1;min-width:120px;">
+              <label for="pack-qty" class="settings-label">Pack quantity</label>
+              <input id="pack-qty" type="number" step="0.01" placeholder="e.g. 100" />
+            </div>
+
+            <div style="flex:1;min-width:120px;">
+              <label for="pack-unit" class="settings-label">Pack unit</label>
+              <select id="pack-unit" class="settings-select">
+                <option value="">unit</option>
+                <option value="g">gr</option>
+                <option value="kg">kg</option>
+                <option value="ml">ml</option>
+                <option value="L">L</option>
+                <option value="pcs">pcs</option>
+              </select>
+            </div>
+
+            <div style="flex:1;min-width:120px;">
+              <label for="pack-price" class="settings-label">Pack price (€)</label>
+              <input id="pack-price" type="number" step="0.01" placeholder="e.g. 5.00" />
+            </div>
+
+            <div style="display:flex;align-items:flex-end;">
               <button
                 type="button"
-                class="btn-secondary"
+                class="btn btn-secondary"
+                style="margin-top:22px;"
                 onclick="fillPriceFromPack()"
               >
                 Use pack
               </button>
             </div>
-          </section>
+          </div>
 
-          <!-- Notes -->
-          <div class="mt-20">
-            <label for="item-notes">Notes</label>
+          <div class="settings-field">
+            <label for="item-notes" class="settings-label">Notes (storage, etc.)</label>
             <textarea
               id="item-notes"
-              rows="3"
-              placeholder="Storage info, special notes, etc."
+              rows="2"
+              placeholder="Remarks, storage notes..."
             ></textarea>
           </div>
 
-          <!-- Price history -->
-          <section id="price-history-block" class="mt-20 hidden">
-            <h3>Price history</h3>
-            <p>Last 10 recorded price changes for this ingredient (newest first).</p>
+          <!-- Price history block -->
+          <div
+            id="price-history-block"
+            class="settings-box hidden"
+            style="margin-top:16px;background:#fafafa;border:1px dashed #ddd;"
+          >
+            <h3 class="section-title" style="font-size:15px;margin-bottom:8px;">Price history</h3>
+            <p class="settings-help" style="margin-top:0;margin-bottom:8px;">
+              Last 10 recorded price changes for this ingredient (newest first).
+            </p>
+            <div style="overflow-x:auto;">
+              <table class="table" style="font-size:13px;">
+                <thead>
+                  <tr>
+                    <th style="width:40%;">Date</th>
+                    <th>Price / unit</th>
+                  </tr>
+                </thead>
+                <tbody id="price-history-body"></tbody>
+              </table>
+            </div>
+          </div>
 
-            <table>
-              <thead>
-                <tr>
-                  <th>Date</th>
-                  <th>Price / unit</th>
-                </tr>
-              </thead>
-              <tbody id="price-history-body"></tbody>
-            </table>
-          </section>
-
-          <!-- Actions -->
-          <div class="mt-20" style="display: flex; gap: 10px;">
-            <button
-              type="button"
-              class="btn-secondary"
-              onclick="toggleAddForm()"
-            >
-              Cancel
-            </button>
-            <button type="submit" class="btn-primary">Save item</button>
+          <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:18px;">
+            <button type="button" class="btn btn-secondary" onclick="toggleAddForm()">Cancel</button>
+            <button type="submit" class="btn btn-primary">Save item</button>
           </div>
         </form>
       </div>
-
-      <hr />
-
-      <!-- Recently updated -->
-      <section>
-        <h2>Recently updated</h2>
-        <div id="recent-list" class="mt-20"></div>
-      </section>
-
-      <hr />
-
-      <!-- All ingredients -->
-      <section>
-        <h2>All ingredients</h2>
-
-        <div class="mt-20">
-          <label for="search-input">Filter</label>
-          <input
-            id="search-input"
-            type="text"
-            placeholder="Search by name, category, supplier, invoice..."
-          />
-        </div>
-
-        <table>
-          <thead>
-            <tr>
-              <th>Ingredient</th>
-              <th>Category</th>
-              <th>Sub-type</th>
-              <th>Supplier</th>
-              <th>Invoice #</th>
-              <th>Unit</th>
-              <th>Latest price</th>
-              <th>Last updated</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody id="purchase-table"></tbody>
-        </table>
-      </section>
     </div>
-  </main>
+
+    <hr style="margin:24px 0 16px;" />
+
+    <!-- Recently updated -->
+    <h2>Recently updated</h2>
+    <div id="recent-list" style="margin-top:10px;">
+      <!-- Filled by app.js -->
+    </div>
+
+    <hr style="margin:24px 0 16px;" />
+
+    <!-- All ingredients -->
+    <div
+      style="
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+        gap:12px;
+        margin-bottom:8px;
+      "
+    >
+      <h2 style="margin:0;">All ingredients</h2>
+      <input
+        id="search-input"
+        type="text"
+        placeholder="Search by name, category, supplier, invoice..."
+        style="max-width:260px;"
+      />
+    </div>
+
+    <div style="overflow-x:auto;margin-top:8px;">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Ingredient</th>
+            <th>Category</th>
+            <th>Sub-type</th>
+            <th>Supplier</th>
+            <!-- NEW column -->
+            <th>Invoice #</th>
+            <!-- END NEW -->
+            <th>Unit</th>
+            <th>Latest price</th>
+            <th>Last updated</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="purchase-table"></tbody>
+      </table>
+    </div>
+  </div>
 
   <script src="assets/app.js"></script>
 </body>
