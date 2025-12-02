@@ -3,351 +3,163 @@
 <head>
   <meta charset="UTF-8" />
   <title>ProfitPlate – Know your profit per plate</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta
+    name="description"
+    content="ProfitPlate helps small restaurants calculate real cost per dish, per portion and profit margin — in seconds, not spreadsheets."
+  />
+  <link rel="stylesheet" href="assets/styles.css" />
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-plate-32.png" />
   <style>
-    :root {
-      --green-main: #0b5d3f;
-      --green-dark: #06412a;
-      --bg: #f5f5f5;
-      --text-main: #222222;
-      --text-muted: #555555;
-    }
-
-    * {
-      box-sizing: border-box;
-    }
-
     body {
       margin: 0;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background-color: var(--bg);
-      color: var(--text-main);
+      background-color: #f5f5f5;
+      color: #222222;
     }
-
     .page {
       max-width: 960px;
       margin: 0 auto;
       padding: 16px 20px 40px;
     }
-
-    header {
-      background-color: #ffffff;
-      border-bottom: 1px solid #dddddd;
-    }
-
-    .header-inner {
-      max-width: 960px;
-      margin: 0 auto;
-      padding: 12px 20px 10px;
-    }
-
-    /* HERO BANNER */
-    .hero-banner {
-      width: 630px;
-      max-width: 100%;
-      height: 130px;
-      margin: 4px auto 16px;
-      border-radius: 14px;
-      background: linear-gradient(135deg, var(--green-main), var(--green-dark));
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 32px;
-      color: #ffffff;
-      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.16);
-    }
-
-    .hero-icons {
-      font-size: 42px;
-      opacity: 0.9;
-    }
-
-    .hero-title-block {
+    .hero-main {
       text-align: center;
-      flex: 1;
-      margin: 0 24px;
+      margin-top: 12px;
+      margin-bottom: 32px;
     }
-
-    .hero-title {
+    .hero-main h1 {
       font-size: 32px;
-      font-weight: 700;
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
+      margin-bottom: 12px;
     }
-
-    .hero-subtitle {
-      margin-top: 6px;
-      font-size: 16px;
-      font-weight: 400;
-    }
-
-    /* NAV */
-    nav {
-      margin-top: 6px;
-      margin-bottom: 6px;
-    }
-
-    .nav-list {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-      display: flex;
-      gap: 32px;
-      align-items: center;
-      justify-content: center;   /* <– match Purchases & Recipes */
-    }
-
-    .nav-link {
-      text-decoration: none;
-      font-size: 14px;
-      color: #222222;
-      padding: 6px 12px;
-      border-radius: 999px;
-      transition: background-color 0.15s ease, color 0.15s ease;
-    }
-
-    .nav-link:hover {
-      background-color: rgba(11, 93, 63, 0.1);
-    }
-
-    .nav-link.active {
-      background-color: var(--green-main);
-      color: #ffffff;
-      font-weight: 500;
-    }
-
-    main {
-      text-align: center;
-    }
-
-    h1 {
-      font-size: 30px;
-      margin: 0 0 10px;
-    }
-
-    p.lead {
-      margin: 0 auto 24px;
-      max-width: 700px;
+    .hero-main p {
       font-size: 15px;
-      color: var(--text-muted);
+      color: #555555;
+      max-width: 720px;
+      margin: 0 auto 20px;
     }
-
-    /* CTA buttons */
-    .cta-row {
+    .hero-buttons {
       display: flex;
       justify-content: center;
       gap: 12px;
-      margin: 28px 0 32px;
       flex-wrap: wrap;
     }
-
-    .btn {
-      border-radius: 999px;
-      padding: 10px 20px;
-      font-size: 14px;
-      font-weight: 500;
-      border: 1px solid transparent;
+    .btn-primary,
+    .btn-secondary {
       cursor: pointer;
-      background: none;
-      transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
     }
-
-    .btn-primary {
-      background-color: var(--green-main);
-      color: #ffffff;
-      border-color: var(--green-main);
+    .home-section {
+      margin-bottom: 28px;
     }
-
-    .btn-primary:hover {
-      background-color: var(--green-dark);
-      border-color: var(--green-dark);
-    }
-
-    .btn-ghost {
-      background-color: #ffffff;
-      color: var(--text-main);
-      border-color: #cccccc;
-    }
-
-    .btn-ghost:hover {
-      background-color: #f0f0f0;
-    }
-
-    section {
-      margin-bottom: 32px;
-      text-align: left;
-    }
-
-    section h2 {
+    .home-section h2 {
       font-size: 22px;
       margin-bottom: 8px;
     }
-
-    section p {
-      margin: 0 0 10px;
+    .home-section p {
       font-size: 14px;
-      line-height: 1.6;
-      color: var(--text-muted);
-      max-width: 800px;
+      color: #555555;
+      max-width: 780px;
     }
-
-    .section-inner {
-      max-width: 840px;
-      margin: 0 auto;
-    }
-
-    .how-steps {
-      margin: 12px 0 0;
+    .home-section ol {
+      font-size: 14px;
+      color: #333333;
       padding-left: 20px;
-      font-size: 14px;
-      color: var(--text-muted);
-      max-width: 800px;
     }
-
-    footer {
-      margin-top: 16px;
-      font-size: 12px;
-      color: var(--text-muted);
-      text-align: center;
-    }
-
-    @media (max-width: 640px) {
-      .nav-list {
-        gap: 12px;
-        flex-wrap: wrap;
-      }
-
-      .hero-banner {
-        padding: 0 16px;
-      }
-
-      .hero-icons {
-        display: none;
-      }
-
-      .hero-title {
-        font-size: 26px;
-      }
-
-      .hero-subtitle {
-        font-size: 14px;
-      }
-
-      h1 {
-        font-size: 24px;
-      }
+    .home-footnote {
+      margin-top: 24px;
+      font-size: 13px;
+      color: #777777;
+      max-width: 780px;
     }
   </style>
 </head>
 
 <body>
-  <header>
-    <div class="header-inner">
-      <!-- Banner -->
-      <div class="hero-banner">
-        <div class="hero-icons">⚖️</div>
-        <div class="hero-title-block">
-          <div class="hero-title">PROFITPLATE</div>
-          <div class="hero-subtitle">Know your profit per plate.</div>
-        </div>
-        <div class="hero-icons">🥩</div>
-      </div>
+  <!-- Shared header -->
+  <div id="site-header"></div>
 
-      <!-- Nav -->
-      <nav>
-        <ul class="nav-list">
-          <li><a class="nav-link active" href="index.html">Home</a></li>
-          <li><a class="nav-link" href="purchases.html">Purchases</a></li>
-          <li><a class="nav-link" href="recipes.html">Recipes</a></li>
-          <li><a class="nav-link" href="settings.html">Settings</a></li>
-        </ul>
-      </nav>
-    </div>
-  </header>
-
-  <div class="page">
-    <main>
+  <main class="page">
+    <section class="hero-main">
       <h1>Stop guessing. Know your dish cost.</h1>
-      <p class="lead">
+      <p>
         ProfitPlate is a simple tool for small restaurants to calculate real cost per dish,
         cost per portion, and profit margin — in seconds, not spreadsheets.
       </p>
-
-      <div class="cta-row">
-        <button class="btn btn-primary">Start 24-hour free trial (future)</button>
-        <button class="btn btn-ghost">See how it works</button>
+      <div class="hero-buttons">
+        <button type="button" class="btn-primary">Start 24-hour free trial (future)</button>
+        <button type="button" class="btn-secondary">See how it works</button>
       </div>
+    </section>
 
-      <section>
-        <div class="section-inner">
-          <h2>Ingredient-based costing</h2>
-          <p>
-            Add ingredients once, use them in any recipe. ProfitPlate calculates cost per portion
-            automatically using your latest supplier prices.
-          </p>
+    <section class="home-section">
+      <h2>Ingredient-based costing</h2>
+      <p>
+        Add ingredients once, use them in any recipe. ProfitPlate calculates cost per portion
+        automatically using your latest supplier prices.
+      </p>
+    </section>
 
-          <h2>Live price updates</h2>
-          <p>
-            Update supplier prices once and see every affected dish update instantly.
-            Perfect when butter, pancetta, salmon or fries jump in price overnight.
-          </p>
+    <section class="home-section">
+      <h2>Live price updates</h2>
+      <p>
+        Update supplier prices once and see every affected dish update instantly. Perfect when butter,
+        pancetta, salmon or fries jump in price overnight.
+      </p>
+    </section>
 
-          <h2>Clean PDF exports (future)</h2>
-          <p>
-            Export dish costing sheets you can print, share with your team, or keep for
-            documentation and menu engineering.
-          </p>
+    <section class="home-section">
+      <h2>Clean PDF exports (future)</h2>
+      <p>
+        Export dish costing sheets you can print, share with your team, or keep for documentation
+        and menu engineering.
+      </p>
+    </section>
 
-          <h2>Built for real kitchens</h2>
-          <p>
-            Designed by a working chef, not an accountant. Simple enough to use during service,
-            powerful enough for menu-planning days.
-          </p>
-        </div>
-      </section>
+    <section class="home-section">
+      <h2>Built for real kitchens</h2>
+      <p>
+        Designed by a working chef, not an accountant. Simple enough to use during service, powerful
+        enough for menu-planning days.
+      </p>
+    </section>
 
-      <section>
-        <div class="section-inner">
-          <h2>How ProfitPlate fits in your day</h2>
-          <p>A quick rhythm that matches how you actually work:</p>
-          <ol class="how-steps">
-            <li>
-              <strong>Update your Purchases.</strong>
-              Add or edit items from your latest invoices – butter, pancetta, fries, flour.
-              Set category, sub-type, unit and price (or use the pack helper if the invoice is weird).
-            </li>
-            <li>
-              <strong>Build your Recipes.</strong>
-              Pick ingredients from Purchases, set the quantities and units you actually use in the dish.
-              ProfitPlate calculates batch cost and cost per portion automatically.
-            </li>
-            <li>
-              <strong>Check margin &amp; export.</strong>
-              Adjust selling price until the margin looks healthy. When you’re happy, export a clean PDF
-              or keep it in ProfitPlate for later.
-            </li>
-          </ol>
-        </div>
-      </section>
+    <section class="home-section">
+      <h2>How ProfitPlate fits in your day</h2>
+      <ol>
+        <li>
+          <strong>Update your Purchases.</strong>
+          Add or edit items from your latest invoices – butter, pancetta, fries, flour.
+          Set category, sub-type, unit and price (or use the pack helper if the invoice is weird).
+        </li>
+        <li>
+          <strong>Build your Recipes.</strong>
+          Pick ingredients from Purchases, set the quantities and units you actually use in the dish.
+          ProfitPlate calculates batch cost and cost per portion automatically.
+        </li>
+        <li>
+          <strong>Check margin &amp; export.</strong>
+          Adjust selling price until the margin looks healthy. When you’re happy,
+          export a clean PDF or keep it in ProfitPlate for later.
+        </li>
+      </ol>
+    </section>
 
-      <section>
-        <div class="section-inner">
-          <h2>Where the app is today</h2>
-          <p>
-            ProfitPlate is in early development. This version runs entirely in your browser using
-            local storage — no login, no cloud, just your device.
-          </p>
-          <p>
-            For now you can test Purchases, Recipes and Settings locally in your browser.
-            In a future release, the costing app, online accounts and syncing will come next.
-          </p>
-        </div>
-      </section>
-    </main>
+    <section class="home-section">
+      <h2>Where the app is today</h2>
+      <p>
+        ProfitPlate is in early development. This version runs entirely in your browser using local
+        storage — no login, no cloud, just your device.
+      </p>
+      <p class="home-footnote">
+        For now you can test Purchases, Recipes and Settings locally in your browser. In a future
+        release, the costing app, online accounts and syncing will come next. Prototype build –
+        copy and testing data are stored only in your browser.
+      </p>
+    </section>
+  </main>
 
-    <footer>
-      Prototype build – copy and testing data are stored only in your browser.
-    </footer>
-  </div>
+  <script src="assets/header.js"></script>
+  <script>
+    renderHeader('home');
+  </script>
 </body>
 </html>
