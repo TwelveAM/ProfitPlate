@@ -12,88 +12,8 @@
 </head>
 
 <body>
-  <header>
-    <div class="header-inner" style="max-width:960px;margin:0 auto;padding:12px 20px 10px;">
-      <!-- Banner -->
-      <div
-        class="hero-banner"
-        style="
-          width:630px;
-          max-width:100%;
-          height:130px;
-          margin:4px auto 16px;
-          border-radius:14px;
-          background:linear-gradient(135deg,#0b5d3f,#06412a);
-          display:flex;
-          align-items:center;
-          justify-content:space-between;
-          padding:0 32px;
-          color:#fff;
-          box-shadow:0 10px 24px rgba(0,0,0,.16);
-        "
-      >
-        <div class="hero-icons" style="font-size:42px;opacity:.9;">⚖️</div>
-        <div class="hero-title-block" style="text-align:center;flex:1;margin:0 24px;">
-          <div class="hero-title" style="font-size:32px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;">
-            PROFITPLATE
-          </div>
-          <div class="hero-subtitle" style="margin-top:6px;font-size:16px;font-weight:400;">
-            Know your profit per plate.
-          </div>
-        </div>
-        <div class="hero-icons" style="font-size:42px;opacity:.9;">🥩</div>
-      </div>
-
-      <!-- Nav -->
-      <nav style="margin-top:6px;margin-bottom:6px;">
-        <ul
-          class="nav-list"
-          style="
-            list-style:none;
-            padding:0;
-            margin:0;
-            display:flex;
-            gap:32px;
-            align-items:center;
-            justify-content:center;
-          "
-        >
-          <li>
-            <a class="nav-link" href="index.html"
-               style="text-decoration:none;font-size:14px;color:#222;padding:6px 12px;border-radius:999px;">
-              Home
-            </a>
-          </li>
-          <li>
-            <a class="nav-link active" href="purchases.html"
-               style="
-                 text-decoration:none;
-                 font-size:14px;
-                 color:#fff;
-                 padding:6px 12px;
-                 border-radius:999px;
-                 background:#0b5d3f;
-                 font-weight:500;
-               ">
-              Purchases
-            </a>
-          </li>
-          <li>
-            <a class="nav-link" href="recipes.html"
-               style="text-decoration:none;font-size:14px;color:#222;padding:6px 12px;border-radius:999px;">
-              Recipes
-            </a>
-          </li>
-          <li>
-            <a class="nav-link" href="settings.html"
-               style="text-decoration:none;font-size:14px;color:#222;padding:6px 12px;border-radius:999px;">
-              Settings
-            </a>
-          </li>
-        </ul>
-      </nav>
-    </div>
-  </header>
+  <!-- Shared header placeholder -->
+  <div id="site-header"></div>
 
   <div class="page" style="max-width:960px;margin:0 auto;padding:16px 20px 40px;">
     <h1>Purchases</h1>
@@ -295,7 +215,7 @@
       />
     </div>
 
-    <!-- NEW: Category filter row -->
+    <!-- Category filter -->
     <div class="settings-field" style="max-width:260px;margin-top:6px;">
       <label for="category-filter" class="settings-label">Category filter</label>
       <select id="category-filter" class="settings-select">
@@ -329,6 +249,10 @@
     </div>
   </div>
 
+  <script src="assets/header.js"></script>
+  <script>
+    renderHeader('purchases');
+  </script>
   <script src="assets/app.js"></script>
 </body>
 </html>
