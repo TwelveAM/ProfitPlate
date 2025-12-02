@@ -58,26 +58,22 @@
       max-width: 720px;
     }
 
-    /* Local override for Behaviour checkboxes */
-    .settings-field-toggle {
-      display: block !important; /* kill any flex coming from global styles */
+    /* Local, isolated styles for Behaviour toggles */
+    .behaviour-toggle-block {
+      margin-bottom: 18px;
     }
 
-    .settings-toggle-row {
+    .behaviour-toggle-line {
       display: flex;
       align-items: center;
       gap: 8px;
       margin: 0 0 4px 0;
-    }
-
-    .settings-toggle-row input[type="checkbox"] {
-      margin: 0;
-    }
-
-    .settings-toggle-text {
+      cursor: pointer;
       font-size: 14px;
       color: #222222;
-      cursor: pointer;
+    }
+
+    .behaviour-toggle-line input[type="checkbox"] {
       margin: 0;
     }
   </style>
@@ -137,31 +133,21 @@
       <section class="settings-box">
         <h2 class="section-title">Behaviour</h2>
 
-        <div class="settings-field settings-field-toggle">
-          <div class="settings-toggle-row">
-            <input
-              type="checkbox"
-              id="setting-autoRecalc"
-            />
-            <label for="setting-autoRecalc" class="settings-toggle-text">
-              Auto-recalculate recipes
-            </label>
-          </div>
+        <div class="behaviour-toggle-block">
+          <label class="behaviour-toggle-line" for="setting-autoRecalc">
+            <input type="checkbox" id="setting-autoRecalc" />
+            <span>Auto-recalculate recipes</span>
+          </label>
           <p class="settings-help">
             When an ingredient price changes in Purchases, update recipe costs automatically.
           </p>
         </div>
 
-        <div class="settings-field settings-field-toggle">
-          <div class="settings-toggle-row">
-            <input
-              type="checkbox"
-              id="setting-showAdvanced"
-            />
-            <label for="setting-showAdvanced" class="settings-toggle-text">
-              Show advanced details
-            </label>
-          </div>
+        <div class="behaviour-toggle-block">
+          <label class="behaviour-toggle-line" for="setting-showAdvanced">
+            <input type="checkbox" id="setting-showAdvanced" />
+            <span>Show advanced details</span>
+          </label>
           <p class="settings-help">
             Display margin %, batch cost and ingredient breakdown by default.
             Turn off for a simpler view.
