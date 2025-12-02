@@ -1,5 +1,8 @@
 // app.js – Tiny brain for ProfitPlate
-// Storage + Purchases page logic (+ exposes ppStore for recipes.js)
+// - Shared storage (purchases, recipes, settings)
+// - Purchases page behaviour (form, pack helper, table render, filters)
+// - Settings helpers
+// - Exposes window.ppStore for recipes.js
 
 (function () {
   // ===========================
@@ -40,32 +43,55 @@
     showAdvanced: true,
   });
 
-  // ===========================
-  // Normalise / clean purchases
-  // ===========================
+  // --- sanitize old / broken purchase entries (from earlier versions)
   function sanitizePurchases() {
     purchases = (purchases || [])
       .filter((p) => p && typeof p === "object")
       .map((p) => {
         const n = { ...p };
 
-        // Normalise price
-        const v = Number(n.pricePerUnit);
-        n.pricePerUnit = Number.isFinite(v) && v >= 0 ? v : 0;
-
-        // Normalise priceHistory
-        if (Array.isArray(n.priceHistory)) {
-          n.priceHistory = n.priceHistory
-            .filter((h) => h && h.date)
-            .map((h) => ({
-              date: h.date,
-              pricePerUnit:
-                Number(h.pricePerUnit) > 0 ? Number(h.pricePerUnit) : n.pricePerUnit,
-            }));
+        // Normalize price
+        const raw = n.pricePerUnit;
+        const price = Number(raw);
+        if (!Number.isFinite(price) || price < 0) {
+          n.pricePerUnit = 0;
         } else {
-          n.priceHistory = [];
+          n.pricePerUnit = price;
         }
 
+        // Normalize history: ensure array of { date, pricePerUnit }
+        let hist = Array.isArray(n.priceHistory) ? n.priceHistory : [];
+        hist = hist
+          .filter((h) => h && typeof h === "object")
+          .map((h) => {
+            const hp = Number(h.pricePerUnit);
+            const d =
+              h.date ||
+              n.updatedAt ||
+              n.createdAt ||
+              new Date().toISOString();
+            return {
+              date: d,
+              pricePerUnit: Number.isFinite(hp) ? hp : n.pricePerUnit || 0,
+            };
+          });
+
+        // If there is no history but we have a price, seed one entry
+        if (!hist.length && n.pricePerUnit > 0) {
+          const baseDate =
+            n.updatedAt || n.createdAt || new Date().toISOString();
+          hist.push({
+            date: baseDate,
+            pricePerUnit: n.pricePerUnit,
+          });
+        }
+
+        // Keep only last 10 records (oldest dropped)
+        if (hist.length > 10) {
+          hist = hist.slice(hist.length - 10);
+        }
+
+        n.priceHistory = hist;
         return n;
       });
 
@@ -91,48 +117,7 @@
   window.saveSettings = saveSettings;
 
   // ===========================
-  // Formatting helpers
-  // ===========================
-  function getFormatting() {
-    const s = loadSettings();
-    const currency = s.currency || "EUR";
-    const locale = s.locale === "us" ? "en-US" : "de-DE";
-
-    const symbolMap = {
-      EUR: "€",
-      RON: "lei",
-      USD: "$",
-      GBP: "£",
-    };
-
-    const symbol = symbolMap[currency] || currency;
-
-    return { currency, symbol, locale };
-  }
-
-  function formatMoney(value, decimals) {
-    const { symbol, locale } = getFormatting();
-    const n = Number(value) || 0;
-    const formatted = n.toLocaleString(locale, {
-      minimumFractionDigits: decimals,
-      maximumFractionDigits: decimals,
-    });
-    return `${formatted} ${symbol}`;
-  }
-
-  // DD-MM-YYYY for display
-  function formatDate(iso) {
-    if (!iso) return "-";
-    const d = new Date(iso);
-    if (isNaN(d)) return "-";
-    const dd = String(d.getDate()).padStart(2, "0");
-    const mm = String(d.getMonth() + 1).padStart(2, "0");
-    const yyyy = d.getFullYear();
-    return `${dd}-${mm}-${yyyy}`;
-  }
-
-  // ===========================
-  // Unit helpers
+  // Shared unit helpers
   // ===========================
   function normalizeUnit(u) {
     if (!u) return "";
@@ -147,11 +132,15 @@
     const to = normalizeUnit(toUnit);
     if (!from || !to || from === to) return q;
 
+    // g <-> kg
     if (from === "g" && to === "kg") return q / 1000;
     if (from === "kg" && to === "g") return q * 1000;
+
+    // ml <-> l
     if (from === "ml" && to === "l") return q / 1000;
     if (from === "l" && to === "ml") return q * 1000;
 
+    // incompatible? just return original
     return q;
   }
 
@@ -165,47 +154,65 @@
     },
 
     upsertPurchase(purchase) {
+      // central place to maintain history + timestamps
       const nowIso = new Date().toISOString();
+
       const idx = purchases.findIndex((p) => p.id === purchase.id);
       const existing = idx !== -1 ? purchases[idx] : null;
-
-      const id = purchase.id || (existing && existing.id) || "p_" + Date.now();
+      const id =
+        purchase.id || (existing && existing.id) || "p_" + Date.now();
       const createdAt =
-        (existing && existing.createdAt) || purchase.createdAt || nowIso;
+        (existing && existing.createdAt) ||
+        purchase.createdAt ||
+        nowIso;
 
       const numericPrice =
         Number(String(purchase.pricePerUnit || "").replace(",", ".")) || 0;
 
-      // Build / update priceHistory (max 10)
-      let history = [];
-      if (existing && Array.isArray(existing.priceHistory)) {
-        history = existing.priceHistory.slice();
+      // Start from existing history if present
+      let history =
+        existing && Array.isArray(existing.priceHistory)
+          ? existing.priceHistory.slice()
+          : [];
+
+      let lastRecorded =
+        history.length > 0
+          ? Number(history[history.length - 1].pricePerUnit)
+          : null;
+
+      if (!history.length && existing && existing.pricePerUnit > 0) {
+        // Seed with existing stored price
+        history.push({
+          date: existing.updatedAt || existing.createdAt || nowIso,
+          pricePerUnit: Number(existing.pricePerUnit) || 0,
+        });
+        lastRecorded = history[history.length - 1].pricePerUnit;
       }
 
-      if (!existing) {
-        if (numericPrice > 0) {
-          history.unshift({
-            date: nowIso,
-            pricePerUnit: numericPrice,
-          });
-        }
-      } else {
-        const prevPrice = Number(existing.pricePerUnit) || 0;
-        if (numericPrice > 0 && numericPrice !== prevPrice) {
-          history.unshift({
-            date: nowIso,
-            pricePerUnit: numericPrice,
-          });
-        } else if (!history.length && prevPrice > 0) {
-          history.unshift({
-            date: existing.updatedAt || existing.createdAt || nowIso,
-            pricePerUnit: prevPrice,
-          });
-        }
+      // If price changed, append new history record
+      if (
+        numericPrice > 0 &&
+        (lastRecorded === null ||
+          !Number.isFinite(lastRecorded) ||
+          numericPrice !== lastRecorded)
+      ) {
+        history.push({
+          date: nowIso,
+          pricePerUnit: numericPrice,
+        });
       }
 
+      // If still no history but we have a price (new item), seed entry
+      if (!history.length && numericPrice > 0) {
+        history.push({
+          date: nowIso,
+          pricePerUnit: numericPrice,
+        });
+      }
+
+      // Keep only last 10
       if (history.length > 10) {
-        history = history.slice(0, 10);
+        history = history.slice(history.length - 10);
       }
 
       const merged = {
@@ -256,6 +263,7 @@
     const purchaseForm = document.getElementById("purchase-form");
     const recentList = document.getElementById("recent-list");
     const searchInput = document.getElementById("search-input");
+    const categoryFilter = document.getElementById("category-filter");
 
     const nameInput = document.getElementById("item-name");
     const categoryInput = document.getElementById("item-category");
@@ -275,7 +283,6 @@
     const historyBody = document.getElementById("price-history-body");
 
     let editingId = null;
-    let categoryFilter = null;
 
     // Category -> subtype options
     const categorySubtypes = {
@@ -290,12 +297,10 @@
     function populateSubtypeSelect(category) {
       const list = categorySubtypes[category] || [];
       subtypeInput.innerHTML = "";
-
       const placeholder = document.createElement("option");
       placeholder.value = "";
       placeholder.textContent = list.length ? "Select..." : "No sub-type";
       subtypeInput.appendChild(placeholder);
-
       list.forEach((st) => {
         const opt = document.createElement("option");
         opt.value = st;
@@ -310,82 +315,15 @@
       });
     }
 
-    // Inject category filter next to search box (without touching HTML file)
-    if (searchInput && searchInput.parentElement) {
-      categoryFilter = document.createElement("select");
-      categoryFilter.id = "category-filter";
-      categoryFilter.className = "settings-select";
-      categoryFilter.style.maxWidth = "180px";
-
-      const categoryOptions = [
-        { value: "", label: "All categories" },
-        { value: "Meat & Fish", label: "Meat & Fish" },
-        { value: "Dairy & Eggs", label: "Dairy & Eggs" },
-        { value: "Vegetables & Fruit", label: "Vegetables & Fruit" },
-        { value: "Dry Goods", label: "Dry Goods" },
-        { value: "Spices & Condiments", label: "Spices & Condiments" },
-        { value: "Other", label: "Other" },
-      ];
-
-      categoryOptions.forEach((optDef) => {
-        const opt = document.createElement("option");
-        opt.value = optDef.value;
-        opt.textContent = optDef.label;
-        categoryFilter.appendChild(opt);
-      });
-
-      // Insert before the search input so the layout stays tidy
-      searchInput.parentElement.insertBefore(categoryFilter, searchInput);
-    }
-
-    // Price history helpers
-    function clearHistoryUI() {
-      if (!historyBlock || !historyBody) return;
-      historyBlock.classList.add("hidden");
-      historyBody.innerHTML = "";
-    }
-
-    function renderHistoryForItem(item) {
-      if (!historyBlock || !historyBody) return;
-
-      const hist = Array.isArray(item.priceHistory) ? item.priceHistory : [];
-      if (!hist.length) {
-        clearHistoryUI();
-        return;
-      }
-
-      historyBody.innerHTML = "";
-      hist.forEach((entry) => {
-        const tr = document.createElement("tr");
-        const td1 = document.createElement("td");
-        const td2 = document.createElement("td");
-
-        td1.textContent = formatDate(entry.date);
-
-        const price = Number(entry.pricePerUnit) || 0;
-        td2.textContent =
-          price > 0
-            ? formatMoney(price, 4).replace(/\s.*$/, "") +
-              " / " +
-              (item.unit || "")
-            : "-";
-
-        tr.appendChild(td1);
-        tr.appendChild(td2);
-        historyBody.appendChild(tr);
-      });
-
-      historyBlock.classList.remove("hidden");
-    }
-
     // Toggle form visibility
     function toggleAddForm() {
       if (!addFormWrapper || !purchaseForm) return;
       const isHidden = addFormWrapper.classList.contains("hidden");
-
       if (isHidden) {
         addFormWrapper.classList.remove("hidden");
-        clearHistoryUI();
+        if (historyBlock) historyBlock.classList.add("hidden");
+        editingId = null;
+        purchaseForm.reset();
         window.scrollTo({
           top: addFormWrapper.offsetTop - 40,
           behavior: "smooth",
@@ -394,7 +332,7 @@
         addFormWrapper.classList.add("hidden");
         editingId = null;
         purchaseForm.reset();
-        clearHistoryUI();
+        if (historyBlock) historyBlock.classList.add("hidden");
       }
     }
 
@@ -431,12 +369,23 @@
     window.fillPriceFromPack = fillPriceFromPack;
 
     // Helpers
+    function formatDate(dateStr) {
+      if (!dateStr) return "";
+      const d = new Date(dateStr);
+      if (isNaN(d)) return dateStr;
+      const dd = String(d.getDate()).padStart(2, "0");
+      const mm = String(d.getMonth() + 1).padStart(2, "0");
+      const yyyy = d.getFullYear();
+      return `${dd}-${mm}-${yyyy}`;
+    }
+
     function getSafePrice(item) {
       const p = Number(item.pricePerUnit);
       if (!Number.isFinite(p) || p <= 0) return 0;
       return p;
     }
 
+    // Render "Recently updated"
     function renderRecent() {
       if (!recentList) return;
       recentList.innerHTML = "";
@@ -444,7 +393,7 @@
       if (!purchases.length) {
         const p = document.createElement("p");
         p.className = "text-muted";
-        p.textContent = "No items yet.\nAdd your first ingredient above.";
+        p.textContent = "No items yet. Add your first ingredient above.";
         recentList.appendChild(p);
         return;
       }
@@ -464,30 +413,22 @@
         const price = getSafePrice(item);
         const priceLabel =
           price > 0
-            ? formatMoney(price, 4).replace(/\s.*$/, "") +
-              " / " +
-              (item.unit || "")
+            ? `${price.toFixed(4)} €/ ${item.unit || ""}`
             : "-";
 
         const title = document.createElement("div");
         title.className = "card-updated-title";
         title.textContent = `${item.name} – ${priceLabel}`;
 
-        let metaParts = [];
-        metaParts.push("Updated " + formatDate(item.updatedAt));
-
-        if (item.category) {
-          let cat = item.category;
-          if (item.subtype) cat += " (" + item.subtype + ")";
-          metaParts.push(cat);
-        }
-
-        if (item.supplier) {
-          metaParts.push("Supplier: " + item.supplier);
-        }
-
         const meta = document.createElement("small");
-        meta.textContent = metaParts.join(" • ");
+        const catPart = item.category || "";
+        const subPart = item.subtype ? ` (${item.subtype})` : "";
+        const supPart = item.supplier
+          ? ` • Supplier: ${item.supplier}`
+          : "";
+        meta.textContent = `Updated ${formatDate(
+          item.updatedAt
+        )} • ${catPart}${subPart}${supPart}`;
 
         card.appendChild(title);
         card.appendChild(meta);
@@ -495,38 +436,75 @@
       });
     }
 
-    function renderTable(filterText) {
-      const q = (filterText || "").toLowerCase();
-      const selectedCategory = categoryFilter ? categoryFilter.value : "";
-      const categoryFilterLower = (selectedCategory || "").toLowerCase();
+    // Render price history table
+    function renderPriceHistory(item) {
+      if (!historyBlock || !historyBody) return;
+      historyBody.innerHTML = "";
+
+      if (
+        !item ||
+        !Array.isArray(item.priceHistory) ||
+        !item.priceHistory.length
+      ) {
+        const tr = document.createElement("tr");
+        const td = document.createElement("td");
+        td.colSpan = 2;
+        td.textContent = "No price history yet.";
+        tr.appendChild(td);
+        historyBody.appendChild(tr);
+        historyBlock.classList.remove("hidden");
+        return;
+      }
+
+      const sorted = item.priceHistory
+        .slice()
+        .sort((a, b) => new Date(b.date) - new Date(a.date)) // newest first
+        .slice(0, 10);
+
+      sorted.forEach((entry) => {
+        const tr = document.createElement("tr");
+        const tdDate = document.createElement("td");
+        tdDate.textContent = formatDate(entry.date);
+        const tdPrice = document.createElement("td");
+        const val = Number(entry.pricePerUnit) || 0;
+        tdPrice.textContent =
+          val.toFixed(4) + " €/ " + (item.unit || "");
+        tr.appendChild(tdDate);
+        tr.appendChild(tdPrice);
+        historyBody.appendChild(tr);
+      });
+
+      historyBlock.classList.remove("hidden");
+    }
+
+    // Render main table with search + category filter
+    function renderTable() {
+      const q = (searchInput ? searchInput.value : "").toLowerCase();
+      const cat = categoryFilter ? categoryFilter.value : "";
 
       tableBody.innerHTML = "";
 
       purchases
+        .slice()
         .filter((p) => {
-          // Category filter first
-          if (
-            categoryFilterLower &&
-            (p.category || "").toLowerCase() !== categoryFilterLower
-          ) {
-            return false;
-          }
+          if (cat && p.category !== cat) return false;
 
-          // Text search
           if (!q) return true;
 
-          const name = (p.name || "").toLowerCase();
-          const category = (p.category || "").toLowerCase();
-          const supplier = (p.supplier || "").toLowerCase();
-          const invoiceNumber = (p.invoiceNumber || "").toLowerCase();
+          const haystack =
+            [
+              p.name || "",
+              p.category || "",
+              p.subtype || "",
+              p.supplier || "",
+              p.invoiceNumber || "",
+            ]
+              .join(" ")
+              .toLowerCase();
 
-          return (
-            name.includes(q) ||
-            category.includes(q) ||
-            supplier.includes(q) ||
-            invoiceNumber.includes(q)
-          );
+          return haystack.includes(q);
         })
+        .sort((a, b) => a.name.localeCompare(b.name))
         .forEach((item) => {
           const tr = document.createElement("tr");
 
@@ -539,12 +517,10 @@
           const price = getSafePrice(item);
           const priceLabel =
             price > 0
-              ? formatMoney(price, 4).replace(/\s.*$/, "") +
-                " / " +
-                (item.unit || "")
+              ? `${price.toFixed(4)} €/ ${item.unit || ""}`
               : "-";
 
-          addCell(item.name);
+          addCell(item.name || "");
           addCell(item.category || "");
           addCell(item.subtype || "");
           addCell(item.supplier || "");
@@ -568,20 +544,14 @@
 
     // Initial render
     renderRecent();
-    renderTable(searchInput ? searchInput.value : "");
+    renderTable();
 
-    // Search
+    // Search + category filter listeners
     if (searchInput) {
-      searchInput.addEventListener("input", function (e) {
-        renderTable(e.target.value);
-      });
+      searchInput.addEventListener("input", renderTable);
     }
-
-    // Category filter change
     if (categoryFilter) {
-      categoryFilter.addEventListener("change", function () {
-        renderTable(searchInput ? searchInput.value : "");
-      });
+      categoryFilter.addEventListener("change", renderTable);
     }
 
     // Edit click
@@ -594,17 +564,14 @@
       if (!item) return;
 
       editingId = id;
+
       nameInput.value = item.name || "";
       categoryInput.value = item.category || "";
       populateSubtypeSelect(item.category || "");
       subtypeInput.value = item.subtype || "";
       supplierInput.value = item.supplier || "";
-
-      if (invoiceNumberInput)
-        invoiceNumberInput.value = item.invoiceNumber || "";
-      if (invoiceDateInput)
-        invoiceDateInput.value = item.invoiceDate || "";
-
+      invoiceNumberInput.value = item.invoiceNumber || "";
+      invoiceDateInput.value = item.invoiceDate || "";
       unitInput.value = item.unit || "";
 
       const price = getSafePrice(item);
@@ -613,7 +580,7 @@
       notesInput.value = item.notes || "";
 
       addFormWrapper.classList.remove("hidden");
-      renderHistoryForItem(item);
+      renderPriceHistory(item);
 
       window.scrollTo({
         top: addFormWrapper.offsetTop - 40,
@@ -629,10 +596,8 @@
       const category = categoryInput.value;
       const subtype = subtypeInput.value;
       const supplier = supplierInput.value.trim();
-      const invoiceNumber = invoiceNumberInput
-        ? invoiceNumberInput.value.trim()
-        : "";
-      const invoiceDate = invoiceDateInput ? invoiceDateInput.value : "";
+      const invoiceNumber = invoiceNumberInput.value.trim();
+      const invoiceDate = invoiceDateInput.value || null;
       const unit = unitInput.value;
       const price =
         Number(String(priceInput.value || "").replace(",", ".")) || 0;
@@ -677,9 +642,10 @@
         notes,
         createdAt,
         updatedAt: now,
-        priceHistory: existing ? existing.priceHistory : [],
+        // priceHistory will be handled/merged inside ppStore.upsertPurchase
       };
 
+      // Persist through store
       ppStore.upsertPurchase(obj);
       purchases = ppStore.getPurchases();
 
@@ -689,11 +655,11 @@
 
       editingId = null;
       purchaseForm.reset();
-      clearHistoryUI();
       addFormWrapper.classList.add("hidden");
+      if (historyBlock) historyBlock.classList.add("hidden");
 
       renderRecent();
-      renderTable(searchInput ? searchInput.value : "");
+      renderTable();
     });
   }
 
@@ -702,6 +668,5 @@
   // ===========================
   document.addEventListener("DOMContentLoaded", function () {
     initPurchasesPage();
-    // Recipes + Settings use their own JS (recipes.js + inline script)
   });
 })();
