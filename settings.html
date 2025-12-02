@@ -12,88 +12,38 @@
   <link rel="stylesheet" href="assets/styles.css" />
   <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
   <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-plate-32.png" />
-
-  <style>
-    :root {
-      --green-main: #0b5d3f;
-      --green-dark: #06412a;
-      --bg: #f5f5f5;
-      --text-main: #222222;
-      --text-muted: #555555;
-    }
-
-    * {
-      box-sizing: border-box;
-    }
-
-    body {
-      margin: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background-color: var(--bg);
-      color: var(--text-main);
-    }
-
-    .page {
-      max-width: 960px;
-      margin: 0 auto;
-      padding: 16px 20px 40px;
-    }
-
-    /* SETTINGS PAGE TYPOGRAPHY */
-    .settings-intro h1 {
-      font-size: 30px;
-      margin-bottom: 8px;
-      color: #222222; /* same as other page titles */
-    }
-
-    .settings-intro p {
-      font-size: 14px;
-      color: var(--text-muted);
-      max-width: 720px;
-    }
-
-    .settings-footer-note {
-      margin-top: 24px;
-      font-size: 13px;
-      color: var(--text-muted);
-      max-width: 720px;
-    }
-
-    /* Fix global `input { width:100% }` for checkboxes */
-    input[type="checkbox"] {
-      width: auto;
-    }
-
-    /* Local, isolated styles for Behaviour toggles */
-    .behaviour-toggle-block {
-      margin-bottom: 18px;
-    }
-
-    .behaviour-toggle-line {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin: 0 0 4px 0;
-      cursor: pointer;
-      font-size: 14px;
-      color: #222222;
-    }
-
-    .behaviour-toggle-line input[type="checkbox"] {
-      margin: 0;
-    }
-  </style>
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-plate-16.png.png" />
 </head>
 
 <body>
-  <!-- Shared header -->
-  <div id="site-header"></div>
+  <!-- Header / banner – keep identical layout to other pages -->
+  <header>
+    <div class="header-inner">
+      <div class="hero-banner">
+        <div class="hero-icons">⚖️</div>
+        <div class="hero-title-block">
+          <div class="hero-title-banner">PROFITPLATE</div>
+          <div class="hero-subtitle-banner">Know your profit per plate.</div>
+        </div>
+        <div class="hero-icons">🥩</div>
+      </div>
+
+      <nav>
+        <ul class="nav-list">
+          <li><a class="nav-link" href="index.html">Home</a></li>
+          <li><a class="nav-link" href="purchases.html">Purchases</a></li>
+          <li><a class="nav-link" href="recipes.html">Recipes</a></li>
+          <li><a class="nav-link active" href="settings.html">Settings</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
 
   <div class="page">
     <main>
       <section class="settings-intro">
-        <h1>Settings</h1>
-        <p>
+        <h1 class="hero-title" style="color:#222;">Settings</h1>
+        <p class="hero-subtitle">
           Adjust how ProfitPlate behaves in your kitchen – currency, display options and data controls.
           In the real app, these settings would be stored in your account and synced across devices.
         </p>
@@ -139,24 +89,31 @@
       <section class="settings-box">
         <h2 class="section-title">Behaviour</h2>
 
-        <div class="behaviour-toggle-block">
-          <label class="behaviour-toggle-line" for="setting-autoRecalc">
-            <input type="checkbox" id="setting-autoRecalc" />
-            <span>Auto-recalculate recipes</span>
+        <div class="settings-field">
+          <label class="settings-checkbox">
+            <input
+              type="checkbox"
+              id="setting-autoRecalc"
+              class="settings-checkbox-input"
+            />
+            <span class="settings-checkbox-label">Auto-recalculate recipes</span>
           </label>
           <p class="settings-help">
             When an ingredient price changes in Purchases, update recipe costs automatically.
           </p>
         </div>
 
-        <div class="behaviour-toggle-block">
-          <label class="behaviour-toggle-line" for="setting-showAdvanced">
-            <input type="checkbox" id="setting-showAdvanced" />
-            <span>Show advanced details</span>
+        <div class="settings-field">
+          <label class="settings-checkbox">
+            <input
+              type="checkbox"
+              id="setting-showAdvanced"
+              class="settings-checkbox-input"
+            />
+            <span class="settings-checkbox-label">Show advanced details</span>
           </label>
           <p class="settings-help">
-            Display margin %, batch cost and ingredient breakdown by default.
-            Turn off for a simpler view.
+            Display margin %, batch cost and ingredient breakdown by default. Turn off for a simpler view.
           </p>
         </div>
       </section>
@@ -171,12 +128,17 @@
         <p class="settings-help">
           In the real app, this section would let you import / export data,
           connect multiple devices and reset your account. For now you can clear
-          the local demo data from this browser.
+          the local demo data from this browser or load sample demo data.
         </p>
 
-        <button id="btn-clear-data" class="btn-secondary" type="button">
-          Clear local demo data
-        </button>
+        <div class="settings-sample-actions" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;">
+          <button id="btn-load-sample" class="btn-secondary" type="button">
+            Load sample demo data
+          </button>
+          <button id="btn-clear-data" class="btn-secondary" type="button">
+            Clear local demo data
+          </button>
+        </div>
       </section>
 
       <section class="settings-footer-note">
@@ -188,11 +150,8 @@
     </main>
   </div>
 
-  <script src="assets/header.js"></script>
-  <script>
-    renderHeader('settings');
-  </script>
   <script src="assets/app.js"></script>
+  <script src="assets/sample-data.js"></script>
   <script>
     // Wire settings UI to the tiny brain in app.js
     document.addEventListener("DOMContentLoaded", function () {
@@ -204,6 +163,7 @@
       const autoEl = document.getElementById("setting-autoRecalc");
       const advEl = document.getElementById("setting-showAdvanced");
       const clearBtn = document.getElementById("btn-clear-data");
+      const loadSampleBtn = document.getElementById("btn-load-sample");
 
       function applyToUI(s) {
         if (!s) return;
@@ -251,9 +211,17 @@
             localStorage.removeItem("pp_recipes");
             localStorage.removeItem("pp_settings");
             alert("Local demo data cleared. Reload the page to start fresh.");
+            window.location.reload();
           } catch (e) {
             alert("Could not clear local data. Check your browser settings.");
           }
+        });
+      }
+
+      // Load sample demo data
+      if (loadSampleBtn && typeof window.loadSampleDataIntoLocalStorage === "function") {
+        loadSampleBtn.addEventListener("click", function () {
+          window.loadSampleDataIntoLocalStorage();
         });
       }
     });
