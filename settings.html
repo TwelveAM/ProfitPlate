@@ -58,6 +58,11 @@
       max-width: 720px;
     }
 
+    /* Fix global `input { width:100% }` for checkboxes */
+    input[type="checkbox"] {
+      width: auto;
+    }
+
     /* Local, isolated styles for Behaviour toggles */
     .behaviour-toggle-block {
       margin-bottom: 18px;
