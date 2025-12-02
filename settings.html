@@ -58,18 +58,26 @@
       max-width: 720px;
     }
 
-    /* Local override: inline checkbox + text */
-    .settings-toggle-label {
+    /* Local override for Behaviour checkboxes */
+    .settings-field-toggle {
+      display: block !important; /* kill any flex coming from global styles */
+    }
+
+    .settings-toggle-row {
       display: flex;
       align-items: center;
       gap: 8px;
-      cursor: pointer;
-      margin: 0;
-      font-size: 14px;
-      color: #222222;
+      margin: 0 0 4px 0;
     }
 
-    .settings-toggle-label input[type="checkbox"] {
+    .settings-toggle-row input[type="checkbox"] {
+      margin: 0;
+    }
+
+    .settings-toggle-text {
+      font-size: 14px;
+      color: #222222;
+      cursor: pointer;
       margin: 0;
     }
   </style>
@@ -129,27 +137,31 @@
       <section class="settings-box">
         <h2 class="section-title">Behaviour</h2>
 
-        <div class="settings-field">
-          <label class="settings-toggle-label" for="setting-autoRecalc">
+        <div class="settings-field settings-field-toggle">
+          <div class="settings-toggle-row">
             <input
               type="checkbox"
               id="setting-autoRecalc"
             />
-            <span>Auto-recalculate recipes</span>
-          </label>
+            <label for="setting-autoRecalc" class="settings-toggle-text">
+              Auto-recalculate recipes
+            </label>
+          </div>
           <p class="settings-help">
             When an ingredient price changes in Purchases, update recipe costs automatically.
           </p>
         </div>
 
-        <div class="settings-field">
-          <label class="settings-toggle-label" for="setting-showAdvanced">
+        <div class="settings-field settings-field-toggle">
+          <div class="settings-toggle-row">
             <input
               type="checkbox"
               id="setting-showAdvanced"
             />
-            <span>Show advanced details</span>
-          </label>
+            <label for="setting-showAdvanced" class="settings-toggle-text">
+              Show advanced details
+            </label>
+          </div>
           <p class="settings-help">
             Display margin %, batch cost and ingredient breakdown by default.
             Turn off for a simpler view.
