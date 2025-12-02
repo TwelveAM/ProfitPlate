@@ -42,7 +42,7 @@
     .settings-intro h1 {
       font-size: 30px;
       margin-bottom: 8px;
-      color: #222222; /* black-ish like other pages */
+      color: #222222; /* same as other page titles */
     }
 
     .settings-intro p {
@@ -58,18 +58,18 @@
       max-width: 720px;
     }
 
-    /* Fix checkbox alignment: checkbox next to text */
-    .settings-checkbox {
+    /* Local override: inline checkbox + text */
+    .settings-toggle-label {
       display: flex;
       align-items: center;
       gap: 8px;
-    }
-
-    .settings-checkbox-input {
+      cursor: pointer;
       margin: 0;
+      font-size: 14px;
+      color: #222222;
     }
 
-    .settings-checkbox-label {
+    .settings-toggle-label input[type="checkbox"] {
       margin: 0;
     }
   </style>
@@ -130,32 +130,26 @@
         <h2 class="section-title">Behaviour</h2>
 
         <div class="settings-field">
-          <div class="settings-checkbox">
+          <label class="settings-toggle-label" for="setting-autoRecalc">
             <input
               type="checkbox"
               id="setting-autoRecalc"
-              class="settings-checkbox-input"
             />
-            <label for="setting-autoRecalc" class="settings-checkbox-label">
-              Auto-recalculate recipes
-            </label>
-          </div>
+            <span>Auto-recalculate recipes</span>
+          </label>
           <p class="settings-help">
             When an ingredient price changes in Purchases, update recipe costs automatically.
           </p>
         </div>
 
         <div class="settings-field">
-          <div class="settings-checkbox">
+          <label class="settings-toggle-label" for="setting-showAdvanced">
             <input
               type="checkbox"
               id="setting-showAdvanced"
-              class="settings-checkbox-input"
             />
-            <label for="setting-showAdvanced" class="settings-checkbox-label">
-              Show advanced details
-            </label>
-          </div>
+            <span>Show advanced details</span>
+          </label>
           <p class="settings-help">
             Display margin %, batch cost and ingredient breakdown by default.
             Turn off for a simpler view.
