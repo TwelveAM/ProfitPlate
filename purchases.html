@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta
     name="description"
-    content="Manage your ingredient base for ProfitPlate – purchases, categories, prices and suppliers."
+    content="Manage your ingredient base for ProfitPlate – purchases, categories, prices, suppliers and invoices."
   />
   <link rel="stylesheet" href="assets/styles.css" />
 </head>
@@ -144,7 +144,6 @@
             <input id="item-supplier" type="text" placeholder="e.g. Metro, local butcher..." />
           </div>
 
-          <!-- NEW: invoice number + date, wired to app.js -->
           <div class="settings-field" style="display:flex;gap:12px;flex-wrap:wrap;">
             <div style="flex:1;min-width:160px;">
               <label for="item-invoice-number" class="settings-label">Invoice number</label>
@@ -160,7 +159,6 @@
               <input id="item-invoice-date" type="date" />
             </div>
           </div>
-          <!-- END NEW -->
 
           <div class="settings-field" style="display:flex;gap:12px;flex-wrap:wrap;">
             <div style="flex:1;min-width:160px;">
@@ -297,6 +295,20 @@
       />
     </div>
 
+    <!-- NEW: Category filter row -->
+    <div class="settings-field" style="max-width:260px;margin-top:6px;">
+      <label for="category-filter" class="settings-label">Category filter</label>
+      <select id="category-filter" class="settings-select">
+        <option value="">All categories</option>
+        <option value="Meat &amp; Fish">Meat &amp; Fish</option>
+        <option value="Dairy & Eggs">Dairy &amp; Eggs</option>
+        <option value="Vegetables & Fruit">Vegetables &amp; Fruit</option>
+        <option value="Dry Goods">Dry Goods</option>
+        <option value="Spices & Condiments">Spices &amp; Condiments</option>
+        <option value="Other">Other</option>
+      </select>
+    </div>
+
     <div style="overflow-x:auto;margin-top:8px;">
       <table class="table">
         <thead>
@@ -305,9 +317,7 @@
             <th>Category</th>
             <th>Sub-type</th>
             <th>Supplier</th>
-            <!-- NEW column -->
             <th>Invoice #</th>
-            <!-- END NEW -->
             <th>Unit</th>
             <th>Latest price</th>
             <th>Last updated</th>
