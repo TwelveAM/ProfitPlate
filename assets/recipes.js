@@ -1,4 +1,5 @@
 // recipes.js – logic for Recipes page
+
 (function () {
   // Guard: only run on recipes.html
   if (!document.getElementById("recipes-list")) return;
@@ -7,13 +8,16 @@
   const formWrapper = document.getElementById("recipe-form-wrapper");
   const formTitle = document.getElementById("recipe-form-title");
   const formEl = document.getElementById("recipe-form");
+
   const nameInput = document.getElementById("recipe-name");
   const portionsInput = document.getElementById("recipe-portions");
   const priceInput = document.getElementById("recipe-price");
   const recipeIdInput = document.getElementById("recipe-id");
+
   const ingredientsContainer = document.getElementById("ingredients-container");
   const recipesList = document.getElementById("recipes-list");
   const showArchivedToggle = document.getElementById("show-archived-toggle");
+  const recipeSearchInput = document.getElementById("recipe-search");
 
   // Purchases cached for dropdowns & snapshots
   let purchases = [];
@@ -36,12 +40,14 @@
   function getFormatting() {
     const currency = settings.currency || "EUR";
     const locale = settings.locale === "us" ? "en-US" : "de-DE";
+
     const symbolMap = {
       EUR: "€",
       RON: "lei",
       USD: "$",
       GBP: "£",
     };
+
     const symbol = symbolMap[currency] || currency;
     return { currency, symbol, locale };
   }
@@ -49,10 +55,12 @@
   function formatMoney(value, decimals) {
     const { symbol, locale } = getFormatting();
     const n = Number(value) || 0;
+
     const formatted = n.toLocaleString(locale, {
       minimumFractionDigits: decimals,
       maximumFractionDigits: decimals,
     });
+
     return `${formatted} ${symbol}`;
   }
 
@@ -68,7 +76,6 @@
     let q = Number(qty) || 0;
     const from = normalizeUnit(fromUnit);
     const to = normalizeUnit(toUnit);
-
     if (!from || !to || from === to) return q;
 
     // grams <-> kg
@@ -79,7 +86,7 @@
     if (from === "ml" && to === "l") return q / 1000;
     if (from === "l" && to === "ml") return q * 1000;
 
-    // incompatible: just return original as a fallback
+    // incompatible: just return original
     return q;
   }
 
@@ -133,6 +140,7 @@
 
     const unitSelect = document.createElement("select");
     unitSelect.className = "form-select";
+
     ["kg", "gr", "L", "ml", "pcs", "tray", "box"].forEach((u) => {
       const opt = document.createElement("option");
       opt.value = u.toLowerCase();
@@ -168,6 +176,7 @@
 
   // ======== Show / hide form ========
   function clearRecipeForm() {
+    if (!formEl) return;
     nameInput.value = "";
     portionsInput.value = "";
     priceInput.value = "";
@@ -177,6 +186,7 @@
 
   function showRecipeForm(editId) {
     clearRecipeForm();
+
     const store = getStore();
     if (!store) return;
 
@@ -190,9 +200,8 @@
         if (existing.sellingPrice != null) {
           priceInput.value = existing.sellingPrice;
         }
-        (existing.ingredients || []).forEach((ing) =>
-          addIngredientRow(ing)
-        );
+
+        (existing.ingredients || []).forEach((ing) => addIngredientRow(ing));
       } else {
         formTitle.textContent = "Add a new recipe";
         addIngredientRow();
@@ -234,6 +243,7 @@
     );
 
     const ingredients = [];
+
     for (const row of ingRows) {
       const selects = row.getElementsByTagName("select");
       const inputs = row.getElementsByTagName("input");
@@ -285,6 +295,7 @@
   function computeRecipeCosts(recipe) {
     let batchCost = 0;
     const ingredientsDetailed = [];
+
     const useLivePrices = autoRecalc;
 
     (recipe.ingredients || []).forEach((ing) => {
@@ -292,6 +303,7 @@
       if (!p && ing.pricePerUnitSnapshot == null) return;
 
       let pricePerUnit = 0;
+
       if (useLivePrices) {
         pricePerUnit = Number(p && p.pricePerUnit) || 0;
       } else {
@@ -387,7 +399,7 @@
     renderRecipes();
   }
 
-  // ======== Render recipes ========
+  // ======== Render recipes (with search) ========
   function renderRecipes() {
     const store = getStore();
     if (!store) return;
@@ -399,9 +411,17 @@
       ? showArchivedToggle.checked
       : false;
 
-    const visible = allRecipes.filter(
-      (r) => showArchived || !r.archived
-    );
+    const search = recipeSearchInput
+      ? recipeSearchInput.value.toLowerCase()
+      : "";
+
+    let visible = allRecipes.filter((r) => showArchived || !r.archived);
+
+    if (search) {
+      visible = visible.filter((r) =>
+        (r.name || "").toLowerCase().includes(search)
+      );
+    }
 
     recipesList.innerHTML = "";
 
@@ -410,7 +430,7 @@
       p.className = "text-muted";
       p.textContent = showArchived
         ? "No archived recipes yet."
-        : 'No active recipes yet.\nClick “Add recipe” to create your first one.';
+        : 'No matching recipes.\nTry a different name or clear the search.';
       recipesList.appendChild(p);
       return;
     }
@@ -469,17 +489,13 @@
       archiveBtn.type = "button";
       archiveBtn.className = "btn-secondary";
       archiveBtn.textContent = recipe.archived ? "Unarchive" : "Archive";
-      archiveBtn.addEventListener("click", () =>
-        toggleArchive(recipe.id)
-      );
+      archiveBtn.addEventListener("click", () => toggleArchive(recipe.id));
 
       const editBtn = document.createElement("button");
       editBtn.type = "button";
       editBtn.className = "btn-secondary";
       editBtn.textContent = "Edit";
-      editBtn.addEventListener("click", () =>
-        showRecipeForm(recipe.id)
-      );
+      editBtn.addEventListener("click", () => showRecipeForm(recipe.id));
 
       right.appendChild(badge);
       right.appendChild(archiveBtn);
@@ -500,7 +516,6 @@
             costs.costPerPortion,
             2
           )}`;
-
         if (recipe.sellingPrice != null) {
           summaryText +=
             ` • Selling price: ${formatMoney(
@@ -537,7 +552,6 @@
         tableWrapper.style.marginTop = "12px";
 
         const table = document.createElement("table");
-
         const thead = document.createElement("thead");
         thead.innerHTML = `
           <tr>
@@ -581,6 +595,7 @@
   // ======== Form submit ========
   formEl.addEventListener("submit", (e) => {
     e.preventDefault();
+
     const store = getStore();
     if (!store) return;
 
@@ -608,6 +623,10 @@
 
     if (showArchivedToggle) {
       showArchivedToggle.addEventListener("change", renderRecipes);
+    }
+
+    if (recipeSearchInput) {
+      recipeSearchInput.addEventListener("input", renderRecipes);
     }
 
     // ESC closes recipe form
