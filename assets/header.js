@@ -149,7 +149,6 @@ nav {
 </header>
     `;
 
-    // Mark active tab
     host.querySelectorAll(".nav-link").forEach((link) => {
       const page = link.getAttribute("data-page");
       if (page === activePage) {
