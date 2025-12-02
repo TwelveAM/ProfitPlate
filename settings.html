@@ -42,7 +42,7 @@
     .settings-intro h1 {
       font-size: 30px;
       margin-bottom: 8px;
-      color: var(--green-main);
+      color: #222222; /* black-ish like other pages */
     }
 
     .settings-intro p {
@@ -56,6 +56,21 @@
       font-size: 13px;
       color: var(--text-muted);
       max-width: 720px;
+    }
+
+    /* Fix checkbox alignment: checkbox next to text */
+    .settings-checkbox {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .settings-checkbox-input {
+      margin: 0;
+    }
+
+    .settings-checkbox-label {
+      margin: 0;
     }
   </style>
 </head>
