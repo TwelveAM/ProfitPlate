@@ -12,8 +12,15 @@
   <link rel="stylesheet" href="assets/styles.css" />
   <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-plate-32.png" />
 
-  <!-- Print tweaks ONLY for this page -->
   <style>
+    /* Same content container layout as Settings page */
+    .page {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 16px 20px 40px;
+    }
+
+    /* Print tweaks ONLY for this page */
     @media print {
       @page {
         size: A4;
@@ -24,8 +31,8 @@
         background: #ffffff;
       }
 
-      /* Hide UI chrome when printing */
-      #site-header,
+      /* Hide header/nav + form + buttons when printing */
+      header,
       #add-item-form,
       .btn,
       .btn-primary,
@@ -54,23 +61,24 @@
 </head>
 
 <body>
-  <!-- Shared header from header.js (banner + nav) -->
+  <!-- Shared header from header.js -->
   <div id="site-header"></div>
 
-  <div class="page" style="max-width:960px;margin:0 auto;padding:16px 20px 40px;">
+  <div class="page">
     <main>
       <h1>Purchases</h1>
-      <p style="font-size:14px;color:#555;max-width:720px;">
+      <p class="hero-subtitle" style="max-width: 720px;">
         This is your ingredient base. Add items you buy, organize them by category, and keep supplier prices
         up to date. Recipes will use everything you add here.
       </p>
 
-      <div style="margin-top:20px;margin-bottom:10px;">
+      <!-- Add item button -->
+      <div style="margin-top: 20px; margin-bottom: 10px;">
         <button type="button" class="btn btn-primary" onclick="toggleAddForm()">Add item manually</button>
       </div>
 
       <!-- Add / edit purchase form -->
-      <div id="add-item-form" class="hidden" style="margin-top:10px;">
+      <div id="add-item-form" class="hidden" style="margin-top: 10px;">
         <div class="settings-box">
           <h2 class="section-title">Add a new purchase item</h2>
 
@@ -80,8 +88,8 @@
               <input id="item-name" type="text" placeholder="e.g. Butter 82% 1kg" />
             </div>
 
-            <div class="settings-field" style="display:flex;gap:12px;flex-wrap:wrap;">
-              <div style="flex:1;min-width:160px;">
+            <div class="settings-field" style="display: flex; gap: 12px; flex-wrap: wrap;">
+              <div style="flex: 1; min-width: 160px;">
                 <label for="item-category" class="settings-label">Category</label>
                 <select id="item-category" class="settings-select">
                   <option value="">Select...</option>
@@ -94,7 +102,7 @@
                 </select>
               </div>
 
-              <div style="flex:1;min-width:160px;">
+              <div style="flex: 1; min-width: 160px;">
                 <label for="item-subtype" class="settings-label">Sub-type</label>
                 <select id="item-subtype" class="settings-select">
                   <option value="">Select...</option>
@@ -107,24 +115,24 @@
               <input id="item-supplier" type="text" placeholder="e.g. Metro, local butcher..." />
             </div>
 
-            <div class="settings-field" style="display:flex;gap:12px;flex-wrap:wrap;">
-              <div style="flex:1;min-width:160px;">
-                <label for="invoice-number" class="settings-label">Invoice number</label>
+            <div class="settings-field" style="display: flex; gap: 12px; flex-wrap: wrap;">
+              <div style="flex: 1; min-width: 160px;">
+                <label for="item-invoice-number" class="settings-label">Invoice number</label>
                 <input
-                  id="invoice-number"
+                  id="item-invoice-number"
                   type="text"
                   placeholder="e.g. 2025-0456 or Ticket #32"
                 />
               </div>
 
-              <div style="flex:1;min-width:160px;">
-                <label for="invoice-date" class="settings-label">Invoice date</label>
-                <input id="invoice-date" type="date" />
+              <div style="flex: 1; min-width: 160px;">
+                <label for="item-invoice-date" class="settings-label">Invoice date</label>
+                <input id="item-invoice-date" type="date" />
               </div>
             </div>
 
-            <div class="settings-field" style="display:flex;gap:12px;flex-wrap:wrap;">
-              <div style="flex:1;min-width:160px;">
+            <div class="settings-field" style="display: flex; gap: 12px; flex-wrap: wrap;">
+              <div style="flex: 1; min-width: 160px;">
                 <label for="item-unit" class="settings-label">Unit (for recipes)</label>
                 <select id="item-unit" class="settings-select">
                   <option value="">Select...</option>
@@ -136,7 +144,7 @@
                 </select>
               </div>
 
-              <div style="flex:1;min-width:160px;">
+              <div style="flex: 1; min-width: 160px;">
                 <label for="item-price" class="settings-label">Purchase price (per recipe unit)</label>
                 <input
                   id="item-price"
@@ -147,20 +155,20 @@
               </div>
             </div>
 
-            <hr style="margin:16px 0;" />
+            <hr style="margin: 16px 0;" />
 
-            <h3 style="margin:0 0 4px;font-size:15px;">Or use pack helper</h3>
-            <p class="settings-help" style="margin-top:2px;">
+            <h3 style="margin: 0 0 4px; font-size: 15px;">Or use pack helper</h3>
+            <p class="settings-help" style="margin-top: 2px;">
               Example: 100 gr for 5 € → auto-converts price per unit.
             </p>
 
-            <div class="settings-field" style="display:flex;gap:12px;flex-wrap:wrap;margin-top:10px;">
-              <div style="flex:1;min-width:120px;">
+            <div class="settings-field" style="display: flex; gap: 12px; flex-wrap: wrap; margin-top: 10px;">
+              <div style="flex: 1; min-width: 120px;">
                 <label for="pack-qty" class="settings-label">Pack quantity</label>
                 <input id="pack-qty" type="number" step="0.01" placeholder="e.g. 100" />
               </div>
 
-              <div style="flex:1;min-width:120px;">
+              <div style="flex: 1; min-width: 120px;">
                 <label for="pack-unit" class="settings-label">Pack unit</label>
                 <select id="pack-unit" class="settings-select">
                   <option value="">unit</option>
@@ -172,16 +180,16 @@
                 </select>
               </div>
 
-              <div style="flex:1;min-width:120px;">
+              <div style="flex: 1; min-width: 120px;">
                 <label for="pack-price" class="settings-label">Pack price (€)</label>
                 <input id="pack-price" type="number" step="0.01" placeholder="e.g. 5.00" />
               </div>
 
-              <div style="display:flex;align-items:flex-end;">
+              <div style="display: flex; align-items: flex-end;">
                 <button
                   type="button"
                   class="btn btn-secondary"
-                  style="margin-top:22px;"
+                  style="margin-top: 22px;"
                   onclick="fillPriceFromPack()"
                 >
                   Use pack
@@ -202,17 +210,17 @@
             <div
               id="price-history-block"
               class="settings-box hidden"
-              style="margin-top:16px;background:#fafafa;border:1px dashed #ddd;"
+              style="margin-top: 16px; background: #fafafa; border: 1px dashed #ddd;"
             >
-              <h3 class="section-title" style="font-size:15px;margin-bottom:8px;">Price history</h3>
-              <p class="settings-help" style="margin-top:0;margin-bottom:8px;">
+              <h3 class="section-title" style="font-size: 15px; margin-bottom: 8px;">Price history</h3>
+              <p class="settings-help" style="margin-top: 0; margin-bottom: 8px;">
                 Last 10 recorded price changes for this ingredient (newest first).
               </p>
-              <div style="overflow-x:auto;">
-                <table class="table" style="font-size:13px;">
+              <div style="overflow-x: auto;">
+                <table class="table" style="font-size: 13px;">
                   <thead>
                     <tr>
-                      <th style="width:40%;">Date</th>
+                      <th style="width: 40%;">Date</th>
                       <th>Price / unit</th>
                     </tr>
                   </thead>
@@ -221,7 +229,7 @@
               </div>
             </div>
 
-            <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:18px;">
+            <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 18px;">
               <button type="button" class="btn btn-secondary" onclick="toggleAddForm()">Cancel</button>
               <button type="submit" class="btn btn-primary">Save item</button>
             </div>
@@ -229,42 +237,61 @@
         </div>
       </div>
 
-      <hr style="margin:24px 0 16px;" />
+      <hr style="margin: 24px 0 16px;" />
 
       <!-- Recently updated -->
       <h2>Recently updated</h2>
-      <div id="recent-list" style="margin-top:10px;">
+      <div id="recent-list" style="margin-top: 10px;">
         <!-- Filled by app.js -->
       </div>
 
-      <hr style="margin:24px 0 16px;" />
+      <hr style="margin: 24px 0 16px;" />
 
       <!-- All ingredients -->
       <div
         style="
-          display:flex;
-          justify-content:space-between;
-          align-items:center;
-          gap:12px;
-          margin-bottom:8px;
-          flex-wrap:wrap;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          gap: 12px;
+          margin-bottom: 8px;
         "
       >
-        <h2 style="margin:0;">All ingredients</h2>
+        <h2 style="margin: 0;">All ingredients</h2>
 
-        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <!-- Print button -->
+        <button
+          type="button"
+          class="btn btn-secondary"
+          onclick="window.print()"
+          title="Print an A4-friendly list of all ingredients"
+        >
+          Print A4 list
+        </button>
+      </div>
+
+      <!-- Filters -->
+      <div
+        style="
+          display: flex;
+          flex-wrap: wrap;
+          gap: 12px;
+          align-items: center;
+          margin-bottom: 8px;
+        "
+      >
+        <div style="flex: 1 1 220px; min-width: 200px;">
+          <label for="search-input" class="settings-label" style="margin-bottom: 4px;">Filter</label>
           <input
             id="search-input"
             type="text"
             placeholder="Search by name, category, supplier, invoice..."
-            style="max-width:260px;"
           />
+        </div>
 
-          <select
-            id="category-filter"
-            class="settings-select"
-            style="min-width:160px;"
-          >
+        <div style="flex: 0 0 220px; min-width: 180px;">
+          <label for="category-filter" class="settings-label" style="margin-bottom: 4px;">Category filter</label>
+          <select id="category-filter" class="settings-select">
             <option value="">All categories</option>
             <option value="Meat &amp; Fish">Meat &amp; Fish</option>
             <option value="Dairy & Eggs">Dairy &amp; Eggs</option>
@@ -273,22 +300,34 @@
             <option value="Spices & Condiments">Spices &amp; Condiments</option>
             <option value="Other">Other</option>
           </select>
-
-          <button
-            type="button"
-            class="btn btn-secondary"
-            onclick="window.print()"
-            title="Print an A4-friendly list of all ingredients"
-          >
-            Print A4 list
-          </button>
         </div>
       </div>
 
-      <div style="overflow-x:auto;margin-top:8px;">
+      <div style="overflow-x: auto; margin-top: 8px;">
         <table class="table">
           <thead>
             <tr>
               <th>Ingredient</th>
               <th>Category</th>
-              <
+              <th>Sub-type</th>
+              <th>Supplier</th>
+              <th>Invoice #</th>
+              <th>Unit</th>
+              <th>Latest price</th>
+              <th>Last updated</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="purchase-table"></tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+
+  <script src="assets/header.js"></script>
+  <script>
+    renderHeader('purchases');
+  </script>
+  <script src="assets/app.js"></script>
+</body>
+</html>
