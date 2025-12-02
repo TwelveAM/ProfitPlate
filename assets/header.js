@@ -1,5 +1,5 @@
 // assets/header.js
-// Single shared header/banner for all pages
+// Single shared header/banner for all ProfitPlate pages
 
 (function () {
   function ensureHeaderStyles() {
