@@ -1,4 +1,4 @@
-/* ================================ Header + hero banner ================================ */
+/* ================================ Header + hero banner =================================== */
 
 header {
   background: transparent;
@@ -64,7 +64,6 @@ header {
   margin: 0;
 }
 
-/* We keep using .nav-link but adapt it to the pill style */
 .nav-link {
   font-size: 16px;
   color: #333;
@@ -78,13 +77,14 @@ header {
   background: #e3e7ea;
 }
 
+/* Support both .active and .nav-link-active */
 .nav-link.active,
 .nav-link-active {
   background: #0b6e46;
   color: #fff !important;
 }
 
-/* ================================ Global resets & layout ================================ */
+/* ================================ Global resets & layout =================================== */
 
 body {
   font-family: Inter, sans-serif;
@@ -100,7 +100,7 @@ body {
   padding: 40px 20px;
 }
 
-/* ================================ Legacy .nav (if used anywhere) ================================ */
+/* ================================ Legacy nav (if used anywhere) =================================== */
 
 .nav {
   display: flex;
@@ -108,9 +108,7 @@ body {
   margin-bottom: 42px;
 }
 
-/* (nav-link styles already defined above) */
-
-/* ================================ Inputs – universal rounded style ================================ */
+/* ================================ Inputs – universal rounded style =================================== */
 
 input,
 select,
@@ -137,7 +135,7 @@ textarea:focus {
   width: 110px;
 }
 
-/* ================================ Buttons ================================ */
+/* ================================ Buttons =================================== */
 
 button,
 .btn {
@@ -177,7 +175,7 @@ button.btn-primary {
   background: #c73d3d;
 }
 
-/* ================================ Pills (Category / Sub-type) ================================ */
+/* ================================ Pills (Category / Sub-type) =================================== */
 
 .filter-pill {
   display: inline-block;
@@ -199,7 +197,7 @@ button.btn-primary {
   color: #fff !important;
 }
 
-/* ================================ “Updated recently” card ================================ */
+/* ================================ “Updated recently” card =================================== */
 
 .card-updated {
   background: #fff;
@@ -223,7 +221,7 @@ button.btn-primary {
   font-size: 12px;
 }
 
-/* ================================ Tables ================================ */
+/* ================================ Tables =================================== */
 
 table {
   width: 100%;
@@ -254,7 +252,7 @@ tr:last-child td {
   border-bottom: none;
 }
 
-/* ================================ Recipe blocks ================================ */
+/* ================================ Recipe blocks =================================== */
 
 .recipe-box {
   background: #fff;
@@ -276,7 +274,7 @@ tr:last-child td {
   color: #555;
 }
 
-/* ================================ Add recipe form ================================ */
+/* ================================ Add recipe form =================================== */
 
 .recipe-form-row {
   display: flex;
@@ -313,7 +311,7 @@ tr:last-child td {
   background: #c73d3d;
 }
 
-/* ================================ Settings page ================================ */
+/* ================================ Settings page =================================== */
 
 .settings-box {
   background: #fff;
@@ -336,7 +334,7 @@ tr:last-child td {
   margin-top: 10px;
 }
 
-/* ================================ Misc ================================ */
+/* ================================ Misc =================================== */
 
 hr {
   border: none;
