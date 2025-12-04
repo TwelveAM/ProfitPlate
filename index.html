@@ -1,57 +1,47 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>ProfitPlate - Dashboard</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/style.css">
-  <link rel="stylesheet" href="assets/tour.css">
+    <meta charset="UTF-8">
+    <title>ProfitPlate</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🥗</text></svg>">
+    <link rel="stylesheet" href="assets/style.css">
 </head>
-<body class="bg-light">
+<body>
 
-  <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
-    <div class="container">
-      <a class="navbar-brand fw-bold" href="index.html">ProfitPlate 👨‍🍳</a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="navbarNav">
-        <ul class="navbar-nav ms-auto">
-          <li class="nav-item"><a class="nav-link active" href="index.html">Dashboard</a></li>
-          <li class="nav-item"><a class="nav-link" href="purchases.html">Purchases</a></li>
-          <li class="nav-item"><a class="nav-link" href="recipes.html">Recipes</a></li>
-          <li class="nav-item"><a class="nav-link" href="settings.html">Settings</a></li>
-        </ul>
-      </div>
+<nav class="navbar">
+    <div class="nav-brand">🥗 ProfitPlate</div>
+    <div class="nav-links">
+        <a href="index.html" class="active">Dashboard</a>
+        <a href="purchases.html">Ingredients</a>
+        <a href="recipes.html">Recipes</a>
+        <a href="settings.html">Settings</a>
     </div>
-  </nav>
+</nav>
 
-  <div class="container">
-    <div class="row justify-content-center">
-      <div class="col-md-8 text-center mt-5">
-        <h1 class="display-5 fw-bold text-dark mb-3">Welcome, Chef!</h1>
-        <p class="lead text-muted mb-5">
-          Control your food costs, calculate margins, and manage your kitchen effortlessly.
-        </p>
-
-        <div class="d-grid gap-3 d-sm-flex justify-content-sm-center">
-          <a href="purchases.html" class="btn btn-primary btn-lg px-4 gap-3">Manage Ingredients</a>
-          <a href="recipes.html" class="btn btn-outline-secondary btn-lg px-4">View Recipes</a>
-        </div>
-
-        <div class="mt-5">
-          <button class="btn btn-link text-decoration-none text-success fw-bold">
-            See how it works <span style="font-size:1.2em;">👉</span>
-          </button>
-        </div>
-      </div>
+<div class="container">
+    <h1>Welcome back</h1>
+    
+    <div class="card">
+        <p>ProfitPlate helps you calculate food costs accurately.</p>
+        <p><strong>1. Ingredients:</strong> Enter your purchases from invoices.</p>
+        <p><strong>2. Recipes:</strong> Build dishes using those ingredients.</p>
+        <p><strong>3. Settings:</strong> Configure your currency and preferences.</p>
     </div>
-  </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="assets/app.js"></script>
-  <script src="assets/tour.js"></script>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
+        <div class="card" style="text-align: center;">
+            <h3>🛒 Ingredients</h3>
+            <p class="text-muted">Manage prices & suppliers</p>
+            <a href="purchases.html" class="btn-primary">Go to Ingredients</a>
+        </div>
+        <div class="card" style="text-align: center;">
+            <h3>🍲 Recipes</h3>
+            <p class="text-muted">Calculate food cost & margins</p>
+            <a href="recipes.html" class="btn-primary">Go to Recipes</a>
+        </div>
+    </div>
+</div>
+
+<script src="assets/app.js"></script>
 </body>
 </html>
