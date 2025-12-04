@@ -2,9 +2,10 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Settings - ProfitPlate</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🥗</text></svg>">
     <link rel="stylesheet" href="assets/style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/shepherd.js@10.0.1/dist/css/shepherd.css"/>
 </head>
 <body>
 
@@ -19,7 +20,9 @@
 </nav>
 
 <div class="container">
-    <h1>Settings</h1>
+    <div class="page-header">
+        <h1>Application Settings</h1>
+    </div>
     
     <div class="card">
         <form id="settings-form">
@@ -47,71 +50,29 @@
                     <input type="checkbox" id="autoRecalc">
                     <span>Auto-update recipe costs when ingredient prices change</span>
                 </div>
-                <p class="text-muted small">
-                    If unchecked, recipe costs are "frozen" at the moment you created the recipe.
-                </p>
             </div>
 
             <div class="form-group">
-                <label>Recipe View</label>
+                <label>Recipe Display</label>
                 <div class="toggle-wrapper">
                     <input type="checkbox" id="showAdvanced">
-                    <span>Show advanced details (margins, full breakdown) on cards</span>
+                    <span>Show advanced details (margins, charts) on cards</span>
                 </div>
             </div>
 
-            <button type="submit" class="btn-primary">Save Settings</button>
+            <button type="submit" class="btn-primary">Save Preferences</button>
         </form>
     </div>
 
-    <div class="card" style="border-left: 5px solid var(--danger);">
-        <h3>Data Management</h3>
-        <p>Your data is stored locally in your browser.</p>
+    <div class="card" style="margin-top: 2rem; border: 1px solid var(--danger);">
+        <h3 style="color: var(--danger);">⚠️ Danger Zone</h3>
+        <p>This action cannot be undone. It will delete all your ingredients and recipes.</p>
         <button class="btn-danger" id="clear-data-btn">Clear All Data</button>
     </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/shepherd.js@10.0.1/dist/js/shepherd.min.js"></script>
 <script src="assets/app.js"></script>
-<script>
-    // Logic specific to settings page
-    document.addEventListener('DOMContentLoaded', () => {
-        // Load settings from app.js API
-        const settings = window.loadSettings();
-
-        const currencyEl = document.getElementById('currency');
-        const localeEl = document.getElementById('locale');
-        const autoRecalcEl = document.getElementById('autoRecalc');
-        const showAdvancedEl = document.getElementById('showAdvanced');
-
-        if(settings) {
-            currencyEl.value = settings.currency || 'EUR';
-            localeEl.value = settings.locale || 'eu';
-            autoRecalcEl.checked = settings.autoRecalc !== false;
-            showAdvancedEl.checked = settings.showAdvanced !== false;
-        }
-
-        // Save
-        document.getElementById('settings-form').addEventListener('submit', (e) => {
-            e.preventDefault();
-            const newSettings = {
-                currency: currencyEl.value,
-                locale: localeEl.value,
-                autoRecalc: autoRecalcEl.checked,
-                showAdvanced: showAdvancedEl.checked
-            };
-            window.saveSettings(newSettings);
-            alert('Settings saved!');
-        });
-
-        // Clear Data
-        document.getElementById('clear-data-btn').addEventListener('click', () => {
-            if(confirm('Are you sure? This will delete all ingredients and recipes. This cannot be undone.')) {
-                localStorage.clear();
-                alert('Data cleared.');
-                location.reload();
-            }
-        });
-    });
-</script>
+<script src="assets/tour.js"></script>
 </body>
 </html>
