@@ -372,13 +372,10 @@
     renderCurrentStep();
   }
 
-  document.addEventListener("DOMContentLoaded", function () {
-    // Hook the “See how it works” button on home
-    const startBtn = document.getElementById("pp-how-it-works");
-    if (howBtn && PAGE_ID === "home") {
-      howBtn.addEventListener("click", function () {
-        startTourFromBeginning();
-      });
+  document.addEventListener("DOMContentLoaded", () => {
+    const btn = document.getElementById("btn-how-it-works");
+    if (btn) btn.addEventListener("click", startTour);
+});
     }
 
     // If the user was in the middle of the tour, resume
