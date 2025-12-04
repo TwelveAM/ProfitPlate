@@ -1,194 +1,109 @@
 // assets/tour.js
-// Multi-page guided tour for ProfitPlate.
-// - Starts when the user clicks "See how it works" on Home.
-// - Moves through Home -> Purchases -> Recipes -> Settings.
-// - Uses localStorage to remember where the user is in the tour.
-// - NO changes to layout, header, or existing app logic.
-
 (function () {
-  const STORAGE_KEY = "pp_tour_state_v1";
-  const HOW_IT_WORKS_ID = "pp-how-it-works";
+  const TOUR_STATE_KEY = "pp_tour_state_v1";
 
-  // --- Identify current page ---------------------------------------
-  function getPageId() {
-    const path = (location.pathname || "").toLowerCase();
-
+  // Figure out which page we are on
+  const PAGE_ID = (function () {
+    const path = window.location.pathname;
     if (path.endsWith("purchases.html")) return "purchases";
     if (path.endsWith("recipes.html")) return "recipes";
     if (path.endsWith("settings.html")) return "settings";
-    // treat index.html or / as home
     return "home";
+  })();
+
+  function pageToUrl(page) {
+    switch (page) {
+      case "home":
+        return "index.html";
+      case "purchases":
+        return "purchases.html";
+      case "recipes":
+        return "recipes.html";
+      case "settings":
+        return "settings.html";
+      default:
+        return "index.html";
+    }
   }
 
-  const CURRENT_PAGE = getPageId();
+  // Tour steps across pages
+  const STEPS = [
+    // HOME
+    {
+      id: "home-intro",
+      page: "home",
+      selector: ".hero-banner",
+      title: "Welcome to ProfitPlate",
+      text:
+        "This is a static prototype that shows how you’ll track real dish cost and margin. Let’s do a quick tour.",
+      panelPlacement: "bottom",
+    },
+    {
+      id: "home-nav",
+      page: "home",
+      selector: "nav .nav-link[href='purchases.html']",
+      title: "Three main areas",
+      text:
+        "Use these tabs to move between Purchases (ingredient costs), Recipes (dishes), and Settings (currency & behaviour).",
+      panelPlacement: "bottom",
+    },
 
-  // --- Tour config per page ----------------------------------------
-  // panelPosition: "bottom" | "top" | "center"
-  // nextPage: when present, Next will redirect to that page and continue tour there.
-  const TOUR_STEPS = {
-    home: [
-      {
-        id: "welcome",
-        title: "Welcome to ProfitPlate",
-        body:
-          "ProfitPlate helps you track real ingredient costs and profit per plate — without living in spreadsheets.",
-        targetSelector: null,
-        panelPosition: "bottom",
-      },
-      {
-        id: "home-header",
-        title: "Your kitchen cockpit",
-        body:
-          "Use this green bar to switch between Purchases, Recipes and Settings. Think of it as your kitchen control panel.",
-        targetSelector: ".hero-banner, #site-header",
-        panelPosition: "bottom",
-      },
-      {
-        id: "home-body",
-        title: "What ProfitPlate does for you",
-        body:
-          "This section explains the idea: add ingredients once, then build recipes and see cost per portion and margin instantly.",
-        targetSelector: "main h1, main h2",
-        panelPosition: "top",
-      },
-      {
-        id: "to-purchases",
-        title: "Let’s start where the money goes out",
-        body:
-          "First stop: Purchases. There you store all your ingredients — names, suppliers, pack size and price.",
-        targetSelector: 'nav a[href="purchases.html"], nav',
-        panelPosition: "bottom",
-        nextPage: "purchases",
-        nextIndex: 0,
-      },
-    ],
+    // PURCHASES
+    {
+      id: "purchases-table",
+      page: "purchases",
+      selector: "table",
+      title: "Latest price always visible",
+      text:
+        "Each row is an ingredient with its latest price. When you change prices here, any recipes using that ingredient will update automatically.",
+      panelPlacement: "bottom",
+    },
 
-    purchases: [
-      {
-        id: "purchases-title",
-        title: "Your ingredient base",
-        body:
-          "Every ingredient you buy lives here. Recipes will only use items you’ve added on this page.",
-        targetSelector: "h1",
-        panelPosition: "top",
-      },
-      {
-        id: "purchases-add",
-        title: "Add items from your invoices",
-        body:
-          'Use the "Add item manually" button to record new ingredients. Pack helper will convert weird pack sizes into clean €/kg, €/g, etc.',
-        targetSelector:
-          'button.btn.btn-primary, button.btn-primary, button[type="button"]',
-        panelPosition: "bottom",
-      },
-      {
-        id: "purchases-filter",
-        title: "Find stuff fast",
-        body:
-          "The search and category filter help you find ingredients by name, supplier or category when your list gets long.",
-        targetSelector: "#search-input, input[type='search']",
-        panelPosition: "top",
-      },
-      {
-        id: "purchases-table",
-        title: "Latest price always visible",
-        body:
-          "Each row is an ingredient with its latest price. When you change prices here, recipes will update automatically.",
-        targetSelector: "#purchase-table, table",
-        panelPosition: "top",
-      },
-      {
-        id: "to-recipes",
-        title: "Next: turn ingredients into dishes",
-        body:
-          "Now let’s jump to Recipes and see how your ingredients become real menu items with cost and margin.",
-        targetSelector: 'nav a[href="recipes.html"], nav',
-        panelPosition: "bottom",
-        nextPage: "recipes",
-        nextIndex: 0,
-      },
-    ],
+    // RECIPES
+    {
+      id: "recipes-overview",
+      page: "recipes",
+      selector: ".page h1, .page h2",
+      title: "Recipes: cost per dish and margin",
+      text:
+        "This is where you’ll see each dish on your menu, its cost per portion, selling price, and profit margin.",
+      panelPlacement: "bottom",
+    },
 
-    recipes: [
-      {
-        id: "recipes-title",
-        title: "Your menu overview",
-        body:
-          "Each recipe here is a menu item: pasta, burgers, desserts, whatever you sell. ProfitPlate shows cost per portion and margin.",
-        targetSelector: "h1",
-        panelPosition: "top",
-      },
-      {
-        id: "recipes-add",
-        title: "Build a new recipe",
-        body:
-          'Click "Add recipe" to compose a dish using your Purchases. Pick ingredients, set portions and selling price.',
-        targetSelector:
-          'button.btn.btn-primary, button.btn-primary, button[type="button"]',
-        panelPosition: "bottom",
-      },
-      {
-        id: "recipes-search",
-        title: "Search your menu",
-        body:
-          "Use the search box to find dishes quickly when your menu grows — perfect for checking cost before changing prices.",
-        targetSelector: "input[type='search'], input[placeholder*='Search recipes']",
-        panelPosition: "top",
-      },
-      {
-        id: "to-settings",
-        title: "Last stop: Settings",
-        body:
-          "Here you control currency, number format and how aggressively recipes auto-recalculate when prices change.",
-        targetSelector: 'nav a[href="settings.html"], nav',
-        panelPosition: "bottom",
-        nextPage: "settings",
-        nextIndex: 0,
-      },
-    ],
+    // SETTINGS – behaviour toggles
+    {
+      id: "settings-behaviour",
+      page: "settings",
+      selector: "#settings-behaviour",
+      title: "Behaviour: smart updates",
+      text:
+        "These toggles control whether recipes auto-recalculate when ingredient prices change, and whether to show advanced cost breakdowns by default.",
+      panelPlacement: "bottom",
+    },
 
-    settings: [
-      {
-        id: "settings-title",
-        title: "Adjust ProfitPlate to your kitchen",
-        body:
-          "Change currency, number format and language placeholders here. In a real app these would sync across all your devices.",
-        targetSelector: "h1",
-        panelPosition: "top",
-      },
-      {
-        id: "settings-behaviour",
-        title: "Behaviour: smart updates",
-        body:
-          "These toggles control whether recipes auto-recalculate when ingredient prices change, and whether to show advanced cost breakdowns.",
-        targetSelector: ".settings-box:nth-of-type(2), .settings-box",
-        panelPosition: "bottom",
-      },
-      {
-        id: "settings-data",
-        title: "Data & local storage",
-        body:
-          "For now everything lives only in your browser — no server, no cloud. In the future this is where imports, exports and backups will live.",
-        targetSelector: ".settings-box:nth-of-type(3), .settings-box",
-        panelPosition: "bottom",
-      },
-      {
-        id: "finish",
-        title: "Tour finished",
-        body:
-          "You’ve seen the core flow: Purchases → Recipes → Settings. Add a few real ingredients and build your first recipe to see ProfitPlate in action.",
-        targetSelector: null,
-        panelPosition: "center",
-      },
-    ],
-  };
+    // SETTINGS – data & local storage + demo CTA
+    {
+      id: "settings-data",
+      page: "settings",
+      selector: "#settings-data",
+      title: "Data & local storage",
+      text:
+        "Right now everything lives only in your browser — no server, no cloud. In a future version, this is where imports, exports and backups will live.",
+      panelPlacement: "bottom",
+      showDemoButton: true, // show “Load demo data” here
+    },
+  ];
 
-  // --- State helpers ------------------------------------------------
-  function loadState() {
+  // DOM elements for overlay
+  let backdropEl = null;
+  let highlightEl = null;
+  let panelEl = null;
+  let currentIndex = null;
+
+  function readState() {
     try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (!raw) return null;
-      return JSON.parse(raw);
+      const raw = localStorage.getItem(TOUR_STATE_KEY);
+      return raw ? JSON.parse(raw) : null;
     } catch (e) {
       return null;
     }
@@ -196,376 +111,277 @@
 
   function saveState(state) {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      if (!state) {
+        localStorage.removeItem(TOUR_STATE_KEY);
+      } else {
+        localStorage.setItem(TOUR_STATE_KEY, JSON.stringify(state));
+      }
     } catch (e) {
       // ignore
     }
   }
 
-  function clearState() {
-    try {
-      localStorage.removeItem(STORAGE_KEY);
-    } catch (e) {
-      // ignore
-    }
-  }
+  function ensureChrome() {
+    if (backdropEl) return;
 
-  // --- DOM globals for overlay --------------------------------------
-  let overlayEl = null;
-  let highlightEl = null;
-  let panelEl = null;
-  let stepTitleEl = null;
-  let stepBodyEl = null;
-  let backBtn = null;
-  let nextBtn = null;
-  let exitBtn = null;
-  let currentStepIndex = 0;
-  let previousBodyOverflow = null;
+    const style = document.createElement("style");
+    style.textContent = `
+.pp-tour-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+  z-index: 9998;
+}
 
-  document.addEventListener("DOMContentLoaded", function () {
-    injectTourStyles();
+.pp-tour-highlight {
+  position: fixed;
+  border-radius: 16px;
+  box-shadow: 0 0 0 2px #ffffff, 0 0 0 9999px rgba(0,0,0,0.55);
+  pointer-events: none;
+  z-index: 9999;
+}
 
-    const existingState = loadState();
+.pp-tour-panel {
+  position: fixed;
+  max-width: 520px;
+  padding: 20px 24px 16px;
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 18px 40px rgba(0,0,0,0.35);
+  z-index: 10000;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
 
-    // If tour is running and this page is the one we expect -> resume.
-    if (existingState && existingState.running && existingState.page === CURRENT_PAGE) {
-      startTour(existingState.stepIndex || 0, false);
-      return;
-    }
+.pp-tour-title {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
 
-    // Only Home page has the "See how it works" trigger.
-    if (CURRENT_PAGE === "home") {
-      const btn = document.getElementById(HOW_IT_WORKS_ID);
-      if (btn) {
-        btn.addEventListener("click", function () {
-          // Start from beginning of home tour
-          saveState({ running: true, page: "home", stepIndex: 0 });
-          startTour(0, true);
-        });
-      }
-    }
-  });
+.pp-tour-text {
+  font-size: 14px;
+  line-height: 1.5;
+  margin-bottom: 16px;
+}
 
-  // --- Core tour logic ----------------------------------------------
-  function startTour(stepIndex, createOverlayNow) {
-    const steps = TOUR_STEPS[CURRENT_PAGE] || [];
-    if (!steps.length) return;
+.pp-tour-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
 
-    currentStepIndex = stepIndex || 0;
+.pp-tour-btn {
+  border-radius: 999px;
+  border: none;
+  padding: 6px 14px;
+  font-size: 13px;
+  cursor: pointer;
+}
 
-    if (!overlayEl) {
-      previousBodyOverflow = document.body.style.overflow;
-      document.body.style.overflow = "hidden";
-      createOverlay();
-    }
+.pp-tour-btn-secondary {
+  background: #f0f0f0;
+  color: #222;
+}
 
-    renderStep();
+.pp-tour-btn-primary {
+  background: #0b5d3f;
+  color: #ffffff;
+}
 
-    if (createOverlayNow) {
-      saveState({ running: true, page: CURRENT_PAGE, stepIndex: currentStepIndex });
-    }
-  }
+.pp-tour-btn-ghost {
+  background: transparent;
+  color: #555;
+}
+`;
+    document.head.appendChild(style);
 
-  function endTour() {
-    if (overlayEl && overlayEl.parentNode) {
-      overlayEl.parentNode.removeChild(overlayEl);
-    }
-    overlayEl = null;
-    highlightEl = null;
-    panelEl = null;
-    stepTitleEl = null;
-    stepBodyEl = null;
-    backBtn = null;
-    nextBtn = null;
-    exitBtn = null;
-    document.body.style.overflow = previousBodyOverflow || "";
-    clearState();
-  }
-
-  function createOverlay() {
-    overlayEl = document.createElement("div");
-    overlayEl.className = "pp-tour-overlay";
-
-    // Don't close on click outside; user must use buttons.
-    overlayEl.addEventListener("click", function (e) {
-      if (e.target === overlayEl) {
-        // do nothing
-      }
-    });
+    backdropEl = document.createElement("div");
+    backdropEl.className = "pp-tour-backdrop";
 
     highlightEl = document.createElement("div");
     highlightEl.className = "pp-tour-highlight";
-    overlayEl.appendChild(highlightEl);
+    highlightEl.style.display = "none";
 
     panelEl = document.createElement("div");
     panelEl.className = "pp-tour-panel";
 
-    stepTitleEl = document.createElement("h2");
-    stepTitleEl.className = "pp-tour-title";
-    panelEl.appendChild(stepTitleEl);
-
-    stepBodyEl = document.createElement("p");
-    stepBodyEl.className = "pp-tour-body";
-    panelEl.appendChild(stepBodyEl);
-
-    const buttonsRow = document.createElement("div");
-    buttonsRow.className = "pp-tour-buttons";
-
-    backBtn = document.createElement("button");
-    backBtn.type = "button";
-    backBtn.className = "pp-tour-btn-secondary";
-    backBtn.textContent = "Back";
-    backBtn.addEventListener("click", function () {
-      if (currentStepIndex > 0) {
-        currentStepIndex--;
-        saveState({ running: true, page: CURRENT_PAGE, stepIndex: currentStepIndex });
-        renderStep();
-      }
-    });
-
-    nextBtn = document.createElement("button");
-    nextBtn.type = "button";
-    nextBtn.className = "pp-tour-btn-primary";
-    nextBtn.textContent = "Next";
-    nextBtn.addEventListener("click", function () {
-      handleNext();
-    });
-
-    exitBtn = document.createElement("button");
-    exitBtn.type = "button";
-    exitBtn.className = "pp-tour-btn-text";
-    exitBtn.textContent = "Exit";
-    exitBtn.addEventListener("click", function () {
-      endTour();
-    });
-
-    buttonsRow.appendChild(backBtn);
-    buttonsRow.appendChild(nextBtn);
-    buttonsRow.appendChild(exitBtn);
-
-    panelEl.appendChild(buttonsRow);
-    overlayEl.appendChild(panelEl);
-    document.body.appendChild(overlayEl);
+    document.body.appendChild(backdropEl);
+    document.body.appendChild(highlightEl);
+    document.body.appendChild(panelEl);
   }
 
-  function handleNext() {
-    const steps = TOUR_STEPS[CURRENT_PAGE] || [];
-    const step = steps[currentStepIndex];
-
-    // If this step says "go to another page", do that.
-    if (step && step.nextPage) {
-      saveState({
-        running: true,
-        page: step.nextPage,
-        stepIndex: step.nextIndex || 0,
-      });
-      // simple redirect
-      if (step.nextPage === "purchases") location.href = "purchases.html";
-      else if (step.nextPage === "recipes") location.href = "recipes.html";
-      else if (step.nextPage === "settings") location.href = "settings.html";
-      else location.href = "index.html";
-      return;
-    }
-
-    if (currentStepIndex < steps.length - 1) {
-      currentStepIndex++;
-      saveState({ running: true, page: CURRENT_PAGE, stepIndex: currentStepIndex });
-      renderStep();
-    } else {
-      endTour();
-    }
+  function endTour() {
+    currentIndex = null;
+    saveState(null);
+    if (backdropEl) backdropEl.style.display = "none";
+    if (highlightEl) highlightEl.style.display = "none";
+    if (panelEl) panelEl.style.display = "none";
   }
 
-  function renderStep() {
-    const steps = TOUR_STEPS[CURRENT_PAGE] || [];
-    const step = steps[currentStepIndex];
-    if (!step) {
+  function goToStep(newIndex) {
+    if (newIndex < 0 || newIndex >= STEPS.length) {
       endTour();
       return;
     }
 
-    stepTitleEl.textContent = step.title;
-    stepBodyEl.textContent = step.body;
+    const nextStep = STEPS[newIndex];
 
-    // Back button state
-    if (currentStepIndex === 0) {
-      backBtn.disabled = true;
-      backBtn.classList.add("pp-tour-btn-disabled");
-    } else {
-      backBtn.disabled = false;
-      backBtn.classList.remove("pp-tour-btn-disabled");
+    // If step is on another page, save state and navigate
+    if (nextStep.page !== PAGE_ID) {
+      saveState({ active: true, index: newIndex });
+      window.location.href = pageToUrl(nextStep.page);
+      return;
     }
 
-    // Next button label
-    const isLast = currentStepIndex === steps.length - 1 && !step.nextPage;
-    nextBtn.textContent = isLast ? "Finish" : "Next";
-
-    const rect = positionHighlight(step);
-    positionPanel(step, rect);
+    currentIndex = newIndex;
+    saveState({ active: true, index: currentIndex });
+    renderCurrentStep();
   }
 
-  function positionHighlight(step) {
-    const sel = step.targetSelector;
-    const target =
-      sel && typeof sel === "string"
-        ? document.querySelector(sel)
-        : null;
+  function renderCurrentStep() {
+    if (currentIndex == null) return;
+    ensureChrome();
 
-    if (!target) {
-      highlightEl.style.opacity = "0";
-      return null;
-    }
+    const step = STEPS[currentIndex];
 
-    try {
-      target.scrollIntoView({ behavior: "smooth", block: "center" });
-    } catch (e) {
-      // ignore
-    }
+    // Default: hide highlight
+    highlightEl.style.display = "none";
 
-    const rect = target.getBoundingClientRect();
+    let targetRect = null;
+    let targetEl = null;
 
-    highlightEl.style.opacity = "1";
-    highlightEl.style.top = rect.top - 8 + "px";
-    highlightEl.style.left = rect.left - 8 + "px";
-    highlightEl.style.width = rect.width + 16 + "px";
-    highlightEl.style.height = rect.height + 16 + "px";
-
-    return rect;
-  }
-
-  function positionPanel(step, rect) {
-    const pos = step.panelPosition || "bottom";
-
-    panelEl.style.left = "50%";
-    panelEl.style.transform = "translateX(-50%)";
-    panelEl.style.maxWidth = "480px";
-
-    if (pos === "top") {
-      panelEl.style.top = "24px";
-      panelEl.style.bottom = "auto";
-      panelEl.style.transform = "translateX(-50%)";
-    } else if (pos === "center") {
-      panelEl.style.top = "50%";
-      panelEl.style.bottom = "auto";
-      panelEl.style.transform = "translate(-50%, -50%)";
-    } else {
-      // default: bottom
-      panelEl.style.top = "auto";
-      panelEl.style.bottom = "24px";
-      panelEl.style.transform = "translateX(-50%)";
-    }
-  }
-
-  // --- Styles -------------------------------------------------------
-  function injectTourStyles() {
-    if (document.getElementById("pp-tour-style")) return;
-
-    const css = `
-      .pp-tour-overlay {
-        position: fixed;
-        inset: 0;
-        background: rgba(0, 0, 0, 0.45);
-        z-index: 9999;
-        display: flex;
-        justify-content: center;
-        align-items: flex-end;
-        pointer-events: auto;
-      }
-
-      .pp-tour-highlight {
-        position: fixed;
-        border-radius: 12px;
-        box-shadow: 0 0 0 3px #ffffff, 0 0 0 2000px rgba(0,0,0,0.45);
-        pointer-events: none;
-        transition: all 0.25s ease;
-        opacity: 0;
-      }
-
-      .pp-tour-panel {
-        position: fixed;
-        max-width: 480px;
-        width: 90%;
-        background: #ffffff;
-        border-radius: 16px;
-        padding: 16px 18px 14px;
-        box-shadow: 0 18px 45px rgba(0,0,0,0.3);
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      }
-
-      .pp-tour-title {
-        margin: 0 0 6px;
-        font-size: 18px;
-        font-weight: 600;
-        color: #1f2933;
-      }
-
-      .pp-tour-body {
-        margin: 0 0 12px;
-        font-size: 14px;
-        line-height: 1.5;
-        color: #4b5563;
-      }
-
-      .pp-tour-buttons {
-        display: flex;
-        justify-content: flex-end;
-        gap: 8px;
-      }
-
-      .pp-tour-btn-primary,
-      .pp-tour-btn-secondary,
-      .pp-tour-btn-text {
-        border-radius: 999px;
-        font-size: 13px;
-        padding: 6px 14px;
-        cursor: pointer;
-        border: none;
-        font-family: inherit;
-      }
-
-      .pp-tour-btn-primary {
-        background: #0b5d3f;
-        color: #ffffff;
-      }
-
-      .pp-tour-btn-primary:hover {
-        background: #094a33;
-      }
-
-      .pp-tour-btn-secondary {
-        background: #e5e7eb;
-        color: #111827;
-      }
-
-      .pp-tour-btn-secondary:hover {
-        background: #d1d5db;
-      }
-
-      .pp-tour-btn-text {
-        background: transparent;
-        color: #6b7280;
-      }
-
-      .pp-tour-btn-text:hover {
-        color: #374151;
-      }
-
-      .pp-tour-btn-disabled {
-        opacity: 0.4;
-        cursor: default;
-      }
-
-      @media (max-width: 600px) {
-        .pp-tour-panel {
-          padding: 12px 12px 10px;
+    if (step.selector) {
+      targetEl = document.querySelector(step.selector);
+      if (targetEl) {
+        targetEl.scrollIntoView({ block: "center", behavior: "smooth" });
+        const rect = targetEl.getBoundingClientRect();
+        // Only treat as valid if it has some size
+        if (rect.width > 10 && rect.height > 10) {
+          targetRect = rect;
         }
       }
+    }
+
+    // Show highlight if we have a valid target
+    if (targetRect) {
+      const padding = 12;
+      highlightEl.style.display = "block";
+      highlightEl.style.top = targetRect.top - padding + "px";
+      highlightEl.style.left = targetRect.left - padding + "px";
+      highlightEl.style.width = targetRect.width + padding * 2 + "px";
+      highlightEl.style.height = targetRect.height + padding * 2 + "px";
+    } else {
+      highlightEl.style.display = "none";
+    }
+
+    backdropEl.style.display = "block";
+    panelEl.style.display = "block";
+
+    // Build panel content
+    const isFirst = currentIndex === 0;
+    const isLast = currentIndex === STEPS.length - 1;
+
+    const showDemo =
+      !!step.showDemoButton &&
+      typeof window.ppLoadSampleDataFromTour === "function";
+
+    panelEl.innerHTML = `
+      <div class="pp-tour-title">${step.title}</div>
+      <div class="pp-tour-text">${step.text}</div>
+      <div class="pp-tour-footer">
+        <button class="pp-tour-btn pp-tour-btn-ghost" data-pp-tour="exit">Exit</button>
+        <button class="pp-tour-btn pp-tour-btn-secondary" data-pp-tour="back"${
+          isFirst ? ' disabled style="opacity:0.4;cursor:default;"' : ""
+        }>Back</button>
+        ${
+          showDemo
+            ? '<button class="pp-tour-btn pp-tour-btn-secondary" data-pp-tour="demo">Load demo data</button>'
+            : ""
+        }
+        <button class="pp-tour-btn pp-tour-btn-primary" data-pp-tour="next">${
+          isLast ? "Finish" : "Next"
+        }</button>
+      </div>
     `;
 
-    const styleEl = document.createElement("style");
-    styleEl.id = "pp-tour-style";
-    styleEl.type = "text/css";
-    styleEl.appendChild(document.createTextNode(css));
-    document.head.appendChild(styleEl);
+    // Position panel – relative to target if present, otherwise centered bottom
+    // Use a small timeout so the browser can measure the element
+    setTimeout(() => {
+      const panelRect = panelEl.getBoundingClientRect();
+      let top, left;
+
+      if (targetRect) {
+        // Attach under the target, centered horizontally
+        const margin = 24;
+        const maxTop = window.innerHeight - panelRect.height - 16;
+        top = Math.min(maxTop, targetRect.bottom + margin);
+
+        const centerX = targetRect.left + targetRect.width / 2;
+        left = centerX - panelRect.width / 2;
+        left = Math.max(16, Math.min(left, window.innerWidth - panelRect.width - 16));
+      } else {
+        // No target – center at the bottom
+        top = window.innerHeight - panelRect.height - 32;
+        left = (window.innerWidth - panelRect.width) / 2;
+      }
+
+      panelEl.style.top = top + "px";
+      panelEl.style.left = left + "px";
+    }, 0);
+
+    // Wire buttons
+    panelEl.querySelector('[data-pp-tour="exit"]').onclick = () => {
+      endTour();
+    };
+
+    const backBtn = panelEl.querySelector('[data-pp-tour="back"]');
+    if (backBtn) {
+      backBtn.onclick = () => {
+        if (currentIndex > 0) goToStep(currentIndex - 1);
+      };
+    }
+
+    panelEl.querySelector('[data-pp-tour="next"]').onclick = () => {
+      goToStep(currentIndex + 1);
+    };
+
+    const demoBtn = panelEl.querySelector('[data-pp-tour="demo"]');
+    if (demoBtn) {
+      demoBtn.onclick = () => {
+        if (typeof window.ppLoadSampleDataFromTour === "function") {
+          window.ppLoadSampleDataFromTour();
+        }
+      };
+    }
   }
+
+  function startTourFromBeginning() {
+    goToStep(0);
+  }
+
+  function maybeResumeTourFromState() {
+    const state = readState();
+    if (!state || !state.active) return;
+    const idx = typeof state.index === "number" ? state.index : 0;
+    const step = STEPS[idx];
+    if (!step || step.page !== PAGE_ID) {
+      // Not our page for this step – do nothing, next navigation will handle it
+      return;
+    }
+    currentIndex = idx;
+    renderCurrentStep();
+  }
+
+  document.addEventListener("DOMContentLoaded", function () {
+    // Hook the “See how it works” button on home
+    const howBtn = document.getElementById("btn-how-it-works");
+    if (howBtn && PAGE_ID === "home") {
+      howBtn.addEventListener("click", function () {
+        startTourFromBeginning();
+      });
+    }
+
+    // If the user was in the middle of the tour, resume
+    maybeResumeTourFromState();
+  });
 })();
