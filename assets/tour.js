@@ -1,306 +1,356 @@
+// assets/tour.js
+// Lightweight guided tour for the Home page.
+// No layout changes, just an overlay + highlight when the user clicks
+// "See how it works".
+
 (function () {
-  // Tour Configuration
-  const steps = [
+  const HOW_IT_WORKS_ID = "pp-how-it-works";
+
+  // --- Simple tour steps ---------------------------------------------
+  // targetSelector may be null; in that case we just show a centered overlay.
+  const TOUR_STEPS = [
     {
-      id: 0,
-      page: "index.html", // Normalized path check
-      type: "modal",
-      title: "Welcome to ProfitPlate!",
-      text: "A quick tour will show you the basics in under 20 seconds.",
-      buttons: [
-        { text: "Start tour", action: "next", class: "primary" },
-        { text: "Skip", action: "exit" },
-      ],
+      id: "welcome",
+      title: "Welcome to ProfitPlate",
+      body:
+        "ProfitPlate helps you track real ingredient costs and profit per plate — no spreadsheets, no headaches.",
+      targetSelector: null,
     },
     {
-      id: 1,
-      page: "index.html",
-      selector: "nav a[href*='purchases']", // Target the nav link
-      title: "Purchases – your ingredient base",
-      text: "This is where you keep all your ingredients with up-to-date prices and suppliers.",
-      position: "bottom",
-      buttons: [
-        { text: "Next", action: "next", class: "primary" },
-        { text: "Exit", action: "exit" },
-      ],
+      id: "banner",
+      title: "This is your kitchen cockpit",
+      body:
+        "The green bar at the top is your main navigation. You can jump between Purchases, Recipes and Settings from here.",
+      // We try hero banner first, then fall back to the header container.
+      targetSelector: ".hero-banner, #site-header",
     },
     {
-      id: 2,
-      page: "purchases.html",
-      selector: ".btn-primary", // The "Add item manually" button
-      title: "Add ingredient",
-      text: "Click here to add butter, pasta, meat, herbs – anything you buy. You’ll set unit, category, supplier and price here.",
-      position: "bottom",
-      buttons: [
-        { text: "Back", action: "back" },
-        { text: "Next", action: "next", class: "primary" },
-        { text: "Exit", action: "exit" },
-      ],
+      id: "hero",
+      title: "Know your dish cost in seconds",
+      body:
+        "This section explains what ProfitPlate does. Once you load some data, you’ll see how ingredient prices roll into dish cost and margin.",
+      targetSelector: "main h1",
     },
     {
-      id: 3,
-      page: "purchases.html",
-      selector: "#recent-list", // The recent list area
-      title: "Keep prices fresh",
-      text: "Edit ingredients when prices change. You can archive items you don’t use anymore instead of deleting them, so your history stays intact.",
-      position: "top",
-      buttons: [
-        { text: "Back", action: "back" },
-        { text: "Next", action: "next", class: "primary" },
-        { text: "Exit", action: "exit" },
-      ],
+      id: "cta",
+      title: "Try it with your own menu",
+      body:
+        "Use the buttons here to start playing with the app. In the future this could start a free trial or launch a demo.",
+      // First primary button in the hero. If it doesn’t exist, we just show the panel.
+      targetSelector:
+        "main .btn-primary, main button.btn-primary, main .hero-actions button",
     },
     {
-      id: 4,
-      page: "recipes.html",
-      selector: ".btn-primary", // The Add Recipe button
-      title: "Recipes – see real cost",
-      text: "Create a recipe, pick ingredients from Purchases, and ProfitPlate calculates batch cost, portion cost, and margin. <br><br>When ingredient prices change, recipes update automatically.",
-      position: "bottom",
-      buttons: [
-        { text: "Back", action: "back" },
-        { text: "Next", action: "next", class: "primary" },
-        { text: "Exit", action: "exit" },
-      ],
-    },
-    {
-      id: 5,
-      page: "settings.html",
-      selector: ".settings-box", // First settings box
-      title: "Settings",
-      text: "Change currency, number format, and how ProfitPlate behaves. This is also where you’ll manage demo data.",
-      position: "top",
-      buttons: [
-        { text: "Back", action: "back" },
-        { text: "Finish", action: "finish", class: "primary" },
-      ],
+      id: "finish",
+      title: "That’s the quick tour",
+      body:
+        "Next steps: add a few ingredients in Purchases, then build your first recipe to see cost per portion and profit margin.",
+      targetSelector: null,
     },
   ];
 
-  // Logic
-  const STORAGE_KEY = "pp_tour_step";
-  const STORAGE_ACTIVE = "pp_tour_active";
+  let currentStepIndex = 0;
+  let overlayEl = null;
+  let panelEl = null;
+  let highlightEl = null;
+  let stepTitleEl = null;
+  let stepBodyEl = null;
+  let backBtn = null;
+  let nextBtn = null;
+  let exitBtn = null;
+  let previousBodyOverflow = null;
 
-  function init() {
-    // Check if tour is active
-    if (sessionStorage.getItem(STORAGE_ACTIVE) === "true") {
-      const stepIndex = parseInt(sessionStorage.getItem(STORAGE_KEY) || 0);
-      renderStep(stepIndex);
-    }
+  document.addEventListener("DOMContentLoaded", function () {
+    const btn = document.getElementById(HOW_IT_WORKS_ID);
+    if (!btn) return;
 
-    // Hook 'See how it works' button on Home
-    // We use a general listener in case the button loads later
-    document.addEventListener("click", function (e) {
-      if (e.target && e.target.textContent.includes("See how it works")) {
-        e.preventDefault();
-        startTour();
-      }
+    injectTourStyles();
+
+    btn.addEventListener("click", function () {
+      startTour();
     });
-  }
+  });
 
   function startTour() {
-    sessionStorage.setItem(STORAGE_ACTIVE, "true");
-    sessionStorage.setItem(STORAGE_KEY, 0);
-    // If not on home, go home
-    if (!window.location.pathname.endsWith("index.html") && !window.location.pathname.endsWith("/")) {
-      window.location.href = "index.html";
-    } else {
-      renderStep(0);
+    if (overlayEl) {
+      // Already running; just restart from step 0
+      currentStepIndex = 0;
+      renderStep();
+      return;
     }
+
+    previousBodyOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    createOverlay();
+    currentStepIndex = 0;
+    renderStep();
   }
 
   function endTour() {
-    sessionStorage.removeItem(STORAGE_ACTIVE);
-    sessionStorage.removeItem(STORAGE_KEY);
-    removeOverlay();
-  }
-
-  function navigateToPage(page) {
-    // If we are already on the page (loose check), just return true
-    if (window.location.pathname.includes(page) || (page === "index.html" && window.location.pathname.endsWith("/"))) {
-      return true;
+    if (overlayEl && overlayEl.parentNode) {
+      overlayEl.parentNode.removeChild(overlayEl);
     }
-    window.location.href = page;
-    return false;
+    overlayEl = null;
+    panelEl = null;
+    highlightEl = null;
+    stepTitleEl = null;
+    stepBodyEl = null;
+    backBtn = null;
+    nextBtn = null;
+    exitBtn = null;
+    document.body.style.overflow = previousBodyOverflow || "";
   }
 
-  function renderStep(index) {
-    const step = steps[index];
-    if (!step) return endTour();
+  function createOverlay() {
+    overlayEl = document.createElement("div");
+    overlayEl.className = "pp-tour-overlay";
 
-    // 1. Check Page
-    if (!navigateToPage(step.page)) return; // browser will redirect, stop execution
-
-    // 2. Setup Overlay
-    let overlay = document.getElementById("tour-overlay");
-    if (!overlay) {
-      overlay = document.createElement("div");
-      overlay.id = "tour-overlay";
-      document.body.appendChild(overlay);
-      // Force reflow
-      void overlay.offsetWidth;
-      overlay.classList.add("active");
-    }
-
-    // Clear previous highlights
-    document.querySelectorAll(".tour-highlight").forEach(el => el.classList.remove("tour-highlight"));
-    const oldBubble = document.querySelector(".tour-bubble");
-    if (oldBubble) oldBubble.remove();
-    const oldModal = document.querySelector(".tour-modal");
-    if (oldModal) oldModal.remove();
-
-    // 3. Render Content
-    if (step.type === "modal") {
-      renderModal(step, index);
-    } else {
-      // Element highlight
-      // Small delay to ensure DOM is ready if we just navigated
-      setTimeout(() => {
-        const target = document.querySelector(step.selector);
-        if (target) {
-          target.classList.add("tour-highlight");
-          target.scrollIntoView({ behavior: "smooth", block: "center" });
-          renderBubble(step, target, index);
-        } else {
-          console.warn("Tour target not found:", step.selector);
-          // If element missing, skip or end? Let's just end for safety.
-          endTour();
-        }
-      }, 300);
-    }
-  }
-
-  function renderModal(step, index) {
-    const modal = document.createElement("div");
-    modal.className = "tour-modal";
-    modal.innerHTML = `
-      <h2>${step.title}</h2>
-      <p>${step.text}</p>
-      <div class="tour-actions"></div>
-    `;
-
-    const actions = modal.querySelector(".tour-actions");
-    step.buttons.forEach(btn => {
-      const b = document.createElement("button");
-      b.className = `tour-btn ${btn.class || ""}`;
-      b.textContent = btn.text;
-      b.onclick = () => handleAction(btn.action, index);
-      actions.appendChild(b);
-    });
-
-    document.body.appendChild(modal);
-  }
-
-  function renderBubble(step, target, index) {
-    const rect = target.getBoundingClientRect();
-    const bubble = document.createElement("div");
-    bubble.className = "tour-bubble";
-    bubble.innerHTML = `
-      <h3>${step.title}</h3>
-      <p>${step.text}</p>
-      <div class="tour-actions"></div>
-    `;
-
-    const actions = bubble.querySelector(".tour-actions");
-    step.buttons.forEach(btn => {
-      const b = document.createElement("button");
-      b.className = `tour-btn ${btn.class || ""}`;
-      b.textContent = btn.text;
-      b.onclick = () => handleAction(btn.action, index);
-      actions.appendChild(b);
-    });
-
-    document.body.appendChild(bubble);
-
-    // Positioning logic (basic)
-    const bubbleRect = bubble.getBoundingClientRect();
-    let top, left;
-
-    // Center horizontally on target
-    left = rect.left + (rect.width / 2) - (bubbleRect.width / 2);
-    // Keep in bounds
-    if (left < 10) left = 10;
-    if (left + bubbleRect.width > window.innerWidth) left = window.innerWidth - bubbleRect.width - 10;
-
-    if (step.position === "top") {
-      top = rect.top - bubbleRect.height - 15 + window.scrollY;
-    } else {
-      top = rect.bottom + 15 + window.scrollY;
-    }
-
-    bubble.style.top = `${top}px`;
-    bubble.style.left = `${left}px`;
-  }
-
-  function handleAction(action, currentIndex) {
-    if (action === "next") {
-      const nextIndex = currentIndex + 1;
-      sessionStorage.setItem(STORAGE_KEY, nextIndex);
-      renderStep(nextIndex);
-    } else if (action === "back") {
-      const prevIndex = currentIndex - 1;
-      if (prevIndex < 0) return;
-      sessionStorage.setItem(STORAGE_KEY, prevIndex);
-      renderStep(prevIndex);
-    } else if (action === "exit") {
-      endTour();
-    } else if (action === "finish") {
-      endTour();
-      showDemoLoader();
-    }
-  }
-
-  function removeOverlay() {
-    const overlay = document.getElementById("tour-overlay");
-    if (overlay) {
-      overlay.classList.remove("active");
-      setTimeout(() => overlay.remove(), 300);
-    }
-    document.querySelectorAll(".tour-highlight").forEach(el => el.classList.remove("tour-highlight"));
-    const b = document.querySelector(".tour-bubble");
-    if (b) b.remove();
-    const m = document.querySelector(".tour-modal");
-    if (m) m.remove();
-  }
-
-  function showDemoLoader() {
-    // Create overlay
-    const overlay = document.createElement("div");
-    overlay.id = "tour-overlay";
-    overlay.classList.add("active");
-    document.body.appendChild(overlay);
-
-    const modal = document.createElement("div");
-    modal.className = "tour-modal";
-    modal.innerHTML = `
-      <h2>Load Demo Data?</h2>
-      <p>We can add a few demo ingredients and a sample recipe (Carbonara) so you can see the math in action.</p>
-      <p style="font-size:13px; color:#0b6e46; font-weight:500;">✅ Your existing data will stay safe and untouched.</p>
-      <div class="tour-actions" style="justify-content: center; margin-top:20px;">
-        <button class="tour-btn" id="btn-no-demo">Not now</button>
-        <button class="tour-btn primary" id="btn-yes-demo">Load Demo Data</button>
-      </div>
-    `;
-    document.body.appendChild(modal);
-
-    document.getElementById("btn-no-demo").onclick = function() {
-      overlay.remove();
-      modal.remove();
-    };
-
-    document.getElementById("btn-yes-demo").onclick = function() {
-      if (window.ppStore && window.ppStore.addDemoDataSafe) {
-        window.ppStore.addDemoDataSafe(); // Will handle adding + redirect
+    // Click outside = do nothing (we force use of buttons)
+    overlayEl.addEventListener("click", function (e) {
+      if (e.target === overlayEl) {
+        // ignore
       }
-      overlay.remove();
-      modal.remove();
-    };
+    });
+
+    highlightEl = document.createElement("div");
+    highlightEl.className = "pp-tour-highlight";
+    overlayEl.appendChild(highlightEl);
+
+    panelEl = document.createElement("div");
+    panelEl.className = "pp-tour-panel";
+
+    stepTitleEl = document.createElement("h2");
+    stepTitleEl.className = "pp-tour-title";
+    panelEl.appendChild(stepTitleEl);
+
+    stepBodyEl = document.createElement("p");
+    stepBodyEl.className = "pp-tour-body";
+    panelEl.appendChild(stepBodyEl);
+
+    const buttonsRow = document.createElement("div");
+    buttonsRow.className = "pp-tour-buttons";
+
+    backBtn = document.createElement("button");
+    backBtn.type = "button";
+    backBtn.className = "pp-tour-btn-secondary";
+    backBtn.textContent = "Back";
+    backBtn.addEventListener("click", function () {
+      if (currentStepIndex > 0) {
+        currentStepIndex--;
+        renderStep();
+      }
+    });
+
+    nextBtn = document.createElement("button");
+    nextBtn.type = "button";
+    nextBtn.className = "pp-tour-btn-primary";
+    nextBtn.textContent = "Next";
+    nextBtn.addEventListener("click", function () {
+      if (currentStepIndex < TOUR_STEPS.length - 1) {
+        currentStepIndex++;
+        renderStep();
+      } else {
+        endTour();
+      }
+    });
+
+    exitBtn = document.createElement("button");
+    exitBtn.type = "button";
+    exitBtn.className = "pp-tour-btn-text";
+    exitBtn.textContent = "Exit";
+    exitBtn.addEventListener("click", function () {
+      endTour();
+    });
+
+    buttonsRow.appendChild(backBtn);
+    buttonsRow.appendChild(nextBtn);
+    buttonsRow.appendChild(exitBtn);
+
+    panelEl.appendChild(buttonsRow);
+    overlayEl.appendChild(panelEl);
+
+    document.body.appendChild(overlayEl);
   }
 
-  // Run init on load
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", init);
-  } else {
-    init();
+  function renderStep() {
+    const step = TOUR_STEPS[currentStepIndex];
+
+    stepTitleEl.textContent = step.title;
+    stepBodyEl.textContent = step.body;
+
+    // Buttons state
+    if (currentStepIndex === 0) {
+      backBtn.disabled = true;
+      backBtn.classList.add("pp-tour-btn-disabled");
+    } else {
+      backBtn.disabled = false;
+      backBtn.classList.remove("pp-tour-btn-disabled");
+    }
+
+    if (currentStepIndex === TOUR_STEPS.length - 1) {
+      nextBtn.textContent = "Finish";
+    } else {
+      nextBtn.textContent = "Next";
+    }
+
+    positionHighlight(step);
+  }
+
+  function positionHighlight(step) {
+    const sel = step.targetSelector;
+    const target =
+      sel && typeof sel === "string"
+        ? document.querySelector(sel)
+        : null;
+
+    if (!target) {
+      // No target: hide highlight and keep panel at bottom center
+      highlightEl.style.opacity = "0";
+      panelEl.style.top = "auto";
+      panelEl.style.bottom = "32px";
+      panelEl.style.left = "50%";
+      panelEl.style.transform = "translateX(-50%)";
+      return;
+    }
+
+    // Ensure target is visible
+    try {
+      target.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+    } catch (e) {
+      // ignore
+    }
+
+    const rect = target.getBoundingClientRect();
+
+    // Highlight box around target
+    highlightEl.style.opacity = "1";
+    highlightEl.style.top = rect.top - 8 + "px";
+    highlightEl.style.left = rect.left - 8 + "px";
+    highlightEl.style.width = rect.width + 16 + "px";
+    highlightEl.style.height = rect.height + 16 + "px";
+
+    // Position panel near bottom, but above the bottom edge
+    panelEl.style.bottom = "24px";
+    panelEl.style.left = "50%";
+    panelEl.style.top = "auto";
+    panelEl.style.transform = "translateX(-50%)";
+  }
+
+  function injectTourStyles() {
+    if (document.getElementById("pp-tour-style")) return;
+
+    const css = `
+      .pp-tour-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.45);
+        z-index: 9999;
+        display: flex;
+        justify-content: center;
+        align-items: flex-end;
+        pointer-events: auto;
+      }
+
+      .pp-tour-highlight {
+        position: fixed;
+        border-radius: 12px;
+        box-shadow: 0 0 0 3px #ffffff, 0 0 0 2000px rgba(0,0,0,0.45);
+        pointer-events: none;
+        transition: all 0.25s ease;
+        opacity: 0;
+      }
+
+      .pp-tour-panel {
+        position: relative;
+        max-width: 480px;
+        width: 90%;
+        background: #ffffff;
+        border-radius: 16px;
+        padding: 16px 18px 14px;
+        margin-bottom: 24px;
+        box-shadow: 0 18px 45px rgba(0,0,0,0.3);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      }
+
+      .pp-tour-title {
+        margin: 0 0 6px;
+        font-size: 18px;
+        font-weight: 600;
+        color: #1f2933;
+      }
+
+      .pp-tour-body {
+        margin: 0 0 12px;
+        font-size: 14px;
+        line-height: 1.5;
+        color: #4b5563;
+      }
+
+      .pp-tour-buttons {
+        display: flex;
+        justify-content: flex-end;
+        gap: 8px;
+      }
+
+      .pp-tour-btn-primary,
+      .pp-tour-btn-secondary,
+      .pp-tour-btn-text {
+        border-radius: 999px;
+        font-size: 13px;
+        padding: 6px 14px;
+        cursor: pointer;
+        border: none;
+        font-family: inherit;
+      }
+
+      .pp-tour-btn-primary {
+        background: #0b5d3f;
+        color: #ffffff;
+      }
+
+      .pp-tour-btn-primary:hover {
+        background: #094a33;
+      }
+
+      .pp-tour-btn-secondary {
+        background: #e5e7eb;
+        color: #111827;
+      }
+
+      .pp-tour-btn-secondary:hover {
+        background: #d1d5db;
+      }
+
+      .pp-tour-btn-text {
+        background: transparent;
+        color: #6b7280;
+      }
+
+      .pp-tour-btn-text:hover {
+        color: #374151;
+      }
+
+      .pp-tour-btn-disabled {
+        opacity: 0.4;
+        cursor: default;
+      }
+
+      @media (max-width: 600px) {
+        .pp-tour-panel {
+          margin-bottom: 12px;
+          padding: 12px 12px 10px;
+        }
+      }
+    `;
+
+    const styleEl = document.createElement("style");
+    styleEl.id = "pp-tour-style";
+    styleEl.type = "text/css";
+    styleEl.appendChild(document.createTextNode(css));
+    document.head.appendChild(styleEl);
   }
 })();
