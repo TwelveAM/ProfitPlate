@@ -2,308 +2,183 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>ProfitPlate – Settings</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta
-    name="description"
-    content="Adjust how ProfitPlate behaves in your kitchen – currency, number format, behaviour and data controls."
-  />
-
+  <title>Settings – ProfitPlate</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="stylesheet" href="assets/styles.css" />
   <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
-  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-plate-32.png" />
-  <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-plate-16.png" />
-
   <style>
-    .page {
-      max-width: 880px;
-      margin: 0 auto;
-      padding: 0 20px 40px;
+    /* Specific styles for the file input */
+    .file-input-wrapper {
+      position: relative;
+      overflow: hidden;
+      display: inline-block;
     }
-
-    .settings-intro {
-      margin: 24px 0 12px;
-    }
-
-    .settings-intro h1 {
-      margin: 0 0 6px;
-      font-size: 26px;
-      font-weight: 700;
-      color: #222;
-    }
-
-    .settings-intro p {
-      margin: 0;
-      font-size: 14px;
-      color: #555;
-      max-width: 720px;
-    }
-
-    .settings-box {
-      background: #fff;
-      padding: 24px;
-      border-radius: 18px;
-      border: 1px solid #dde2e6;
-      margin-top: 20px;
-    }
-
-    .settings-box h2 {
-      margin-top: 0;
-      font-size: 19px;
-      font-weight: 600;
-      color: #0b6e46;
-      margin-bottom: 16px;
-    }
-
-    .settings-field {
-      margin-bottom: 18px;
-    }
-
-    .settings-label {
-      display: block;
-      font-size: 14px;
-      font-weight: 500;
-      margin-bottom: 6px;
-    }
-
-    .settings-help {
-      margin-top: 6px;
-      font-size: 13px;
-      color: #666;
-    }
-
-    /* Checkbox rows – checkbox left, text right */
-    .settings-checkbox-row {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-size: 14px;
-    }
-
-    .settings-checkbox-row input[type="checkbox"] {
-      width: auto;
-      height: auto;
-      margin: 0;
-      transform: scale(1.1);
-      cursor: pointer;
-    }
-
-    .settings-footer-note {
-      margin-top: 22px;
-      font-size: 13px;
-      color: #777;
-      max-width: 720px;
-    }
-
-    .danger-zone {
-      border: 1px solid #e54c4c;
-      background: #fff5f5;
-    }
-    .danger-zone h2 {
-      color: #c73d3d;
+    .file-input-wrapper input[type=file] {
+      font-size: 100px;
+      position: absolute;
+      left: 0;
+      top: 0;
+      opacity: 0;
     }
   </style>
 </head>
 
 <body>
-  <header id="site-header"></header>
+  <div id="site-header"></div>
 
   <div class="page">
-    <main>
-      <section class="settings-intro">
-        <h1>Settings</h1>
-        <p>
-          Adjust how ProfitPlate behaves in your kitchen – currency, display options and data controls.
-          In the real app, these settings would be stored in your account and synced across devices.
-        </p>
-      </section>
+    <div class="page-header">
+      <h1>Settings</h1>
+    </div>
 
-      <section class="settings-box" aria-labelledby="settings-general">
-        <h2 id="settings-general">General</h2>
-
+    <section class="settings-box">
+      <h2 class="section-title">General Preferences</h2>
+      
+      <div class="grid-2">
         <div class="settings-field">
-          <label for="setting-language" class="settings-label">Language</label>
-          <select id="setting-language">
-            <option value="en">English</option>
-            <option value="ro">Română (future)</option>
-            <option value="fr">Français (future)</option>
-            <option value="it">Italiano (future)</option>
-          </select>
-          <p class="settings-help">
-            UI language is fixed to English in this prototype. Other languages are placeholders for the future app.
-          </p>
-        </div>
-
-        <div class="settings-field">
-          <label for="setting-currency" class="settings-label">Currency</label>
-          <select id="setting-currency">
+          <label class="settings-label">Currency</label>
+          <select id="setting-currency" class="form-select">
             <option value="EUR">€ – Euro</option>
-            <option value="RON">lei – Romanian leu</option>
+            <option value="RON">lei – Romanian Leu</option>
             <option value="USD">$ – US Dollar</option>
             <option value="GBP">£ – British Pound</option>
           </select>
         </div>
-
+        
         <div class="settings-field">
-          <label for="setting-locale" class="settings-label">Number format</label>
-          <select id="setting-locale">
-            <option value="eu">1.234,56 (EU style)</option>
-            <option value="us">1,234.56 (US/UK style)</option>
+          <label class="settings-label">Number Format</label>
+          <select id="setting-locale" class="form-select">
+            <option value="eu">1.234,56 (EU)</option>
+            <option value="us">1,234.56 (US/UK)</option>
           </select>
         </div>
-      </section>
+      </div>
 
-      <section class="settings-box" aria-labelledby="settings-behaviour">
-        <h2 id="settings-behaviour">Behaviour</h2>
+      <div class="settings-field">
+        <label class="toggle-switch">
+          <input type="checkbox" id="setting-autoRecalc" checked>
+          <span class="toggle-slider"></span>
+          <span class="toggle-label" style="font-weight:600;">Auto-recalculate recipes</span>
+        </label>
+        <p class="settings-help">If unchecked, recipe costs will freeze at the time of creation.</p>
+      </div>
+      
+      <div class="settings-field">
+        <label class="toggle-switch">
+          <input type="checkbox" id="setting-showAdvanced" checked>
+          <span class="toggle-slider"></span>
+          <span class="toggle-label" style="font-weight:600;">Show advanced details</span>
+        </label>
+        <p class="settings-help">Show breakdown tables and margin details on recipe cards.</p>
+      </div>
+    </section>
 
-        <div class="settings-field">
-          <div class="settings-checkbox-row">
-            <input type="checkbox" id="setting-autoRecalc" />
-            <label for="setting-autoRecalc">
-              Auto-recalculate recipes
-            </label>
-          </div>
-          <p class="settings-help">
-            When an ingredient price changes in Purchases, update recipe costs automatically.
-          </p>
+    <section class="settings-box">
+      <h2 class="section-title">Data Backup & Restore</h2>
+      <p class="settings-help">Save your menu to a file or load a previous backup.</p>
+      
+      <div style="display:flex; gap: 15px; margin-top:15px; flex-wrap:wrap;">
+        <button type="button" class="btn-primary" onclick="exportData()">
+          📥 Download Backup (JSON)
+        </button>
+        
+        <div class="file-input-wrapper">
+          <button class="btn-secondary">📤 Restore from File</button>
+          <input type="file" id="import-file" accept=".json" onchange="importData(this)" />
         </div>
+      </div>
+    </section>
 
-        <div class="settings-field">
-          <div class="settings-checkbox-row">
-            <input type="checkbox" id="setting-showAdvanced" />
-            <label for="setting-showAdvanced">
-              Show advanced details
-            </label>
-          </div>
-          <p class="settings-help">
-            Display margin %, batch cost and ingredient breakdown by default. Turn off for a simpler view.
-          </p>
-        </div>
-      </section>
+    <section class="settings-box" style="border-color: #ffcccc; background: #fff5f5;">
+      <h2 class="section-title" style="color: #c00;">Danger Zone</h2>
+      <p class="settings-help">Permanently delete all data from this browser.</p>
+      <button id="btn-clear-data" class="btn-danger" type="button">
+        Delete All Data
+      </button>
+    </section>
 
-      <section class="settings-box" aria-labelledby="settings-data">
-        <h2 id="settings-data">Data management</h2>
-
-        <p class="settings-help" style="margin-bottom: 20px;">
-          ProfitPlate keeps everything in your browser. <strong>No server, no cloud</strong>.
-        </p>
-
-        <div style="margin-bottom: 24px;">
-          <h3 style="font-size: 15px; margin: 0 0 8px;">Demo Data</h3>
-          <p class="settings-help" style="margin-top:0; margin-bottom:10px;">
-            Remove the example ingredients (Butter, Spaghetti, etc.) and recipes. Your own added items will stay.
-          </p>
-          <button id="btn-clear-demo" class="btn btn-secondary" type="button">
-            Remove Demo Items
-          </button>
-        </div>
-
-        <hr style="margin: 20px 0;">
-
-        <div>
-          <h3 style="font-size: 15px; margin: 0 0 8px; color: #c73d3d;">Danger Zone</h3>
-          <p class="settings-help" style="margin-top:0; margin-bottom:10px;">
-            Delete <strong>ALL</strong> your Purchases and Recipes. This cannot be undone.
-          </p>
-          <button id="btn-nuke-data" class="btn btn-danger" type="button">
-            Delete My Data
-          </button>
-        </div>
-      </section>
-
-      <section class="settings-footer-note">
-        <p>
-          Settings are a visual prototype for now. In a future version, they’ll be saved per account
-          and synced across all your devices.
-        </p>
-      </section>
-    </main>
   </div>
 
   <script src="assets/header.js"></script>
+  <script>renderHeader('settings');</script>
   <script src="assets/app.js"></script>
   <script>
     document.addEventListener("DOMContentLoaded", function () {
-      // 1) Render shared header with "Settings" active
-      if (typeof renderHeader === "function") {
-        renderHeader("settings");
-      }
-
-      // 2) Wire settings UI to app.js helpers (loadSettings / saveSettings)
       if (typeof loadSettings !== "function") return;
 
-      const langEl = document.getElementById("setting-language");
       const curEl  = document.getElementById("setting-currency");
       const locEl  = document.getElementById("setting-locale");
       const autoEl = document.getElementById("setting-autoRecalc");
       const advEl  = document.getElementById("setting-showAdvanced");
+      const clearBtn = document.getElementById("btn-clear-data");
 
-      const btnClearDemo = document.getElementById("btn-clear-demo");
-      const btnNukeData = document.getElementById("btn-nuke-data");
+      // Load Values
+      const s = loadSettings();
+      if (curEl)  curEl.value  = s.currency || "EUR";
+      if (locEl)  locEl.value  = s.locale || "eu";
+      if (autoEl) autoEl.checked = s.autoRecalc !== false;
+      if (advEl)  advEl.checked  = s.showAdvanced !== false;
 
-      function applyToUI(s) {
-        if (!s) return;
-        if (langEl) langEl.value = s.language || "en";
-        if (curEl)  curEl.value  = s.currency || "EUR";
-        if (locEl)  locEl.value  = s.locale || "eu";
-        if (autoEl) autoEl.checked = !!s.autoRecalc;
-        if (advEl)  advEl.checked  = !!s.showAdvanced;
-      }
-
-      function currentSettingsFromUI() {
-        return {
-          language:   langEl ? langEl.value : "en",
-          currency:   curEl  ? curEl.value  : "EUR",
-          locale:     locEl  ? locEl.value  : "eu",
-          autoRecalc: autoEl ? autoEl.checked : true,
-          showAdvanced: advEl ? advEl.checked : true
-        };
-      }
-
-      // Initial load
-      applyToUI(loadSettings());
-
-      // Save whenever something changes
-      [langEl, curEl, locEl, autoEl, advEl].forEach(function (el) {
-        if (!el) return;
-        el.addEventListener("change", function () {
-          if (typeof saveSettings === "function") {
-            saveSettings(currentSettingsFromUI());
-          }
-        });
-      });
-
-      // --- CLEAR DEMO DATA ---
-      if (btnClearDemo) {
-        btnClearDemo.addEventListener("click", function () {
-          if (!window.ppStore) return;
-          if (confirm("Remove only the example Demo items? Your created items will remain.")) {
-            window.ppStore.removeDemoData();
-            alert("Demo data removed.");
-          }
+      // Save on Change
+      function save() {
+        saveSettings({
+          currency: curEl.value,
+          locale: locEl.value,
+          autoRecalc: autoEl.checked,
+          showAdvanced: advEl.checked
         });
       }
+      [curEl, locEl, autoEl, advEl].forEach(el => el.addEventListener("change", save));
 
-      // --- NUKE ALL DATA ---
-      if (btnNukeData) {
-        btnNukeData.addEventListener("click", function () {
-          const userCheck = prompt(
-            "WARNING: This will delete ALL your items and recipes forever.\n\nTo confirm, type DELETE in the box below:"
-          );
-
-          if (userCheck === "DELETE") {
-             if (window.ppStore) {
-               window.ppStore.nukeUserData();
-               alert("All data deleted. The app is clean.");
-               // Optional: Reload to re-seed demo data if the user wants to see it empty
-               // location.reload();
-             }
-          } else if (userCheck !== null) {
-            alert("Confirmation failed. Data was NOT deleted.");
+      // Clear Data
+      if (clearBtn) {
+        clearBtn.addEventListener("click", function () {
+          if (confirm("Are you sure? This will delete ALL recipes and purchases.")) {
+            localStorage.clear();
+            location.reload();
           }
         });
       }
     });
+
+    // ==== Export Data Function ====
+    function exportData() {
+      const data = {
+        purchases: JSON.parse(localStorage.getItem("pp_purchases") || "[]"),
+        recipes: JSON.parse(localStorage.getItem("pp_recipes") || "[]"),
+        settings: JSON.parse(localStorage.getItem("pp_settings") || "{}"),
+        timestamp: new Date().toISOString()
+      };
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "ProfitPlate_Backup_" + new Date().toISOString().slice(0,10) + ".json";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+
+    // ==== Import Data Function ====
+    function importData(input) {
+      const file = input.files[0];
+      if (!file) return;
+      
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const data = JSON.parse(e.target.result);
+          if (data.purchases) localStorage.setItem("pp_purchases", JSON.stringify(data.purchases));
+          if (data.recipes) localStorage.setItem("pp_recipes", JSON.stringify(data.recipes));
+          if (data.settings) localStorage.setItem("pp_settings", JSON.stringify(data.settings));
+          alert("Data restored successfully! The page will now reload.");
+          location.reload();
+        } catch (err) {
+          alert("Error parsing backup file. Is it a valid JSON?");
+        }
+      };
+      reader.readAsText(file);
+    }
   </script>
 </body>
 </html>
