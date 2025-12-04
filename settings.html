@@ -14,7 +14,6 @@
   <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-plate-32.png" />
   <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-plate-16.png" />
 
-  <!-- Tiny page-specific tweaks only (NO banner/layout changes) -->
   <style>
     .page {
       max-width: 880px;
@@ -95,16 +94,22 @@
       color: #777;
       max-width: 720px;
     }
+
+    .danger-zone {
+      border: 1px solid #e54c4c;
+      background: #fff5f5;
+    }
+    .danger-zone h2 {
+      color: #c73d3d;
+    }
   </style>
 </head>
 
 <body>
-  <!-- Shared banner + nav, rendered by header.js. DO NOT TOUCH. -->
   <header id="site-header"></header>
 
   <div class="page">
     <main>
-      <!-- Intro -->
       <section class="settings-intro">
         <h1>Settings</h1>
         <p>
@@ -113,7 +118,6 @@
         </p>
       </section>
 
-      <!-- General -->
       <section class="settings-box" aria-labelledby="settings-general">
         <h2 id="settings-general">General</h2>
 
@@ -149,7 +153,6 @@
         </div>
       </section>
 
-      <!-- Behaviour -->
       <section class="settings-box" aria-labelledby="settings-behaviour">
         <h2 id="settings-behaviour">Behaviour</h2>
 
@@ -178,22 +181,34 @@
         </div>
       </section>
 
-      <!-- Data & local storage -->
       <section class="settings-box" aria-labelledby="settings-data">
-        <h2 id="settings-data">Data &amp; local storage</h2>
+        <h2 id="settings-data">Data management</h2>
 
-        <p>
-          ProfitPlate keeps everything in your browser for now.
-          <strong>No server, no cloud</strong> – just your device.
-        </p>
-        <p class="settings-help">
-          In the real app, this section would let you import / export data, connect multiple devices and reset
-          your account. For now you can clear the local demo data from this browser.
+        <p class="settings-help" style="margin-bottom: 20px;">
+          ProfitPlate keeps everything in your browser. <strong>No server, no cloud</strong>.
         </p>
 
-        <button id="btn-clear-data" class="btn btn-secondary" type="button">
-          Clear local demo data
-        </button>
+        <div style="margin-bottom: 24px;">
+          <h3 style="font-size: 15px; margin: 0 0 8px;">Demo Data</h3>
+          <p class="settings-help" style="margin-top:0; margin-bottom:10px;">
+            Remove the example ingredients (Butter, Spaghetti, etc.) and recipes. Your own added items will stay.
+          </p>
+          <button id="btn-clear-demo" class="btn btn-secondary" type="button">
+            Remove Demo Items
+          </button>
+        </div>
+
+        <hr style="margin: 20px 0;">
+
+        <div>
+          <h3 style="font-size: 15px; margin: 0 0 8px; color: #c73d3d;">Danger Zone</h3>
+          <p class="settings-help" style="margin-top:0; margin-bottom:10px;">
+            Delete <strong>ALL</strong> your Purchases and Recipes. This cannot be undone.
+          </p>
+          <button id="btn-nuke-data" class="btn btn-danger" type="button">
+            Delete My Data
+          </button>
+        </div>
       </section>
 
       <section class="settings-footer-note">
@@ -205,7 +220,6 @@
     </main>
   </div>
 
-  <!-- Scripts -->
   <script src="assets/header.js"></script>
   <script src="assets/app.js"></script>
   <script>
@@ -223,7 +237,9 @@
       const locEl  = document.getElementById("setting-locale");
       const autoEl = document.getElementById("setting-autoRecalc");
       const advEl  = document.getElementById("setting-showAdvanced");
-      const clearBtn = document.getElementById("btn-clear-data");
+
+      const btnClearDemo = document.getElementById("btn-clear-demo");
+      const btnNukeData = document.getElementById("btn-nuke-data");
 
       function applyToUI(s) {
         if (!s) return;
@@ -257,21 +273,33 @@
         });
       });
 
-      // Clear local demo data
-      if (clearBtn) {
-        clearBtn.addEventListener("click", function () {
-          if (!confirm(
-            "This will clear local Purchases, Recipes and Settings stored in this browser. Continue?"
-          )) {
-            return;
+      // --- CLEAR DEMO DATA ---
+      if (btnClearDemo) {
+        btnClearDemo.addEventListener("click", function () {
+          if (!window.ppStore) return;
+          if (confirm("Remove only the example Demo items? Your created items will remain.")) {
+            window.ppStore.removeDemoData();
+            alert("Demo data removed.");
           }
-          try {
-            localStorage.removeItem("pp_purchases");
-            localStorage.removeItem("pp_recipes");
-            localStorage.removeItem("pp_settings");
-            alert("Local demo data cleared. Reload the page to start fresh.");
-          } catch (e) {
-            alert("Could not clear local data. Check your browser settings.");
+        });
+      }
+
+      // --- NUKE ALL DATA ---
+      if (btnNukeData) {
+        btnNukeData.addEventListener("click", function () {
+          const userCheck = prompt(
+            "WARNING: This will delete ALL your items and recipes forever.\n\nTo confirm, type DELETE in the box below:"
+          );
+
+          if (userCheck === "DELETE") {
+             if (window.ppStore) {
+               window.ppStore.nukeUserData();
+               alert("All data deleted. The app is clean.");
+               // Optional: Reload to re-seed demo data if the user wants to see it empty
+               // location.reload();
+             }
+          } else if (userCheck !== null) {
+            alert("Confirmation failed. Data was NOT deleted.");
           }
         });
       }
