@@ -1,289 +1,187 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ProfitPlate - Purchases</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/style.css">
-  <link rel="stylesheet" href="assets/tour.css">
+    <meta charset="UTF-8">
+    <title>Ingredients - ProfitPlate</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🥗</text></svg>">
+    <link rel="stylesheet" href="assets/style.css">
 </head>
-<body class="bg-light">
+<body>
 
-  <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
-    <div class="container">
-      <a class="navbar-brand fw-bold" href="index.html">ProfitPlate 👨‍🍳</a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="navbarNav">
-        <ul class="navbar-nav ms-auto">
-          <li class="nav-item"><a class="nav-link" href="index.html">Dashboard</a></li>
-          <li class="nav-item"><a class="nav-link active" href="purchases.html">Purchases</a></li>
-          <li class="nav-item"><a class="nav-link" href="recipes.html">Recipes</a></li>
-          <li class="nav-item"><a class="nav-link" href="settings.html">Settings</a></li>
-        </ul>
-      </div>
+<nav class="navbar">
+    <div class="nav-brand">🥗 ProfitPlate</div>
+    <div class="nav-links">
+        <a href="index.html">Dashboard</a>
+        <a href="purchases.html" class="active">Ingredients</a>
+        <a href="recipes.html">Recipes</a>
+        <a href="settings.html">Settings</a>
     </div>
-  </nav>
+</nav>
 
-  <div class="container">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-      <h2>Purchases Database</h2>
-      <button class="btn btn-primary" onclick="openPurchaseModal()">+ Add item manually</button>
+<div class="container">
+    <div class="page-header">
+        <h1>Ingredients & Purchases</h1>
+        <button class="btn-primary" onclick="toggleAddForm()">+ Add Item</button>
     </div>
 
-    <div class="card shadow-sm mb-4" id="recent-list">
-      <div class="card-header bg-white py-3">
-        <h5 class="mb-0">Ingredient List</h5>
-      </div>
-      <div class="card-body p-0">
-        <div class="table-responsive">
-          <table class="table table-hover mb-0 align-middle">
-            <thead class="table-light">
-              <tr>
-                <th class="ps-4">Name</th>
-                <th>Category</th>
-                <th>Sub-Category</th>
-                <th>Supplier</th>
-                <th>Price / Unit</th>
-                <th class="text-end pe-4">Actions</th>
-              </tr>
-            </thead>
-            <tbody id="purchases-table-body">
-              </tbody>
-          </table>
-        </div>
-        <div id="empty-state" class="text-center py-5 d-none">
-          <p class="text-muted">No ingredients yet. Add your first one!</p>
-        </div>
-      </div>
+    <div class="card">
+        <h3>Recently Updated</h3>
+        <div id="recent-list">
+            </div>
     </div>
-  </div>
 
-  <div class="modal fade" id="purchaseModal" tabindex="-1">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="purchaseModalLabel">Add Ingredient</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+    <div id="add-item-form" class="card hidden" style="border-left: 5px solid var(--accent);">
+        <h2 style="margin-bottom: 1rem;">Add / Edit Purchase</h2>
+        <form id="purchase-form">
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Item Name *</label>
+                    <input type="text" id="item-name" placeholder="e.g. Flour 00" required>
+                </div>
+                <div class="form-group">
+                    <label>Category *</label>
+                    <select id="item-category" required>
+                        <option value="">Select...</option>
+                        <option value="Meat & Fish">Meat & Fish</option>
+                        <option value="Dairy & Eggs">Dairy & Eggs</option>
+                        <option value="Vegetables & Fruit">Vegetables & Fruit</option>
+                        <option value="Dry Goods">Dry Goods</option>
+                        <option value="Spices & Condiments">Spices & Condiments</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Sub-type</label>
+                    <select id="item-subtype">
+                        <option value="">Select category first</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Supplier</label>
+                    <input type="text" id="item-supplier" placeholder="e.g. Metro">
+                </div>
+                <div class="form-group">
+                    <label>Invoice Number</label>
+                    <input type="text" id="item-invoice-number">
+                </div>
+                <div class="form-group">
+                    <label>Invoice Date</label>
+                    <input type="date" id="item-invoice-date">
+                </div>
+            </div>
+
+            <hr style="margin: 1.5rem 0; border: 0; border-top: 1px solid var(--border);">
+
+            <div class="pack-helper">
+                <label style="color: var(--primary);">📦 Price Calculator Helper</label>
+                <div class="text-muted" style="font-size: 0.85rem; margin-bottom: 10px;">
+                    Enter pack details (e.g. 5kg for €10) to calculate unit price automatically.
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <input type="text" id="pack-qty" placeholder="Pack Qty (e.g. 5)">
+                    </div>
+                    <div class="form-group">
+                        <select id="pack-unit">
+                            <option value="">Unit...</option>
+                            <option value="kg">kg</option>
+                            <option value="g">g</option>
+                            <option value="l">L</option>
+                            <option value="ml">ml</option>
+                            <option value="pcs">pcs</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <input type="text" id="pack-price" placeholder="Pack Price (e.g. 10.50)">
+                    </div>
+                    <div class="form-group" style="flex: 0 0 auto;">
+                        <button type="button" class="btn-secondary" onclick="fillPriceFromPack()">Calculate ↓</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Standard Unit *</label>
+                    <select id="item-unit" required>
+                        <option value="">Select...</option>
+                        <option value="kg">kg</option>
+                        <option value="g">g</option>
+                        <option value="l">L</option>
+                        <option value="ml">ml</option>
+                        <option value="pcs">pcs</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Price per Unit *</label>
+                    <input type="number" id="item-price" step="0.0001" placeholder="Calculated cost..." required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Notes</label>
+                <textarea id="item-notes" rows="2"></textarea>
+            </div>
+
+            <div class="form-row">
+                <button type="submit" class="btn-primary">Save Item</button>
+                <button type="button" class="btn-secondary" onclick="toggleAddForm()">Cancel</button>
+            </div>
+        </form>
+
+        <div id="price-history-block" class="hidden" style="margin-top: 2rem;">
+            <h4>Price History</h4>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Price</th>
+                    </tr>
+                </thead>
+                <tbody id="price-history-body"></tbody>
+            </table>
         </div>
-        <div class="modal-body">
-          <form id="purchaseForm">
-            <input type="hidden" id="p-id">
-            
-            <div class="mb-3">
-              <label class="form-label">Name</label>
-              <input type="text" class="form-control" id="p-name" placeholder="e.g. Butter 82%" required>
-            </div>
-
-            <div class="row">
-              <div class="col-6 mb-3">
-                <label class="form-label">Price</label>
-                <input type="number" step="0.01" class="form-control" id="p-price" placeholder="0.00" required>
-              </div>
-              <div class="col-6 mb-3">
-                <label class="form-label">Unit</label>
-                <select class="form-select" id="p-unit">
-                  <option value="kg">kg</option>
-                  <option value="L">L</option>
-                  <option value="pcs">pcs</option>
-                  <option value="g">g</option>
-                  <option value="ml">ml</option>
-                </select>
-              </div>
-            </div>
-
-            <div class="row">
-              <div class="col-6 mb-3">
-                <label class="form-label">Category</label>
-                <select class="form-select" id="p-category">
-                  <option value="">Select...</option>
-                  </select>
-              </div>
-              <div class="col-6 mb-3">
-                <label class="form-label">Sub-Category</label>
-                <select class="form-select" id="p-subtype" disabled>
-                  <option value="">Select Category first</option>
-                </select>
-              </div>
-            </div>
-
-            <div class="mb-3">
-              <label class="form-label">Supplier</label>
-              <input type="text" class="form-control" id="p-supplier" placeholder="e.g. Metro">
-            </div>
-          </form>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-          <button type="button" class="btn btn-primary" onclick="savePurchase()">Save Item</button>
-        </div>
-      </div>
     </div>
-  </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="assets/app.js"></script>
-  <script src="assets/tour.js"></script>
-  
-  <script>
-    // --- 1. DEFINITION OF CATEGORIES AND SUB-CATEGORIES ---
-    const CATEGORY_DATA = {
-      "Meat & Fish": ["Fresh Meat", "Cured Meat", "Fish", "Seafood", "Poultry"],
-      "Dairy & Eggs": ["Milk & Cream", "Cheese", "Eggs", "Butter", "Yogurt"],
-      "Produce": ["Vegetables", "Fruits", "Herbs", "Microgreens", "Mushrooms"],
-      "Dry Goods": ["Pasta", "Rice & Grains", "Flour", "Sugar", "Nuts & Seeds", "Spices"],
-      "Spices & Condiments": ["Oils", "Vinegars", "Sauces", "Salt & Pepper", "Spices"],
-      "Beverage": ["Coffee", "Tea", "Syrups", "Water", "Alcohol"],
-      "Packaging": ["Boxes", "Paper", "Cleaning", "Other"]
-    };
+    <div class="card">
+        <div class="form-row" style="margin-bottom: 1rem;">
+            <input type="text" id="search-input" placeholder="Search items..." style="margin-bottom: 0;">
+            <select id="category-filter" style="margin-bottom: 0; width: 200px;">
+                <option value="">All Categories</option>
+                <option value="Meat & Fish">Meat & Fish</option>
+                <option value="Dairy & Eggs">Dairy & Eggs</option>
+                <option value="Vegetables & Fruit">Vegetables & Fruit</option>
+                <option value="Dry Goods">Dry Goods</option>
+                <option value="Spices & Condiments">Spices & Condiments</option>
+                <option value="Other">Other</option>
+            </select>
+        </div>
 
-    // --- 2. INIT LOGIC ---
-    document.addEventListener('DOMContentLoaded', () => {
-      renderPurchases();
-      initCategoryDropdowns();
-    });
+        <div style="overflow-x: auto;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Category</th>
+                        <th>Sub</th>
+                        <th>Supplier</th>
+                        <th>Inv #</th>
+                        <th>Unit</th>
+                        <th>Price</th>
+                        <th>Updated</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="purchase-table">
+                    </tbody>
+            </table>
+        </div>
+    </div>
+</div>
 
-    // Populate the Main Category Dropdown
-    function initCategoryDropdowns() {
-      const catSelect = document.getElementById('p-category');
-      const subSelect = document.getElementById('p-subtype');
-
-      // Clear
-      catSelect.innerHTML = '<option value="">Select...</option>';
-      
-      // Fill Categories
-      Object.keys(CATEGORY_DATA).forEach(cat => {
-        const opt = document.createElement('option');
-        opt.value = cat;
-        opt.textContent = cat;
-        catSelect.appendChild(opt);
-      });
-
-      // Listen for changes
-      catSelect.addEventListener('change', function() {
-        const selectedCat = this.value;
-        subSelect.innerHTML = ''; // Clear sub
-        
-        if (selectedCat && CATEGORY_DATA[selectedCat]) {
-          subSelect.disabled = false;
-          // Add default
-          const def = document.createElement('option');
-          def.value = "";
-          def.textContent = "Select sub-category...";
-          subSelect.appendChild(def);
-
-          // Add sub options
-          CATEGORY_DATA[selectedCat].forEach(sub => {
-            const opt = document.createElement('option');
-            opt.value = sub;
-            opt.textContent = sub;
-            subSelect.appendChild(opt);
-          });
-        } else {
-          subSelect.disabled = true;
-          subSelect.innerHTML = '<option value="">Select Category first</option>';
-        }
-      });
-    }
-
-    // --- 3. RENDER TABLE ---
-    function renderPurchases() {
-      const list = window.ppStore.getPurchases();
-      const tbody = document.getElementById('purchases-table-body');
-      const empty = document.getElementById('empty-state');
-      
-      tbody.innerHTML = '';
-      
-      if(list.length === 0) {
-        empty.classList.remove('d-none');
-        return;
-      }
-      empty.classList.add('d-none');
-
-      list.forEach(p => {
-        const tr = document.createElement('tr');
-        if(p.isDemo) tr.classList.add('table-warning'); 
-        tr.innerHTML = `
-          <td class="ps-4 fw-medium">
-            ${p.name} 
-            ${p.isDemo ? '<span class="badge bg-warning text-dark" style="font-size:0.7em">DEMO</span>' : ''}
-          </td>
-          <td><span class="badge bg-light text-dark border">${p.category || '-'}</span></td>
-          <td><small class="text-muted">${p.subtype || '-'}</small></td>
-          <td>${p.supplier || '-'}</td>
-          <td>${parseFloat(p.pricePerUnit).toFixed(2)} / ${p.unit}</td>
-          <td class="text-end pe-4">
-            <button class="btn btn-sm btn-outline-secondary" onclick="editPurchase('${p.id}')">Edit</button>
-          </td>
-        `;
-        tbody.appendChild(tr);
-      });
-    }
-    
-    // --- 4. MODAL LOGIC ---
-    const pModal = new bootstrap.Modal(document.getElementById('purchaseModal'));
-
-    function openPurchaseModal() { 
-      document.getElementById('purchaseForm').reset();
-      document.getElementById('p-id').value = '';
-      
-      // Reset dropdowns
-      document.getElementById('p-category').value = "";
-      document.getElementById('p-category').dispatchEvent(new Event('change')); // Trigger sub reset
-      
-      pModal.show(); 
-    }
-
-    function savePurchase() {
-      const id = document.getElementById('p-id').value;
-      const name = document.getElementById('p-name').value;
-      const price = document.getElementById('p-price').value;
-      const unit = document.getElementById('p-unit').value;
-      const cat = document.getElementById('p-category').value;
-      const sub = document.getElementById('p-subtype').value;
-      const sup = document.getElementById('p-supplier').value;
-
-      if(!name || !price) return alert("Name and Price are required");
-
-      window.ppStore.upsertPurchase({
-        id: id || null,
-        name, 
-        pricePerUnit: price, 
-        unit, 
-        category: cat, 
-        subtype: sub, // Saving the sub-category
-        supplier: sup
-      });
-      pModal.hide();
-      renderPurchases();
-    }
-
-    function editPurchase(id) {
-      const p = window.ppStore.getPurchases().find(x => x.id === id);
-      if(!p) return;
-      document.getElementById('p-id').value = p.id;
-      document.getElementById('p-name').value = p.name;
-      document.getElementById('p-price').value = p.pricePerUnit;
-      document.getElementById('p-unit').value = p.unit;
-      document.getElementById('p-supplier').value = p.supplier;
-
-      // Handle Cascading Dropdowns for Edit
-      const catSelect = document.getElementById('p-category');
-      catSelect.value = p.category || "";
-      
-      // Manually trigger change so sub-dropdown fills up
-      catSelect.dispatchEvent(new Event('change'));
-
-      // Now set the subtype
-      if(p.subtype) {
-        document.getElementById('p-subtype').value = p.subtype;
-      }
-
-      pModal.show();
-    }
-  </script>
+<script src="assets/app.js"></script>
 </body>
 </html>
