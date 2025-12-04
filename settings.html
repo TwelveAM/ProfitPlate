@@ -1,184 +1,117 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Settings – ProfitPlate</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="stylesheet" href="assets/styles.css" />
-  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
-  <style>
-    /* Specific styles for the file input */
-    .file-input-wrapper {
-      position: relative;
-      overflow: hidden;
-      display: inline-block;
-    }
-    .file-input-wrapper input[type=file] {
-      font-size: 100px;
-      position: absolute;
-      left: 0;
-      top: 0;
-      opacity: 0;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <title>Settings - ProfitPlate</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🥗</text></svg>">
+    <link rel="stylesheet" href="assets/style.css">
 </head>
-
 <body>
-  <div id="site-header"></div>
 
-  <div class="page">
-    <div class="page-header">
-      <h1>Settings</h1>
+<nav class="navbar">
+    <div class="nav-brand">🥗 ProfitPlate</div>
+    <div class="nav-links">
+        <a href="index.html">Dashboard</a>
+        <a href="purchases.html">Ingredients</a>
+        <a href="recipes.html">Recipes</a>
+        <a href="settings.html" class="active">Settings</a>
+    </div>
+</nav>
+
+<div class="container">
+    <h1>Settings</h1>
+    
+    <div class="card">
+        <form id="settings-form">
+            <div class="form-group">
+                <label>Currency Symbol</label>
+                <select id="currency">
+                    <option value="EUR">EUR (€)</option>
+                    <option value="USD">USD ($)</option>
+                    <option value="GBP">GBP (£)</option>
+                    <option value="RON">RON (lei)</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Number Format (Locale)</label>
+                <select id="locale">
+                    <option value="eu">European (1.234,56)</option>
+                    <option value="us">US/UK (1,234.56)</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Calculation Mode</label>
+                <div class="toggle-wrapper">
+                    <input type="checkbox" id="autoRecalc">
+                    <span>Auto-update recipe costs when ingredient prices change</span>
+                </div>
+                <p class="text-muted small">
+                    If unchecked, recipe costs are "frozen" at the moment you created the recipe.
+                </p>
+            </div>
+
+            <div class="form-group">
+                <label>Recipe View</label>
+                <div class="toggle-wrapper">
+                    <input type="checkbox" id="showAdvanced">
+                    <span>Show advanced details (margins, full breakdown) on cards</span>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-primary">Save Settings</button>
+        </form>
     </div>
 
-    <section class="settings-box">
-      <h2 class="section-title">General Preferences</h2>
-      
-      <div class="grid-2">
-        <div class="settings-field">
-          <label class="settings-label">Currency</label>
-          <select id="setting-currency" class="form-select">
-            <option value="EUR">€ – Euro</option>
-            <option value="RON">lei – Romanian Leu</option>
-            <option value="USD">$ – US Dollar</option>
-            <option value="GBP">£ – British Pound</option>
-          </select>
-        </div>
-        
-        <div class="settings-field">
-          <label class="settings-label">Number Format</label>
-          <select id="setting-locale" class="form-select">
-            <option value="eu">1.234,56 (EU)</option>
-            <option value="us">1,234.56 (US/UK)</option>
-          </select>
-        </div>
-      </div>
+    <div class="card" style="border-left: 5px solid var(--danger);">
+        <h3>Data Management</h3>
+        <p>Your data is stored locally in your browser.</p>
+        <button class="btn-danger" id="clear-data-btn">Clear All Data</button>
+    </div>
+</div>
 
-      <div class="settings-field">
-        <label class="toggle-switch">
-          <input type="checkbox" id="setting-autoRecalc" checked>
-          <span class="toggle-slider"></span>
-          <span class="toggle-label" style="font-weight:600;">Auto-recalculate recipes</span>
-        </label>
-        <p class="settings-help">If unchecked, recipe costs will freeze at the time of creation.</p>
-      </div>
-      
-      <div class="settings-field">
-        <label class="toggle-switch">
-          <input type="checkbox" id="setting-showAdvanced" checked>
-          <span class="toggle-slider"></span>
-          <span class="toggle-label" style="font-weight:600;">Show advanced details</span>
-        </label>
-        <p class="settings-help">Show breakdown tables and margin details on recipe cards.</p>
-      </div>
-    </section>
+<script src="assets/app.js"></script>
+<script>
+    // Logic specific to settings page
+    document.addEventListener('DOMContentLoaded', () => {
+        // Load settings from app.js API
+        const settings = window.loadSettings();
 
-    <section class="settings-box">
-      <h2 class="section-title">Data Backup & Restore</h2>
-      <p class="settings-help">Save your menu to a file or load a previous backup.</p>
-      
-      <div style="display:flex; gap: 15px; margin-top:15px; flex-wrap:wrap;">
-        <button type="button" class="btn-primary" onclick="exportData()">
-          📥 Download Backup (JSON)
-        </button>
-        
-        <div class="file-input-wrapper">
-          <button class="btn-secondary">📤 Restore from File</button>
-          <input type="file" id="import-file" accept=".json" onchange="importData(this)" />
-        </div>
-      </div>
-    </section>
+        const currencyEl = document.getElementById('currency');
+        const localeEl = document.getElementById('locale');
+        const autoRecalcEl = document.getElementById('autoRecalc');
+        const showAdvancedEl = document.getElementById('showAdvanced');
 
-    <section class="settings-box" style="border-color: #ffcccc; background: #fff5f5;">
-      <h2 class="section-title" style="color: #c00;">Danger Zone</h2>
-      <p class="settings-help">Permanently delete all data from this browser.</p>
-      <button id="btn-clear-data" class="btn-danger" type="button">
-        Delete All Data
-      </button>
-    </section>
-
-  </div>
-
-  <script src="assets/header.js"></script>
-  <script>renderHeader('settings');</script>
-  <script src="assets/app.js"></script>
-  <script>
-    document.addEventListener("DOMContentLoaded", function () {
-      if (typeof loadSettings !== "function") return;
-
-      const curEl  = document.getElementById("setting-currency");
-      const locEl  = document.getElementById("setting-locale");
-      const autoEl = document.getElementById("setting-autoRecalc");
-      const advEl  = document.getElementById("setting-showAdvanced");
-      const clearBtn = document.getElementById("btn-clear-data");
-
-      // Load Values
-      const s = loadSettings();
-      if (curEl)  curEl.value  = s.currency || "EUR";
-      if (locEl)  locEl.value  = s.locale || "eu";
-      if (autoEl) autoEl.checked = s.autoRecalc !== false;
-      if (advEl)  advEl.checked  = s.showAdvanced !== false;
-
-      // Save on Change
-      function save() {
-        saveSettings({
-          currency: curEl.value,
-          locale: locEl.value,
-          autoRecalc: autoEl.checked,
-          showAdvanced: advEl.checked
-        });
-      }
-      [curEl, locEl, autoEl, advEl].forEach(el => el.addEventListener("change", save));
-
-      // Clear Data
-      if (clearBtn) {
-        clearBtn.addEventListener("click", function () {
-          if (confirm("Are you sure? This will delete ALL recipes and purchases.")) {
-            localStorage.clear();
-            location.reload();
-          }
-        });
-      }
-    });
-
-    // ==== Export Data Function ====
-    function exportData() {
-      const data = {
-        purchases: JSON.parse(localStorage.getItem("pp_purchases") || "[]"),
-        recipes: JSON.parse(localStorage.getItem("pp_recipes") || "[]"),
-        settings: JSON.parse(localStorage.getItem("pp_settings") || "{}"),
-        timestamp: new Date().toISOString()
-      };
-      const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "ProfitPlate_Backup_" + new Date().toISOString().slice(0,10) + ".json";
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-    }
-
-    // ==== Import Data Function ====
-    function importData(input) {
-      const file = input.files[0];
-      if (!file) return;
-      
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        try {
-          const data = JSON.parse(e.target.result);
-          if (data.purchases) localStorage.setItem("pp_purchases", JSON.stringify(data.purchases));
-          if (data.recipes) localStorage.setItem("pp_recipes", JSON.stringify(data.recipes));
-          if (data.settings) localStorage.setItem("pp_settings", JSON.stringify(data.settings));
-          alert("Data restored successfully! The page will now reload.");
-          location.reload();
-        } catch (err) {
-          alert("Error parsing backup file. Is it a valid JSON?");
+        if(settings) {
+            currencyEl.value = settings.currency || 'EUR';
+            localeEl.value = settings.locale || 'eu';
+            autoRecalcEl.checked = settings.autoRecalc !== false;
+            showAdvancedEl.checked = settings.showAdvanced !== false;
         }
-      };
-      reader.readAsText(file);
-    }
-  </script>
+
+        // Save
+        document.getElementById('settings-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const newSettings = {
+                currency: currencyEl.value,
+                locale: localeEl.value,
+                autoRecalc: autoRecalcEl.checked,
+                showAdvanced: showAdvancedEl.checked
+            };
+            window.saveSettings(newSettings);
+            alert('Settings saved!');
+        });
+
+        // Clear Data
+        document.getElementById('clear-data-btn').addEventListener('click', () => {
+            if(confirm('Are you sure? This will delete all ingredients and recipes. This cannot be undone.')) {
+                localStorage.clear();
+                alert('Data cleared.');
+                location.reload();
+            }
+        });
+    });
+</script>
 </body>
 </html>
