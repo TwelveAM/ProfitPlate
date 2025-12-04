@@ -1,95 +1,87 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Recipes – ProfitPlate</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="stylesheet" href="assets/styles.css" />
-  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
+    <meta charset="UTF-8">
+    <title>Recipes - ProfitPlate</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🥗</text></svg>">
+    <link rel="stylesheet" href="assets/style.css">
 </head>
-
 <body>
-  <div id="site-header"></div>
 
-  <div class="page">
+<nav class="navbar">
+    <div class="nav-brand">🥗 ProfitPlate</div>
+    <div class="nav-links">
+        <a href="index.html">Dashboard</a>
+        <a href="purchases.html">Ingredients</a>
+        <a href="recipes.html" class="active">Recipes</a>
+        <a href="settings.html">Settings</a>
+    </div>
+</nav>
+
+<div class="container">
     <div class="page-header">
-      <div>
         <h1>Recipes</h1>
-        <p class="text-muted">Manage your menu, costs, and margins.</p>
-      </div>
-      <div class="header-actions">
-        <button type="button" class="btn-primary" onclick="showRecipeForm()">
-          + Add Recipe
-        </button>
-      </div>
+        <button class="btn-primary" onclick="showRecipeForm()">+ New Recipe</button>
     </div>
 
-    <div class="toolbar">
-      <div class="search-wrapper">
-        <input
-          id="recipe-search"
-          type="text"
-          class="form-input"
-          placeholder="Search recipes..."
-        />
-      </div>
-      
-      <label class="toggle-switch">
-        <input type="checkbox" id="show-archived-toggle">
-        <span class="toggle-slider"></span>
-        <span class="toggle-label">Show Archived</span>
-      </label>
+    <div class="card" style="display: flex; gap: 1rem; align-items: center; padding: 1rem;">
+        <input type="text" id="recipe-search" placeholder="Search recipes..." style="margin-bottom: 0; flex: 1;">
+        <div class="toggle-wrapper">
+            <input type="checkbox" id="show-archived-toggle">
+            <label for="show-archived-toggle" style="margin: 0; cursor: pointer;">Show Archived</label>
+        </div>
     </div>
 
-    <div id="recipe-form-wrapper" class="settings-box hidden" style="margin-bottom: 30px; border-left: 4px solid #0b6e46;">
-      <h2 id="recipe-form-title" class="section-title">Add Recipe</h2>
-      <p class="text-muted small">
-        Define the batch size and ingredients. Costs are calculated automatically.
-      </p>
-
-      <form id="recipe-form">
-        <input type="hidden" id="recipe-id" />
-
-        <div class="grid-2">
-          <div>
-            <label class="settings-label">Recipe Name</label>
-            <input id="recipe-name" type="text" class="form-input" placeholder="e.g. Tiramisu" />
-          </div>
-          <div>
-            <label class="settings-label">Portions per Batch</label>
-            <input id="recipe-portions" type="number" min="1" class="form-input" placeholder="e.g. 10" />
-          </div>
+    <div id="recipes-list">
         </div>
+</div>
 
-        <div style="margin-top: 15px;">
-          <label class="settings-label">Selling Price per Portion (Optional)</label>
-          <input id="recipe-price" type="number" min="0" step="0.01" class="form-input" placeholder="0.00" />
+<div id="recipe-form-wrapper" class="hidden" 
+     style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 200; display: flex; justify-content: center; overflow-y: auto; padding: 2rem;">
+    
+    <div class="card" style="width: 100%; max-width: 800px; height: fit-content; border-top: 5px solid var(--accent);">
+        <div class="page-header">
+            <h2 id="recipe-form-title">Recipe</h2>
+            <button type="button" class="btn-secondary small" onclick="hideRecipeForm()">✕ Close</button>
         </div>
+        
+        <form id="recipe-form">
+            <input type="hidden" id="recipe-id">
 
-        <hr />
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Recipe Name</label>
+                    <input type="text" id="recipe-name" required>
+                </div>
+                <div class="form-group">
+                    <label>Portions (Yield)</label>
+                    <input type="number" id="recipe-portions" placeholder="e.g. 4" required>
+                </div>
+                <div class="form-group">
+                    <label>Selling Price (per portion)</label>
+                    <input type="number" id="recipe-price" step="0.01">
+                </div>
+            </div>
 
-        <h3 class="section-title" style="font-size:16px;">Ingredients</h3>
-        <div id="ingredients-container"></div>
+            <hr style="margin: 1rem 0; border: 0; border-top: 1px solid var(--border);">
+            
+            <h3>Ingredients</h3>
+            <div id="ingredients-container">
+                </div>
+            
+            <button type="button" class="btn-secondary small" onclick="addIngredientRow()" style="margin-bottom: 1.5rem;">
+                + Add Ingredient
+            </button>
 
-        <div style="margin-top:10px; margin-bottom: 20px;">
-          <button type="button" class="btn-secondary small" onclick="addIngredientRow()">
-            + Add Ingredient
-          </button>
-        </div>
-
-        <div class="form-actions">
-          <button type="button" class="btn-secondary" onclick="hideRecipeForm()">Cancel</button>
-          <button type="submit" class="btn-primary">Save Recipe</button>
-        </div>
-      </form>
+            <div class="form-row" style="justify-content: flex-end; gap: 10px;">
+                <button type="button" class="btn-secondary" onclick="hideRecipeForm()">Cancel</button>
+                <button type="submit" class="btn-primary">Save Recipe</button>
+            </div>
+        </form>
     </div>
+</div>
 
-    <div id="recipes-list" class="recipe-grid"></div>
-  </div>
-
-  <script src="assets/header.js"></script>
-  <script>renderHeader('recipes');</script>
-  <script src="assets/app.js"></script>
-  <script src="assets/recipes.js"></script>
+<script src="assets/app.js"></script>
+<script src="assets/recipes.js"></script>
 </body>
 </html>
