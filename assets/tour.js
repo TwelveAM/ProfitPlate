@@ -374,7 +374,7 @@
 
   document.addEventListener("DOMContentLoaded", function () {
     // Hook the “See how it works” button on home
-    const howBtn = document.getElementById("btn-how-it-works");
+    const startBtn = document.getElementById("pp-how-it-works");
     if (howBtn && PAGE_ID === "home") {
       howBtn.addEventListener("click", function () {
         startTourFromBeginning();
