@@ -1,355 +1,228 @@
-/* ================================ Header + hero banner =================================== */
+/* assets/style.css */
 
-header {
-  background: transparent;
+:root {
+    /* Palette: Deep Green Forest */
+    --primary: #143d2e;       /* Dark Green */
+    --primary-hover: #1f5c45;
+    --accent: #40916c;        /* Medium Green */
+    --bg-body: #f4f9f6;       /* Mint White */
+    --bg-card: #ffffff;
+    --text-main: #1d1d1d;
+    --text-muted: #666;
+    --border: #dbece5;
+    
+    /* Functional Colors */
+    --danger: #d93025;
+    --warning: #f9a825;
+    --success: #188038;
 }
 
-.header-inner {
-  max-width: 880px;
-  margin: 0 auto;
-  padding: 24px 20px 0;
-  text-align: center;
-}
-
-/* Green pill banner with icons left/right and title centered */
-.hero-banner {
-  width: 630px;
-  max-width: 100%;
-  height: 130px;
-  margin: 0 auto 18px;
-  background: #0b6e46;
-  border-radius: 26px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 24px 40px;
-  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.18);
-  box-sizing: border-box;
-}
-
-.hero-icons {
-  font-size: 36px;
-}
-
-.hero-title-block {
-  flex: 1;
-  text-align: center;
-}
-
-.hero-title {
-  font-size: 28px;
-  font-weight: 700;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: #ffffff;
-  margin-bottom: 4px;
-}
-
-.hero-subtitle {
-  font-size: 15px;
-  color: #f2f7f4;
-}
-
-/* Nav under the banner */
-.nav-list {
-  list-style: none;
-  padding: 0;
-  margin: 16px 0 32px;
-  display: flex;
-  justify-content: center;
-  gap: 32px;
-}
-
-.nav-list li {
-  margin: 0;
-}
-
-.nav-link {
-  font-size: 16px;
-  color: #333;
-  text-decoration: none;
-  padding: 6px 18px;
-  border-radius: 25px;
-  transition: 0.22s ease;
-}
-
-.nav-link:hover {
-  background: #e3e7ea;
-}
-
-/* Support both .active and .nav-link-active */
-.nav-link.active,
-.nav-link-active {
-  background: #0b6e46;
-  color: #fff !important;
-}
-
-/* ================================ Global resets & layout =================================== */
+* { box-sizing: border-box; }
 
 body {
-  font-family: Inter, sans-serif;
-  background: #f7f8fa;
-  color: #333;
-  margin: 0;
-  padding: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background-color: var(--bg-body);
+    color: var(--text-main);
+    margin: 0;
+    padding: 0;
+    line-height: 1.5;
+}
+
+/* --- Layout --- */
+.navbar {
+    background-color: var(--primary);
+    color: white;
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.nav-brand {
+    font-weight: 700;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.nav-links a {
+    color: rgba(255,255,255,0.8);
+    text-decoration: none;
+    margin-left: 20px;
+    font-weight: 500;
+    transition: color 0.2s;
+}
+
+.nav-links a:hover, .nav-links a.active {
+    color: white;
 }
 
 .container {
-  max-width: 880px;
-  margin: 0 auto;
-  padding: 40px 20px;
+    max-width: 1000px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+    padding-bottom: 4rem; /* Space for scrolling */
 }
 
-/* ================================ Legacy nav (if used anywhere) =================================== */
+/* --- Typography & Headings --- */
+h1, h2, h3 { margin-top: 0; color: var(--primary); }
+h1 { font-size: 1.8rem; margin-bottom: 1.5rem; }
 
-.nav {
-  display: flex;
-  gap: 32px;
-  margin-bottom: 42px;
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
 }
 
-/* ================================ Inputs – universal rounded style =================================== */
-
-input,
-select,
-textarea {
-  width: 100%;
-  padding: 10px 14px;
-  font-size: 15px;
-  border-radius: 12px;
-  border: 1px solid #cfd5db;
-  background: #ffffff;
-  box-sizing: border-box;
-  outline: none;
+/* --- Cards --- */
+.card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
 }
-
-input:focus,
-select:focus,
-textarea:focus {
-  border-color: #0b6e46;
-  box-shadow: 0 0 0 2px rgba(11, 110, 70, 0.15);
-}
-
-/* Smaller inputs for recipe table rows */
-.small-input {
-  width: 110px;
-}
-
-/* ================================ Buttons =================================== */
-
-button,
-.btn {
-  font-size: 14px;
-  padding: 9px 16px;
-  border-radius: 12px;
-  border: none;
-  cursor: pointer;
-  transition: 0.22s ease;
-}
-
-.btn-primary,
-button.btn-primary {
-  background: #0b6e46;
-  color: white;
-}
-
-.btn-primary:hover {
-  background: #095a38;
-}
-
-.btn-secondary {
-  background: #e3e7ea;
-  color: #333;
-}
-
-.btn-secondary:hover {
-  background: #d6dbdf;
-}
-
-.btn-danger {
-  background: #e54c4c;
-  color: white;
-}
-
-.btn-danger:hover {
-  background: #c73d3d;
-}
-
-/* ================================ Pills (Category / Sub-type) =================================== */
-
-.filter-pill {
-  display: inline-block;
-  padding: 8px 18px;
-  border-radius: 50px;
-  background: #e3e7ea;
-  margin: 6px;
-  cursor: pointer;
-  transition: 0.2s ease;
-  font-size: 14px;
-}
-
-.filter-pill:hover {
-  background: #d6dbdf;
-}
-
-.filter-pill-active {
-  background: #0b6e46 !important;
-  color: #fff !important;
-}
-
-/* ================================ “Updated recently” card =================================== */
 
 .card-updated {
-  background: #fff;
-  padding: 10px 14px; /* reduced padding */
-  border-radius: 10px; /* smaller rounded corner */
-  border: 1px solid #d9dee3;
-  margin-bottom: 10px; /* reduced spacing between cards */
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04); /* lighter shadow */
-  font-size: 14px; /* slightly smaller text */
-  line-height: 1.25; /* compact line spacing */
+    padding: 10px;
+    border-bottom: 1px solid var(--border);
+}
+.card-updated:last-child { border-bottom: none; }
+.card-updated-title { font-weight: 600; color: var(--primary); }
+
+.recipe-box {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    transition: transform 0.2s;
+}
+.recipe-box:hover {
+    border-color: var(--accent);
 }
 
-.card-updated-title {
-  font-weight: 600;
-  color: #0b6e46;
-  font-size: 14px;
+/* --- Forms & Inputs --- */
+label {
+    display: block;
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 0.4rem;
+    color: var(--text-main);
 }
 
-.card-updated small {
-  color: #666;
-  font-size: 12px;
+input[type="text"],
+input[type="number"],
+input[type="date"],
+select,
+textarea {
+    width: 100%;
+    padding: 0.6rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 1rem;
+    margin-bottom: 1rem;
 }
 
-/* ================================ Tables =================================== */
+input:focus, select:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px rgba(64, 145, 108, 0.2);
+}
 
+.form-row {
+    display: flex;
+    gap: 1rem;
+}
+.form-group { flex: 1; }
+
+/* --- Buttons --- */
+button {
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 1rem;
+    border: none;
+    border-radius: 4px;
+    padding: 0.6rem 1.2rem;
+    transition: background 0.2s;
+}
+
+.btn-primary {
+    background-color: var(--primary);
+    color: white;
+}
+.btn-primary:hover { background-color: var(--primary-hover); }
+
+.btn-secondary {
+    background-color: #e9ecef;
+    color: #333;
+}
+.btn-secondary:hover { background-color: #dee2e6; }
+
+.btn-danger {
+    background-color: #fee2e2;
+    color: #b91c1c;
+}
+.btn-danger:hover { background-color: #fecaca; }
+
+.small { padding: 0.3rem 0.6rem; font-size: 0.85rem; }
+
+/* --- Tables --- */
 table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 16px;
-  background: #fff;
-  border-radius: 16px;
-  overflow: hidden;
-}
-
-thead {
-  background: #f0f2f5;
-}
-
-th,
-td {
-  padding: 14px 18px;
-  border-bottom: 1px solid #eceff2;
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.95rem;
 }
 
 th {
-  text-align: left;
-  font-weight: 600;
-  color: #5a5a5a;
+    text-align: left;
+    padding: 12px 8px;
+    border-bottom: 2px solid var(--border);
+    color: var(--primary);
+    font-weight: 600;
 }
 
-tr:last-child td {
-  border-bottom: none;
+td {
+    padding: 10px 8px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
 }
 
-/* ================================ Recipe blocks =================================== */
+tr:last-child td { border-bottom: none; }
+tr:hover td { background-color: #f9fbf9; }
 
-.recipe-box {
-  background: #fff;
-  padding: 24px;
-  border-radius: 18px;
-  border: 1px solid #dde2e6;
-  margin-bottom: 22px;
+/* --- Utilities --- */
+.hidden { display: none !important; }
+.text-muted { color: var(--text-muted); }
+.pack-helper {
+    background-color: #f0f7f4;
+    padding: 1rem;
+    border-radius: 6px;
+    border: 1px dashed var(--accent);
+    margin-bottom: 1.5rem;
 }
-
-.recipe-title {
-  font-size: 20px;
-  font-weight: 600;
-  color: #0b6e46;
-}
-
-.recipe-summary {
-  margin-top: 8px;
-  font-size: 15px;
-  color: #555;
-}
-
-/* ================================ Add recipe form =================================== */
-
-.recipe-form-row {
-  display: flex;
-  gap: 12px;
-  margin-bottom: 14px;
-}
-
-.recipe-form-row .half {
-  flex: 1;
-}
-
 .recipe-ingredient-row {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 10px;
+    display: flex;
+    gap: 8px;
+    margin-bottom: 8px;
+    align-items: center;
 }
-
-.recipe-ingredient-row select {
-  width: 220px;
+.recipe-ingredient-row select, .recipe-ingredient-row input {
+    margin-bottom: 0; 
 }
+.small-input { width: 80px; }
 
-.recipe-ingredient-row input {
-  width: 110px;
-}
-
-.recipe-ingredient-row .remove-btn {
-  background: #e54c4c;
-  color: white;
-  padding: 8px 12px;
-  border-radius: 10px;
-}
-
-.recipe-ingredient-row .remove-btn:hover {
-  background: #c73d3d;
-}
-
-/* ================================ Settings page =================================== */
-
-.settings-box {
-  background: #fff;
-  padding: 24px;
-  border-radius: 18px;
-  border: 1px solid #dde2e6;
-  margin-top: 20px;
-}
-
-.settings-title {
-  font-size: 19px;
-  font-weight: 600;
-  color: #0b6e46;
-  margin-bottom: 20px;
-}
-
-.settings-note {
-  color: #666;
-  font-size: 14px;
-  margin-top: 10px;
-}
-
-/* ================================ Misc =================================== */
-
-hr {
-  border: none;
-  border-top: 1px solid #e1e4e7;
-  margin: 25px 0;
-}
-
-.text-muted {
-  color: #777;
-}
-
-.mt-20 {
-  margin-top: 20px;
-}
-
-.hidden {
-  display: none;
+/* Toggle Switch */
+.toggle-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9rem;
 }
