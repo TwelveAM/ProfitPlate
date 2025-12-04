@@ -1,0 +1,113 @@
+/* tour.css - Styling for the guided tour */
+
+/* The dark overlay */
+#tour-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 9990;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: auto; /* Blocks clicks on background */
+}
+
+#tour-overlay.active {
+  opacity: 1;
+}
+
+/* The element being highlighted */
+.tour-highlight {
+  position: relative;
+  z-index: 9991 !important;
+  background-color: white; /* Ensure it has background to stand out */
+  box-shadow: 0 0 0 4px #0b6e46, 0 0 20px rgba(0,0,0,0.5); /* Green ring + shadow */
+  border-radius: 4px;
+  pointer-events: none; /* User can look but not click interacting during tour */
+}
+
+/* The Tooltip Bubble */
+.tour-bubble {
+  position: absolute;
+  width: 300px;
+  max-width: 90vw;
+  background: #fff;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+  z-index: 9992;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  animation: tour-pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes tour-pop {
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.tour-bubble h3 {
+  margin: 0 0 8px;
+  font-size: 18px;
+  color: #0b6e46;
+}
+
+.tour-bubble p {
+  margin: 0 0 16px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #444;
+}
+
+.tour-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.tour-btn {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 6px 12px;
+  border-radius: 6px;
+  color: #666;
+}
+
+.tour-btn:hover {
+  background: #f0f0f0;
+  color: #333;
+}
+
+.tour-btn.primary {
+  background: #0b6e46;
+  color: white;
+}
+
+.tour-btn.primary:hover {
+  background: #095c3b;
+}
+
+/* Center Modal for Intro / End */
+.tour-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: white;
+  padding: 30px;
+  border-radius: 16px;
+  width: 90%;
+  max-width: 400px;
+  z-index: 9995;
+  text-align: center;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+}
+
+.tour-modal h2 {
+  margin-top: 0;
+  color: #222;
+}
