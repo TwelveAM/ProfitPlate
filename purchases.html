@@ -1,169 +1,334 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ingredients - ProfitPlate</title>
-    <link rel="stylesheet" href="assets/style.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/shepherd.js@10.0.1/dist/css/shepherd.css"/>
+  <meta charset="UTF-8" />
+  <title>Purchases – ProfitPlate</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta
+    name="description"
+    content="Manage your ingredient base for ProfitPlate – purchases, categories, prices and suppliers."
+  />
+
+  <link rel="stylesheet" href="assets/styles.css" />
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-plate-32.png" />
+
+  <style>
+    /* Same content container layout as Settings page */
+    .page {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 16px 20px 40px;
+    }
+
+    /* Print tweaks ONLY for this page */
+    @media print {
+      @page {
+        size: A4;
+        margin: 12mm;
+      }
+
+      body {
+        background: #ffffff;
+      }
+
+      /* Hide header/nav + form + buttons when printing */
+      header,
+      #add-item-form,
+      .btn,
+      .btn-primary,
+      .btn-secondary {
+        display: none !important;
+      }
+
+      .page {
+        max-width: none;
+        padding: 0;
+      }
+
+      table.table {
+        border-collapse: collapse;
+        font-size: 11px;
+        width: 100%;
+      }
+
+      table.table th,
+      table.table td {
+        border: 1px solid #cccccc;
+        padding: 4px 6px;
+      }
+    }
+  </style>
 </head>
+
 <body>
+  <!-- Shared header from header.js -->
+  <div id="site-header"></div>
 
-<nav class="navbar">
-    <div class="nav-brand">🥗 ProfitPlate</div>
-    <div class="nav-links">
-        <a href="index.html">Dashboard</a>
-        <a href="purchases.html" class="active">Ingredients</a>
-        <a href="recipes.html">Recipes</a>
-        <a href="settings.html">Settings</a>
-    </div>
-</nav>
+  <div class="page">
+    <main>
+      <h1>Purchases</h1>
+      <p class="hero-subtitle" style="max-width: 720px;">
+        This is your ingredient base. Add items you buy, organize them by category, and keep supplier prices
+        up to date. Recipes will use everything you add here.
+      </p>
 
-<div class="container">
-    <div class="page-header">
-        <h1>Ingredients Database</h1>
-        <button class="btn-primary" onclick="toggleAddForm()" id="tour-add-ingredient-btn">+ Add Ingredient</button>
-    </div>
+      <!-- Add item button -->
+      <div style="margin-top: 20px; margin-bottom: 10px;">
+        <button type="button" class="btn btn-primary" onclick="toggleAddForm()">Add item manually</button>
+      </div>
 
-    <div id="add-item-form" class="card hidden" style="border-left: 5px solid var(--accent);">
-        <h2 style="margin-bottom: 1rem;">Add / Edit Purchase</h2>
-        
-        <form id="purchase-form">
-            <input type="hidden" id="edit-index"> <div class="form-row">
-                <div class="form-group">
-                    <label>Item Name *</label>
-                    <input type="text" id="item-name" placeholder="e.g. Flour 00" required>
-                </div>
-                <div class="form-group">
-                    <label>Category *</label>
-                    <select id="item-category" required>
-                        <option value="">Select...</option>
-                        <option value="Meat & Fish">Meat & Fish</option>
-                        <option value="Dairy & Eggs">Dairy & Eggs</option>
-                        <option value="Vegetables & Fruit">Vegetables & Fruit</option>
-                        <option value="Dry Goods">Dry Goods</option>
-                        <option value="Spices & Condiments">Spices & Condiments</option>
-                        <option value="Other">Other</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Sub-type</label>
-                    <select id="item-subtype">
-                        <option value="">Select category first</option>
-                    </select>
-                </div>
+      <!-- Add / edit purchase form -->
+      <div id="add-item-form" class="hidden" style="margin-top: 10px;">
+        <div class="settings-box">
+          <h2 class="section-title">Add a new purchase item</h2>
+
+          <form id="purchase-form">
+            <div class="settings-field">
+              <label for="item-name" class="settings-label">Name</label>
+              <input id="item-name" type="text" placeholder="e.g. Butter 82% 1kg" />
             </div>
 
-            <div class="form-row">
-                <div class="form-group">
-                    <label>Supplier</label>
-                    <input type="text" id="item-supplier" placeholder="e.g. Metro">
-                </div>
-                <div class="form-group">
-                    <label>Invoice Number</label>
-                    <input type="text" id="item-invoice-number">
-                </div>
-                <div class="form-group">
-                    <label>Invoice Date</label>
-                    <input type="date" id="item-invoice-date">
-                </div>
+            <div class="settings-field" style="display: flex; gap: 12px; flex-wrap: wrap;">
+              <div style="flex: 1; min-width: 160px;">
+                <label for="item-category" class="settings-label">Category</label>
+                <select id="item-category" class="settings-select">
+                  <option value="">Select...</option>
+                  <option value="Meat &amp; Fish">Meat &amp; Fish</option>
+                  <option value="Dairy & Eggs">Dairy &amp; Eggs</option>
+                  <option value="Vegetables & Fruit">Vegetables &amp; Fruit</option>
+                  <option value="Dry Goods">Dry Goods</option>
+                  <option value="Spices & Condiments">Spices &amp; Condiments</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+
+              <div style="flex: 1; min-width: 160px;">
+                <label for="item-subtype" class="settings-label">Sub-type</label>
+                <select id="item-subtype" class="settings-select">
+                  <option value="">Select...</option>
+                </select>
+              </div>
             </div>
 
-            <hr class="divider">
-
-            <div style="background: #f0f7f4; padding: 1rem; border-radius: 8px; border: 1px dashed var(--primary); margin-bottom: 1rem;">
-                <label style="color: var(--primary);">📦 Pack Price Calculator</label>
-                <div class="text-muted" style="font-size: 0.9rem; margin-bottom: 0.5rem;">
-                    Enter pack details to auto-calculate the unit price.
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <input type="number" id="pack-qty" placeholder="Qty (e.g. 5)">
-                    </div>
-                    <div class="form-group">
-                        <select id="pack-unit">
-                            <option value="">Unit...</option>
-                            <option value="kg">kg</option>
-                            <option value="g">g</option>
-                            <option value="l">L</option>
-                            <option value="ml">ml</option>
-                            <option value="pcs">pcs</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <input type="number" id="pack-price" placeholder="Total Price">
-                    </div>
-                    <div class="form-group" style="flex: 0 0 auto;">
-                        <button type="button" class="btn-secondary" onclick="fillPriceFromPack()">Calculate ↓</button>
-                    </div>
-                </div>
+            <div class="settings-field">
+              <label for="item-supplier" class="settings-label">Supplier</label>
+              <input id="item-supplier" type="text" placeholder="e.g. Metro, local butcher..." />
             </div>
 
-            <div class="form-row">
-                <div class="form-group">
-                    <label>Standard Unit *</label>
-                    <select id="item-unit" required>
-                        <option value="">Select...</option>
-                        <option value="kg">kg</option>
-                        <option value="g">g</option>
-                        <option value="l">L</option>
-                        <option value="ml">ml</option>
-                        <option value="pcs">pcs</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Price per Unit *</label>
-                    <input type="number" id="item-price" step="0.0001" placeholder="Calculated cost..." required>
-                </div>
+            <div class="settings-field" style="display: flex; gap: 12px; flex-wrap: wrap;">
+              <div style="flex: 1; min-width: 160px;">
+                <label for="item-invoice-number" class="settings-label">Invoice number</label>
+                <input
+                  id="item-invoice-number"
+                  type="text"
+                  placeholder="e.g. 2025-0456 or Ticket #32"
+                />
+              </div>
+
+              <div style="flex: 1; min-width: 160px;">
+                <label for="item-invoice-date" class="settings-label">Invoice date</label>
+                <input id="item-invoice-date" type="date" />
+              </div>
             </div>
 
-            <div class="form-group">
-                <label>Notes</label>
-                <textarea id="item-notes" rows="2"></textarea>
+            <div class="settings-field" style="display: flex; gap: 12px; flex-wrap: wrap;">
+              <div style="flex: 1; min-width: 160px;">
+                <label for="item-unit" class="settings-label">Unit (for recipes)</label>
+                <select id="item-unit" class="settings-select">
+                  <option value="">Select...</option>
+                  <option value="kg">kg</option>
+                  <option value="g">gr</option>
+                  <option value="L">L</option>
+                  <option value="ml">ml</option>
+                  <option value="pcs">pcs</option>
+                </select>
+              </div>
+
+              <div style="flex: 1; min-width: 160px;">
+                <label for="item-price" class="settings-label">Purchase price (per recipe unit)</label>
+                <input
+                  id="item-price"
+                  type="number"
+                  step="0.0001"
+                  placeholder="e.g. 16.00"
+                />
+              </div>
             </div>
 
-            <div class="form-row">
-                <button type="submit" class="btn-primary">Save Item</button>
-                <button type="button" class="btn-secondary" onclick="toggleAddForm()">Cancel</button>
+            <hr style="margin: 16px 0;" />
+
+            <h3 style="margin: 0 0 4px; font-size: 15px;">Or use pack helper</h3>
+            <p class="settings-help" style="margin-top: 2px;">
+              Example: 100 gr for 5 € → auto-converts price per unit.
+            </p>
+
+            <div class="settings-field" style="display: flex; gap: 12px; flex-wrap: wrap; margin-top: 10px;">
+              <div style="flex: 1; min-width: 120px;">
+                <label for="pack-qty" class="settings-label">Pack quantity</label>
+                <input id="pack-qty" type="number" step="0.01" placeholder="e.g. 100" />
+              </div>
+
+              <div style="flex: 1; min-width: 120px;">
+                <label for="pack-unit" class="settings-label">Pack unit</label>
+                <select id="pack-unit" class="settings-select">
+                  <option value="">unit</option>
+                  <option value="g">gr</option>
+                  <option value="kg">kg</option>
+                  <option value="ml">ml</option>
+                  <option value="L">L</option>
+                  <option value="pcs">pcs</option>
+                </select>
+              </div>
+
+              <div style="flex: 1; min-width: 120px;">
+                <label for="pack-price" class="settings-label">Pack price (€)</label>
+                <input id="pack-price" type="number" step="0.01" placeholder="e.g. 5.00" />
+              </div>
+
+              <div style="display: flex; align-items: flex-end;">
+                <button
+                  type="button"
+                  class="btn btn-secondary"
+                  style="margin-top: 22px;"
+                  onclick="fillPriceFromPack()"
+                >
+                  Use pack
+                </button>
+              </div>
             </div>
-        </form>
-    </div>
 
-    <div class="card toolbar-card">
-        <input type="text" id="search-input" placeholder="Search items..." class="search-input">
-        <select id="category-filter" style="width: auto; margin-bottom: 0;">
-            <option value="">All Categories</option>
-            <option value="Meat & Fish">Meat & Fish</option>
-            <option value="Dairy & Eggs">Dairy & Eggs</option>
-            <option value="Vegetables & Fruit">Vegetables & Fruit</option>
-            <option value="Dry Goods">Dry Goods</option>
-            <option value="Spices & Condiments">Spices & Condiments</option>
-            <option value="Other">Other</option>
-        </select>
-    </div>
+            <div class="settings-field">
+              <label for="item-notes" class="settings-label">Notes (storage, etc.)</label>
+              <textarea
+                id="item-notes"
+                rows="2"
+                placeholder="Storage notes, internal codes…"
+              ></textarea>
+            </div>
 
-    <div class="card">
-        <div style="overflow-x: auto;">
-            <table>
-                <thead>
+            <!-- Price history block -->
+            <div
+              id="price-history-block"
+              class="settings-box hidden"
+              style="margin-top: 16px; background: #fafafa; border: 1px dashed #ddd;"
+            >
+              <h3 class="section-title" style="font-size: 15px; margin-bottom: 8px;">Price history</h3>
+              <p class="settings-help" style="margin-top: 0; margin-bottom: 8px;">
+                Last 10 recorded price changes for this ingredient (newest first).
+              </p>
+              <div style="overflow-x: auto;">
+                <table class="table" style="font-size: 13px;">
+                  <thead>
                     <tr>
-                        <th>Name</th>
-                        <th>Category</th>
-                        <th>Supplier</th>
-                        <th>Unit</th>
-                        <th>Price</th>
-                        <th style="text-align: right;">Action</th>
+                      <th style="width: 40%;">Date</th>
+                      <th>Price / unit</th>
                     </tr>
-                </thead>
-                <tbody id="purchase-table">
-                    </tbody>
-            </table>
-        </div>
-    </div>
-</div>
+                  </thead>
+                  <tbody id="price-history-body"></tbody>
+                </table>
+              </div>
+            </div>
 
-<script src="https://cdn.jsdelivr.net/npm/shepherd.js@10.0.1/dist/js/shepherd.min.js"></script>
-<script src="assets/app.js"></script>
-<script src="assets/tour.js"></script>
+            <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 18px;">
+              <button type="button" class="btn btn-secondary" onclick="toggleAddForm()">Cancel</button>
+              <button type="submit" class="btn btn-primary">Save item</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <hr style="margin: 24px 0 16px;" />
+
+      <!-- Recently updated -->
+      <h2>Recently updated</h2>
+      <div id="recent-list" style="margin-top: 10px;">
+        <!-- Filled by app.js -->
+      </div>
+
+      <hr style="margin: 24px 0 16px;" />
+
+      <!-- All ingredients -->
+      <div
+        style="
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          gap: 12px;
+          margin-bottom: 8px;
+        "
+      >
+        <h2 style="margin: 0;">All ingredients</h2>
+
+        <!-- Print button -->
+        <button
+          type="button"
+          class="btn btn-secondary"
+          onclick="window.print()"
+          title="Print an A4-friendly list of all ingredients"
+        >
+          Print A4 list
+        </button>
+      </div>
+
+      <!-- Filters -->
+      <div
+        style="
+          display: flex;
+          flex-wrap: wrap;
+          gap: 12px;
+          align-items: center;
+          margin-bottom: 8px;
+        "
+      >
+        <div style="flex: 1 1 220px; min-width: 200px;">
+          <label for="search-input" class="settings-label" style="margin-bottom: 4px;">Filter</label>
+          <input
+            id="search-input"
+            type="text"
+            placeholder="Search by name, category, supplier, invoice..."
+          />
+        </div>
+
+        <div style="flex: 0 0 220px; min-width: 180px;">
+          <label for="category-filter" class="settings-label" style="margin-bottom: 4px;">Category filter</label>
+          <select id="category-filter" class="settings-select">
+            <option value="">All categories</option>
+            <option value="Meat &amp; Fish">Meat &amp; Fish</option>
+            <option value="Dairy & Eggs">Dairy &amp; Eggs</option>
+            <option value="Vegetables & Fruit">Vegetables &amp; Fruit</option>
+            <option value="Dry Goods">Dry Goods</option>
+            <option value="Spices & Condiments">Spices &amp; Condiments</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+      </div>
+
+      <div style="overflow-x: auto; margin-top: 8px;">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Ingredient</th>
+              <th>Category</th>
+              <th>Sub-type</th>
+              <th>Supplier</th>
+              <th>Invoice #</th>
+              <th>Unit</th>
+              <th>Latest price</th>
+              <th>Last updated</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="purchase-table"></tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+
+  <script src="assets/header.js"></script>
+  <script>
+    renderHeader('purchases');
+  </script>
+  <script src="assets/app.js"></script>
 </body>
 </html>
