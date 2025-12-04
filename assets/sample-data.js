@@ -13,7 +13,7 @@
       name: "Butter 82% 1kg",
       category: "Dairy & Eggs",
       subtype: "Butter",
-      supplier: "Nicolas",
+      supplier: "Metro",
       invoiceNumber: "INV-2025-001",
       invoiceDate: "2025-01-10",
       unit: "kg",
@@ -206,3 +206,36 @@
   // expose globally so settings.html can call it
   window.loadSampleDataIntoLocalStorage = loadSampleDataIntoLocalStorage;
 })();
+// assets/sample-data.js (add this near the bottom)
+
+window.ppLoadSampleDataFromTour = function () {
+  // IMPORTANT:
+  // Replace this function name if your main loader is called something else.
+  // e.g. ppLoadSampleData(), loadSampleDataIntoLocalStorage(), etc.
+  var loader = window.ppLoadSampleDataIntoLocalStorage || window.ppLoadSampleData;
+
+  if (typeof loader !== "function") {
+    alert("Demo data loader is not wired up yet. Check sample-data.js.");
+    return;
+  }
+
+  const msg =
+    "This will load demo data for Purchases and Recipes so you can see ProfitPlate in action.\n\n" +
+    "Your existing data will be backed up if the loader is implemented that way. " +
+    "If you're unsure, export or copy any important data first.\n\n" +
+    "Continue and load demo data now?";
+
+  if (!window.confirm(msg)) {
+    return;
+  }
+
+  // Call the real loader
+  loader();
+
+  // Close the tour and take the user to Purchases as a logical next step
+  try {
+    localStorage.removeItem("pp_tour_state_v1");
+  } catch (e) {}
+  window.location.href = "purchases.html";
+};
+
