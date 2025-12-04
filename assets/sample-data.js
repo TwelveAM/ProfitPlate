@@ -208,14 +208,13 @@
 })();
 // assets/sample-data.js (add this near the bottom)
 
+// Used by the guided tour
 window.ppLoadSampleDataFromTour = function () {
-  // IMPORTANT:
-  // Replace this function name if your main loader is called something else.
-  // e.g. ppLoadSampleData(), loadSampleDataIntoLocalStorage(), etc.
-  var loader = window.ppLoadSampleDataIntoLocalStorage || window.ppLoadSampleData;
-
-  if (typeof loader !== "function") {
-    alert("Demo data loader is not wired up yet. Check sample-data.js.");
+  var loader = window.loadSampleDataIntoLocalStorage;
+  if (typeof loader === "function") {
+    loader();
+  } else {
+    alert("Demo data loader is not wired up yet.");
     return;
   }
 
