@@ -2,9 +2,10 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ingredients - ProfitPlate</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🥗</text></svg>">
     <link rel="stylesheet" href="assets/style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/shepherd.js@10.0.1/dist/css/shepherd.css"/>
 </head>
 <body>
 
@@ -20,20 +21,15 @@
 
 <div class="container">
     <div class="page-header">
-        <h1>Ingredients & Purchases</h1>
-        <button class="btn-primary" onclick="toggleAddForm()">+ Add Item</button>
-    </div>
-
-    <div class="card">
-        <h3>Recently Updated</h3>
-        <div id="recent-list">
-            </div>
+        <h1>Ingredients Database</h1>
+        <button class="btn-primary" onclick="toggleAddForm()" id="tour-add-ingredient-btn">+ Add Ingredient</button>
     </div>
 
     <div id="add-item-form" class="card hidden" style="border-left: 5px solid var(--accent);">
         <h2 style="margin-bottom: 1rem;">Add / Edit Purchase</h2>
+        
         <form id="purchase-form">
-            <div class="form-row">
+            <input type="hidden" id="edit-index"> <div class="form-row">
                 <div class="form-group">
                     <label>Item Name *</label>
                     <input type="text" id="item-name" placeholder="e.g. Flour 00" required>
@@ -73,16 +69,16 @@
                 </div>
             </div>
 
-            <hr style="margin: 1.5rem 0; border: 0; border-top: 1px solid var(--border);">
+            <hr class="divider">
 
-            <div class="pack-helper">
-                <label style="color: var(--primary);">📦 Price Calculator Helper</label>
-                <div class="text-muted" style="font-size: 0.85rem; margin-bottom: 10px;">
-                    Enter pack details (e.g. 5kg for €10) to calculate unit price automatically.
+            <div style="background: #f0f7f4; padding: 1rem; border-radius: 8px; border: 1px dashed var(--primary); margin-bottom: 1rem;">
+                <label style="color: var(--primary);">📦 Pack Price Calculator</label>
+                <div class="text-muted" style="font-size: 0.9rem; margin-bottom: 0.5rem;">
+                    Enter pack details to auto-calculate the unit price.
                 </div>
                 <div class="form-row">
                     <div class="form-group">
-                        <input type="text" id="pack-qty" placeholder="Pack Qty (e.g. 5)">
+                        <input type="number" id="pack-qty" placeholder="Qty (e.g. 5)">
                     </div>
                     <div class="form-group">
                         <select id="pack-unit">
@@ -95,7 +91,7 @@
                         </select>
                     </div>
                     <div class="form-group">
-                        <input type="text" id="pack-price" placeholder="Pack Price (e.g. 10.50)">
+                        <input type="number" id="pack-price" placeholder="Total Price">
                     </div>
                     <div class="form-group" style="flex: 0 0 auto;">
                         <button type="button" class="btn-secondary" onclick="fillPriceFromPack()">Calculate ↓</button>
@@ -131,48 +127,32 @@
                 <button type="button" class="btn-secondary" onclick="toggleAddForm()">Cancel</button>
             </div>
         </form>
+    </div>
 
-        <div id="price-history-block" class="hidden" style="margin-top: 2rem;">
-            <h4>Price History</h4>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Date</th>
-                        <th>Price</th>
-                    </tr>
-                </thead>
-                <tbody id="price-history-body"></tbody>
-            </table>
-        </div>
+    <div class="card toolbar-card">
+        <input type="text" id="search-input" placeholder="Search items..." class="search-input">
+        <select id="category-filter" style="width: auto; margin-bottom: 0;">
+            <option value="">All Categories</option>
+            <option value="Meat & Fish">Meat & Fish</option>
+            <option value="Dairy & Eggs">Dairy & Eggs</option>
+            <option value="Vegetables & Fruit">Vegetables & Fruit</option>
+            <option value="Dry Goods">Dry Goods</option>
+            <option value="Spices & Condiments">Spices & Condiments</option>
+            <option value="Other">Other</option>
+        </select>
     </div>
 
     <div class="card">
-        <div class="form-row" style="margin-bottom: 1rem;">
-            <input type="text" id="search-input" placeholder="Search items..." style="margin-bottom: 0;">
-            <select id="category-filter" style="margin-bottom: 0; width: 200px;">
-                <option value="">All Categories</option>
-                <option value="Meat & Fish">Meat & Fish</option>
-                <option value="Dairy & Eggs">Dairy & Eggs</option>
-                <option value="Vegetables & Fruit">Vegetables & Fruit</option>
-                <option value="Dry Goods">Dry Goods</option>
-                <option value="Spices & Condiments">Spices & Condiments</option>
-                <option value="Other">Other</option>
-            </select>
-        </div>
-
         <div style="overflow-x: auto;">
             <table>
                 <thead>
                     <tr>
                         <th>Name</th>
                         <th>Category</th>
-                        <th>Sub</th>
                         <th>Supplier</th>
-                        <th>Inv #</th>
                         <th>Unit</th>
                         <th>Price</th>
-                        <th>Updated</th>
-                        <th>Action</th>
+                        <th style="text-align: right;">Action</th>
                     </tr>
                 </thead>
                 <tbody id="purchase-table">
@@ -182,6 +162,8 @@
     </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/shepherd.js@10.0.1/dist/js/shepherd.min.js"></script>
 <script src="assets/app.js"></script>
+<script src="assets/tour.js"></script>
 </body>
 </html>
