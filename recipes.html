@@ -1,94 +1,162 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Recipes - ProfitPlate</title>
-    <link rel="stylesheet" href="assets/style.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/shepherd.js@10.0.1/dist/css/shepherd.css"/>
+  <meta charset="UTF-8" />
+  <title>Recipes – ProfitPlate</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta
+    name="description"
+    content="See cost per portion and profit margin for each dish on your menu with ProfitPlate."
+  />
+  <link rel="stylesheet" href="assets/styles.css" />
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-plate-32.png" />
+  <style>
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: #f5f5f5;
+      color: #222222;
+    }
+    .page {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 16px 20px 40px;
+    }
+  </style>
 </head>
+
 <body>
+  <!-- Shared header -->
+  <div id="site-header"></div>
 
-<nav class="navbar">
-    <div class="nav-brand">🥗 ProfitPlate</div>
-    <div class="nav-links">
-        <a href="index.html">Dashboard</a>
-        <a href="purchases.html">Ingredients</a>
-        <a href="recipes.html" class="active">Recipes</a>
-        <a href="settings.html">Settings</a>
+  <div class="page">
+    <h1>Recipes</h1>
+    <p style="font-size:14px;color:#555;max-width:720px;">
+      See cost per portion and profit margin for each dish on your menu.
+      Adjust selling price and keep an eye on how ingredient changes in Purchases affect your bottom line.
+    </p>
+
+    <!-- Top buttons -->
+    <div style="margin-top:20px;margin-bottom:10px;display:flex;gap:10px;flex-wrap:wrap;">
+      <button type="button" class="btn-primary" onclick="showRecipeForm()">
+        Add recipe
+      </button>
+      <button type="button" class="btn-secondary" disabled>
+        Export all to PDF (future)
+      </button>
     </div>
-</nav>
 
-<div class="container">
-    <div class="page-header">
-        <h1>Recipes Manager</h1>
-        <button class="btn-primary" onclick="showRecipeForm()" id="tour-add-btn">
-            + New Recipe
-        </button>
-    </div>
+    <!-- Recipe form (hidden by default) -->
+    <div id="recipe-form-wrapper" class="settings-box hidden">
+      <h2 id="recipe-form-title" class="section-title">Add a new recipe</h2>
+      <p class="settings-help" style="margin-top:0;margin-bottom:12px;">
+        Give the recipe a name, set how many portions it makes, then add ingredients from your Purchases.
+        ProfitPlate will calculate cost per portion automatically.
+      </p>
 
-    <div class="card toolbar-card">
-        <input type="text" id="recipe-search" placeholder="Search recipes..." class="search-input">
-        
-        <div class="toggle-wrapper">
-            <input type="checkbox" id="show-archived-toggle">
-            <label for="show-archived-toggle">Show Archived</label>
+      <form id="recipe-form">
+        <input type="hidden" id="recipe-id" />
+
+        <div class="recipe-form-row">
+          <div class="half">
+            <label for="recipe-name" class="settings-label">Recipe name</label>
+            <input id="recipe-name" type="text" placeholder="e.g. Spaghetti Carbonara" />
+          </div>
+          <div class="half">
+            <label for="recipe-portions" class="settings-label">Portions per batch</label>
+            <input id="recipe-portions" type="number" min="1" step="1" placeholder="e.g. 12" />
+          </div>
         </div>
-        
-        <button class="btn-secondary small" id="start-tour-btn">❓ Help / Tour</button>
+
+        <div class="recipe-form-row">
+          <div class="half">
+            <label for="recipe-price" class="settings-label">
+              Selling price per portion (optional)
+            </label>
+            <input
+              id="recipe-price"
+              type="number"
+              min="0"
+              step="0.01"
+              placeholder="e.g. 16.00"
+            />
+          </div>
+        </div>
+
+        <hr />
+
+        <h3 class="section-title" style="font-size:16px;margin-top:0;margin-bottom:6px;">
+          Ingredients
+        </h3>
+        <p class="settings-help" style="margin-top:0;margin-bottom:10px;">
+          Choose items from your Purchases list, set the quantity and unit actually used in this recipe.
+          ProfitPlate will use the latest purchase price (or snapshots) to compute the cost.
+        </p>
+
+        <div id="ingredients-container"></div>
+
+        <div style="margin-top:6px;margin-bottom:16px;">
+          <button type="button" class="btn-secondary" onclick="addIngredientRow()">
+            + Add ingredient
+          </button>
+        </div>
+
+        <div style="display:flex;justify-content:flex-end;gap:10px;">
+          <button type="button" class="btn-secondary" onclick="hideRecipeForm()">
+            Cancel
+          </button>
+          <button type="submit" class="btn-primary">Save recipe</button>
+        </div>
+      </form>
     </div>
 
-    <div id="recipes-list" class="grid-list">
-        </div>
-</div>
+    <hr style="margin:24px 0 16px;" />
 
-<div id="recipe-form-wrapper" class="modal-overlay hidden">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h2 id="recipe-form-title">Recipe</h2>
-            <button type="button" class="close-btn" onclick="hideRecipeForm()">×</button>
-        </div>
-
-        <form id="recipe-form">
-            <input type="hidden" id="recipe-id">
-
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="recipe-name">Recipe Name</label>
-                    <input type="text" id="recipe-name" required placeholder="e.g., Lasagna">
-                </div>
-                <div class="form-group">
-                    <label for="recipe-portions">Portions</label>
-                    <input type="number" id="recipe-portions" required placeholder="10">
-                </div>
-                <div class="form-group">
-                    <label for="recipe-price">Selling Price</label>
-                    <input type="number" id="recipe-price" step="0.01" placeholder="0.00">
-                </div>
-            </div>
-
-            <hr class="divider">
-
-            <h3>Ingredients</h3>
-            <div id="ingredients-container"></div>
-
-            <button type="button" class="btn-secondary small" onclick="addIngredientRow()" style="margin-top: 10px;">
-                + Add Ingredient
-            </button>
-
-            <div class="modal-actions">
-                <button type="button" class="btn-ghost" onclick="hideRecipeForm()">Cancel</button>
-                <button type="submit" class="btn-primary">Save Recipe</button>
-            </div>
-        </form>
+    <!-- Menu overview header + search -->
+    <div
+      style="
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+        gap:12px;
+        margin-bottom:8px;
+      "
+    >
+      <h2 style="margin:0;">Menu overview</h2>
+      <input
+        id="recipe-search"
+        type="text"
+        placeholder="Search recipes by name..."
+        style="max-width:260px;"
+      />
     </div>
-</div>
 
-<script src="https://cdn.jsdelivr.net/npm/shepherd.js@10.0.1/dist/js/shepherd.min.js"></script>
+    <p class="text-muted" style="font-size:14px;max-width:720px;margin-top:0;">
+      Recipe data is stored locally in your browser using ProfitPlate's tiny brain.
+      Changing ingredient prices in Purchases will change costs here the next time you open the page,
+      unless you turn off auto-recalculation in Settings.
+    </p>
+    <p class="text-muted" style="font-size:13px;max-width:720px;margin-top:4px;">
+      Only active recipes are shown. Archived recipes stay in your browser but are hidden from the menu.
+    </p>
 
-<script src="assets/app.js"></script>
-<script src="assets/recipes.js"></script>
-<script src="assets/tour.js"></script>
+    <div style="display:flex;justify-content:flex-end;align-items:center;gap:6px;margin:8px 0 18px;">
+      <label style="font-size:14px;color:#555;display:flex;align-items:center;gap:6px;cursor:pointer;">
+        <input id="show-archived-toggle" type="checkbox" />
+        <span>Show archived recipes</span>
+      </label>
+    </div>
 
+    <!-- Where recipe cards are rendered -->
+    <div id="recipes-list" class="mt-20"></div>
+  </div>
+
+  <script src="assets/header.js"></script>
+  <script>
+    renderHeader('recipes');
+  </script>
+  <script src="assets/app.js"></script>
+  <script src="assets/recipes.js"></script>
 </body>
 </html>
