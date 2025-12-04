@@ -43,6 +43,91 @@
     showAdvanced: true,
   });
 
+  // ===========================
+  // Demo Data Seeder
+  // ===========================
+  function seedDemoData() {
+    // Only seed if absolutely nothing exists
+    if (purchases.length > 0 || recipes.length > 0) return;
+
+    const demoPurchases = [
+      {
+        id: "p_demo_1",
+        name: "Butter 82% (Demo)",
+        category: "Dairy & Eggs",
+        subtype: "Butter",
+        supplier: "Metro",
+        unit: "kg",
+        pricePerUnit: 12.5,
+        updatedAt: new Date().toISOString(),
+        isDemo: true,
+        priceHistory: []
+      },
+      {
+        id: "p_demo_2",
+        name: "Spaghetti No.5 (Demo)",
+        category: "Dry Goods",
+        subtype: "Pasta",
+        supplier: "Local Dist.",
+        unit: "kg",
+        pricePerUnit: 2.2,
+        updatedAt: new Date().toISOString(),
+        isDemo: true,
+        priceHistory: []
+      },
+      {
+        id: "p_demo_3",
+        name: "Pancetta Cured (Demo)",
+        category: "Meat & Fish",
+        subtype: "Cured",
+        supplier: "Butcher",
+        unit: "kg",
+        pricePerUnit: 18.0,
+        updatedAt: new Date().toISOString(),
+        isDemo: true,
+        priceHistory: []
+      },
+      {
+        id: "p_demo_4",
+        name: "Eggs (Large) (Demo)",
+        category: "Dairy & Eggs",
+        subtype: "Eggs",
+        supplier: "Farm",
+        unit: "pcs",
+        pricePerUnit: 0.35,
+        updatedAt: new Date().toISOString(),
+        isDemo: true,
+        priceHistory: []
+      }
+    ];
+
+    const demoRecipes = [
+      {
+        id: "r_demo_1",
+        name: "Carbonara (Demo)",
+        portions: 4,
+        sellingPrice: 14.0,
+        archived: false,
+        isDemo: true,
+        ingredients: [
+          { purchaseId: "p_demo_2", quantity: 0.5, unit: "kg" }, // 500g pasta
+          { purchaseId: "p_demo_3", quantity: 0.2, unit: "kg" }, // 200g pancetta
+          { purchaseId: "p_demo_4", quantity: 5, unit: "pcs" },   // 5 eggs
+          { purchaseId: "p_demo_1", quantity: 0.05, unit: "kg" } // 50g butter
+        ]
+      }
+    ];
+
+    purchases = demoPurchases;
+    recipes = demoRecipes;
+    safeSave(KEYS.purchases, purchases);
+    safeSave(KEYS.recipes, recipes);
+    console.log("ProfitPlate: Demo data seeded.");
+  }
+
+  // Run seeder on init
+  seedDemoData();
+
   // --- sanitize old / broken purchase entries (from earlier versions)
   function sanitizePurchases() {
     purchases = (purchases || [])
@@ -225,6 +310,9 @@
         priceHistory: history,
       };
 
+      // If user edits a demo item, it's no longer a demo item
+      if (merged.isDemo) delete merged.isDemo;
+
       if (idx === -1) {
         purchases.push(merged);
       } else {
@@ -240,6 +328,9 @@
     },
 
     upsertRecipe(recipe) {
+      // If user edits a demo recipe, it's no longer demo
+      if (recipe.isDemo) delete recipe.isDemo;
+
       const idx = recipes.findIndex((r) => r.id === recipe.id);
       if (idx === -1) {
         recipes.push(recipe);
@@ -248,6 +339,24 @@
       }
       safeSave(KEYS.recipes, recipes);
     },
+
+    // --- DATA MANAGEMENT ---
+    removeDemoData() {
+      // Filter out anything marked isDemo
+      purchases = purchases.filter(p => !p.isDemo);
+      recipes = recipes.filter(r => !r.isDemo);
+      safeSave(KEYS.purchases, purchases);
+      safeSave(KEYS.recipes, recipes);
+      return { pCount: purchases.length, rCount: recipes.length };
+    },
+
+    nukeUserData() {
+      // Keep settings, kill data
+      purchases = [];
+      recipes = [];
+      safeSave(KEYS.purchases, purchases);
+      safeSave(KEYS.recipes, recipes);
+    }
   };
 
   window.ppStore = ppStore;
@@ -430,6 +539,13 @@
           item.updatedAt
         )} • ${catPart}${subPart}${supPart}`;
 
+        if(item.isDemo) {
+          const demoTag = document.createElement("span");
+          demoTag.textContent = " (Demo)";
+          demoTag.style.color = "#888";
+          title.appendChild(demoTag);
+        }
+
         card.appendChild(title);
         card.appendChild(meta);
         recentList.appendChild(card);
@@ -520,7 +636,10 @@
               ? `${price.toFixed(4)} €/ ${item.unit || ""}`
               : "-";
 
-          addCell(item.name || "");
+          let displayName = item.name || "";
+          if (item.isDemo) displayName += " (Demo)";
+
+          addCell(displayName);
           addCell(item.category || "");
           addCell(item.subtype || "");
           addCell(item.supplier || "");
