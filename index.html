@@ -2,9 +2,10 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>ProfitPlate</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🥗</text></svg>">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - ProfitPlate</title>
     <link rel="stylesheet" href="assets/style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/shepherd.js@10.0.1/dist/css/shepherd.css"/>
 </head>
 <body>
 
@@ -19,29 +20,39 @@
 </nav>
 
 <div class="container">
-    <h1>Welcome back</h1>
-    
-    <div class="card">
-        <p>ProfitPlate helps you calculate food costs accurately.</p>
-        <p><strong>1. Ingredients:</strong> Enter your purchases from invoices.</p>
-        <p><strong>2. Recipes:</strong> Build dishes using those ingredients.</p>
-        <p><strong>3. Settings:</strong> Configure your currency and preferences.</p>
+    <div class="page-header">
+        <h1>Dashboard</h1>
+        <button class="btn-secondary small" id="start-tour-btn">❓ Start Tour</button>
     </div>
 
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
-        <div class="card" style="text-align: center;">
-            <h3>🛒 Ingredients</h3>
-            <p class="text-muted">Manage prices & suppliers</p>
-            <a href="purchases.html" class="btn-primary">Go to Ingredients</a>
+    <div class="card">
+        <h2>Welcome back</h2>
+        <p class="text-muted">Manage your kitchen costs, track ingredient prices, and calculate recipe margins.</p>
+        
+        <div class="form-row" style="margin-top: 1.5rem;">
+            <a href="purchases.html" class="btn-primary" style="text-decoration: none; text-align: center;">Manage Ingredients</a>
+            <a href="recipes.html" class="btn-secondary" style="text-decoration: none; text-align: center;">View Recipes</a>
         </div>
-        <div class="card" style="text-align: center;">
+    </div>
+
+    <div class="grid-list">
+        <div class="card">
+            <h3>🛒 Ingredients</h3>
+            <p class="text-muted">Database of your purchased items and costs.</p>
+        </div>
+        <div class="card">
             <h3>🍲 Recipes</h3>
-            <p class="text-muted">Calculate food cost & margins</p>
-            <a href="recipes.html" class="btn-primary">Go to Recipes</a>
+            <p class="text-muted">Calculate costs and margins per dish.</p>
+        </div>
+        <div class="card">
+            <h3>⚙️ Settings</h3>
+            <p class="text-muted">Configure currency and backup data.</p>
         </div>
     </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/shepherd.js@10.0.1/dist/js/shepherd.min.js"></script>
 <script src="assets/app.js"></script>
+<script src="assets/tour.js"></script>
 </body>
 </html>
