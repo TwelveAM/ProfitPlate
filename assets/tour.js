@@ -2,7 +2,7 @@
 (function () {
   const TOUR_STATE_KEY = "pp_tour_state_v1";
 
-  // Figure out which page we are on
+  // Work out which page we are on
   const PAGE_ID = (function () {
     const path = window.location.pathname;
     if (path.endsWith("purchases.html")) return "purchases";
@@ -36,7 +36,7 @@
       title: "Welcome to ProfitPlate",
       text:
         "This is a static prototype that shows how you’ll track real dish cost and margin. Let’s do a quick tour.",
-      panelPlacement: "bottom",
+      panelPlacement: "bottom"
     },
     {
       id: "home-nav",
@@ -45,18 +45,18 @@
       title: "Three main areas",
       text:
         "Use these tabs to move between Purchases (ingredient costs), Recipes (dishes), and Settings (currency & behaviour).",
-      panelPlacement: "bottom",
+      panelPlacement: "bottom"
     },
 
     // PURCHASES
     {
       id: "purchases-table",
       page: "purchases",
-      selector: "table",
+      selector: "#purchase-table, table",
       title: "Latest price always visible",
       text:
         "Each row is an ingredient with its latest price. When you change prices here, any recipes using that ingredient will update automatically.",
-      panelPlacement: "bottom",
+      panelPlacement: "bottom"
     },
 
     // RECIPES
@@ -67,7 +67,7 @@
       title: "Recipes: cost per dish and margin",
       text:
         "This is where you’ll see each dish on your menu, its cost per portion, selling price, and profit margin.",
-      panelPlacement: "bottom",
+      panelPlacement: "bottom"
     },
 
     // SETTINGS – behaviour toggles
@@ -78,7 +78,7 @@
       title: "Behaviour: smart updates",
       text:
         "These toggles control whether recipes auto-recalculate when ingredient prices change, and whether to show advanced cost breakdowns by default.",
-      panelPlacement: "bottom",
+      panelPlacement: "bottom"
     },
 
     // SETTINGS – data & local storage + demo CTA
@@ -88,13 +88,13 @@
       selector: "#settings-data",
       title: "Data & local storage",
       text:
-        "Right now everything lives only in your browser — no server, no cloud. In a future version, this is where imports, exports and backups will live.",
+        "For now everything lives only in your browser — no server, no cloud. In the future this is where imports, exports and backups will live.",
       panelPlacement: "bottom",
-      showDemoButton: true, // show “Load demo data” here
-    },
+      showDemoButton: true
+    }
   ];
 
-  // DOM elements for overlay
+  // DOM chrome
   let backdropEl = null;
   let highlightEl = null;
   let panelEl = null;
@@ -104,7 +104,7 @@
     try {
       const raw = localStorage.getItem(TOUR_STATE_KEY);
       return raw ? JSON.parse(raw) : null;
-    } catch (e) {
+    } catch {
       return null;
     }
   }
@@ -116,7 +116,7 @@
       } else {
         localStorage.setItem(TOUR_STATE_KEY, JSON.stringify(state));
       }
-    } catch (e) {
+    } catch {
       // ignore
     }
   }
@@ -132,7 +132,6 @@
   background: rgba(0,0,0,0.55);
   z-index: 9998;
 }
-
 .pp-tour-highlight {
   position: fixed;
   border-radius: 16px;
@@ -140,7 +139,6 @@
   pointer-events: none;
   z-index: 9999;
 }
-
 .pp-tour-panel {
   position: fixed;
   max-width: 520px;
@@ -151,25 +149,21 @@
   z-index: 10000;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
-
 .pp-tour-title {
   font-size: 18px;
   font-weight: 600;
   margin-bottom: 8px;
 }
-
 .pp-tour-text {
   font-size: 14px;
   line-height: 1.5;
   margin-bottom: 16px;
 }
-
 .pp-tour-footer {
   display: flex;
   justify-content: flex-end;
   gap: 8px;
 }
-
 .pp-tour-btn {
   border-radius: 999px;
   border: none;
@@ -177,17 +171,14 @@
   font-size: 13px;
   cursor: pointer;
 }
-
 .pp-tour-btn-secondary {
   background: #f0f0f0;
   color: #222;
 }
-
 .pp-tour-btn-primary {
   background: #0b5d3f;
   color: #ffffff;
 }
-
 .pp-tour-btn-ghost {
   background: transparent;
   color: #555;
@@ -226,7 +217,7 @@
 
     const nextStep = STEPS[newIndex];
 
-    // If step is on another page, save state and navigate
+    // Need to be on a different page?
     if (nextStep.page !== PAGE_ID) {
       saveState({ active: true, index: newIndex });
       window.location.href = pageToUrl(nextStep.page);
@@ -255,14 +246,12 @@
       if (targetEl) {
         targetEl.scrollIntoView({ block: "center", behavior: "smooth" });
         const rect = targetEl.getBoundingClientRect();
-        // Only treat as valid if it has some size
         if (rect.width > 10 && rect.height > 10) {
           targetRect = rect;
         }
       }
     }
 
-    // Show highlight if we have a valid target
     if (targetRect) {
       const padding = 12;
       highlightEl.style.display = "block";
@@ -277,7 +266,6 @@
     backdropEl.style.display = "block";
     panelEl.style.display = "block";
 
-    // Build panel content
     const isFirst = currentIndex === 0;
     const isLast = currentIndex === STEPS.length - 1;
 
@@ -304,23 +292,23 @@
       </div>
     `;
 
-    // Position panel – relative to target if present, otherwise centered bottom
-    // Use a small timeout so the browser can measure the element
+    // Position the panel
     setTimeout(() => {
       const panelRect = panelEl.getBoundingClientRect();
       let top, left;
 
       if (targetRect) {
-        // Attach under the target, centered horizontally
         const margin = 24;
         const maxTop = window.innerHeight - panelRect.height - 16;
         top = Math.min(maxTop, targetRect.bottom + margin);
 
         const centerX = targetRect.left + targetRect.width / 2;
         left = centerX - panelRect.width / 2;
-        left = Math.max(16, Math.min(left, window.innerWidth - panelRect.width - 16));
+        left = Math.max(
+          16,
+          Math.min(left, window.innerWidth - panelRect.width - 16)
+        );
       } else {
-        // No target – center at the bottom
         top = window.innerHeight - panelRect.height - 32;
         left = (window.innerWidth - panelRect.width) / 2;
       }
@@ -330,20 +318,22 @@
     }, 0);
 
     // Wire buttons
-    panelEl.querySelector('[data-pp-tour="exit"]').onclick = () => {
-      endTour();
-    };
+    const exitBtn = panelEl.querySelector('[data-pp-tour="exit"]');
+    if (exitBtn) {
+      exitBtn.onclick = () => endTour();
+    }
 
     const backBtn = panelEl.querySelector('[data-pp-tour="back"]');
-    if (backBtn) {
+    if (backBtn && !backBtn.disabled) {
       backBtn.onclick = () => {
         if (currentIndex > 0) goToStep(currentIndex - 1);
       };
     }
 
-    panelEl.querySelector('[data-pp-tour="next"]').onclick = () => {
-      goToStep(currentIndex + 1);
-    };
+    const nextBtn = panelEl.querySelector('[data-pp-tour="next"]');
+    if (nextBtn) {
+      nextBtn.onclick = () => goToStep(currentIndex + 1);
+    }
 
     const demoBtn = panelEl.querySelector('[data-pp-tour="demo"]');
     if (demoBtn) {
@@ -362,23 +352,28 @@
   function maybeResumeTourFromState() {
     const state = readState();
     if (!state || !state.active) return;
+
     const idx = typeof state.index === "number" ? state.index : 0;
     const step = STEPS[idx];
     if (!step || step.page !== PAGE_ID) {
-      // Not our page for this step – do nothing, next navigation will handle it
+      // Wrong page for this step – let navigation handle it later
       return;
     }
+
     currentIndex = idx;
     renderCurrentStep();
   }
 
-  document.addEventListener("DOMContentLoaded", () => {
+  // Hook up button + resume on load
+  document.addEventListener("DOMContentLoaded", function () {
     const btn = document.getElementById("btn-how-it-works");
-    if (btn) btn.addEventListener("click", startTour);
-});
+    if (btn) {
+      btn.addEventListener("click", function (ev) {
+        ev.preventDefault();
+        startTourFromBeginning();
+      });
     }
 
-    // If the user was in the middle of the tour, resume
     maybeResumeTourFromState();
   });
 })();
