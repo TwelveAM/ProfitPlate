@@ -1,58 +1,166 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - ProfitPlate</title>
-    <link rel="stylesheet" href="assets/style.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/shepherd.js@10.0.1/dist/css/shepherd.css"/>
+  <meta charset="UTF-8" />
+  <title>ProfitPlate – Know your profit per plate</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta
+    name="description"
+    content="ProfitPlate helps small restaurants calculate real cost per dish, per portion and profit margin — in seconds, not spreadsheets."
+  />
+  <link rel="stylesheet" href="assets/styles.css" />
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-plate-32.png" />
+  <style>
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: #f5f5f5;
+      color: #222222;
+    }
+    .page {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 16px 20px 40px;
+    }
+    .hero-main {
+      text-align: center;
+      margin-top: 12px;
+      margin-bottom: 32px;
+    }
+    .hero-main h1 {
+      font-size: 32px;
+      margin-bottom: 12px;
+    }
+    .hero-main p {
+      font-size: 15px;
+      color: #555555;
+      max-width: 720px;
+      margin: 0 auto 20px;
+    }
+    .hero-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .btn-primary,
+    .btn-secondary {
+      cursor: pointer;
+    }
+    .home-section {
+      margin-bottom: 28px;
+    }
+    .home-section h2 {
+      font-size: 22px;
+      margin-bottom: 8px;
+    }
+    .home-section p {
+      font-size: 14px;
+      color: #555555;
+      max-width: 780px;
+    }
+    .home-section ol {
+      font-size: 14px;
+      color: #333333;
+      padding-left: 20px;
+    }
+    .home-footnote {
+      margin-top: 24px;
+      font-size: 13px;
+      color: #777777;
+      max-width: 780px;
+    }
+  </style>
 </head>
+
 <body>
+  <!-- Shared header -->
+  <div id="site-header"></div>
 
-<nav class="navbar">
-    <div class="nav-brand">🥗 ProfitPlate</div>
-    <div class="nav-links">
-        <a href="index.html" class="active">Dashboard</a>
-        <a href="purchases.html">Ingredients</a>
-        <a href="recipes.html">Recipes</a>
-        <a href="settings.html">Settings</a>
-    </div>
-</nav>
+  <main class="page">
+    <section class="hero-main">
+      <h1>Stop guessing. Know your dish cost.</h1>
+      <p>
+        ProfitPlate is a simple tool for small restaurants to calculate real cost per dish,
+        cost per portion, and profit margin — in seconds, not spreadsheets.
+      </p>
+      <div class="hero-buttons">
+        <button type="button" class="btn-primary">Start 24-hour free trial (future)</button>
+        <button type="button" class="btn-secondary">See how it works</button>
+      </div>
+    </section>
 
-<div class="container">
-    <div class="page-header">
-        <h1>Dashboard</h1>
-        <button class="btn-secondary small" id="start-tour-btn">❓ Start Tour</button>
-    </div>
+    <section class="home-section">
+      <h2>Ingredient-based costing</h2>
+      <p>
+        Add ingredients once, use them in any recipe. ProfitPlate calculates cost per portion
+        automatically using your latest supplier prices.
+      </p>
+    </section>
 
-    <div class="card">
-        <h2>Welcome back</h2>
-        <p class="text-muted">Manage your kitchen costs, track ingredient prices, and calculate recipe margins.</p>
-        
-        <div class="form-row" style="margin-top: 1.5rem;">
-            <a href="purchases.html" class="btn-primary" style="text-decoration: none; text-align: center;">Manage Ingredients</a>
-            <a href="recipes.html" class="btn-secondary" style="text-decoration: none; text-align: center;">View Recipes</a>
-        </div>
-    </div>
+    <section class="home-section">
+      <h2>Live price updates</h2>
+      <p>
+        Update supplier prices once and see every affected dish update instantly. Perfect when butter,
+        pancetta, salmon or fries jump in price overnight.
+      </p>
+    </section>
 
-    <div class="grid-list">
-        <div class="card">
-            <h3>🛒 Ingredients</h3>
-            <p class="text-muted">Database of your purchased items and costs.</p>
-        </div>
-        <div class="card">
-            <h3>🍲 Recipes</h3>
-            <p class="text-muted">Calculate costs and margins per dish.</p>
-        </div>
-        <div class="card">
-            <h3>⚙️ Settings</h3>
-            <p class="text-muted">Configure currency and backup data.</p>
-        </div>
-    </div>
-</div>
+    <section class="home-section">
+      <h2>Clean PDF exports (future)</h2>
+      <p>
+        Export dish costing sheets you can print, share with your team, or keep for documentation
+        and menu engineering.
+      </p>
+    </section>
 
-<script src="https://cdn.jsdelivr.net/npm/shepherd.js@10.0.1/dist/js/shepherd.min.js"></script>
-<script src="assets/app.js"></script>
-<script src="assets/tour.js"></script>
+    <section class="home-section">
+      <h2>Built for real kitchens</h2>
+      <p>
+        Designed by a working chef, not an accountant. Simple enough to use during service, powerful
+        enough for menu-planning days.
+      </p>
+    </section>
+
+    <section class="home-section">
+      <h2>How ProfitPlate fits in your day</h2>
+      <ol>
+        <li>
+          <strong>Update your Purchases.</strong>
+          Add or edit items from your latest invoices – butter, pancetta, fries, flour.
+          Set category, sub-type, unit and price (or use the pack helper if the invoice is weird).
+        </li>
+        <li>
+          <strong>Build your Recipes.</strong>
+          Pick ingredients from Purchases, set the quantities and units you actually use in the dish.
+          ProfitPlate calculates batch cost and cost per portion automatically.
+        </li>
+        <li>
+          <strong>Check margin &amp; export.</strong>
+          Adjust selling price until the margin looks healthy. When you’re happy,
+          export a clean PDF or keep it in ProfitPlate for later.
+        </li>
+      </ol>
+    </section>
+
+    <section class="home-section">
+      <h2>Where the app is today</h2>
+      <p>
+        ProfitPlate is in early development. This version runs entirely in your browser using local
+        storage — no login, no cloud, just your device.
+      </p>
+      <p class="home-footnote">
+        For now you can test Purchases, Recipes and Settings locally in your browser. In a future
+        release, the costing app, online accounts and syncing will come next. Prototype build –
+        copy and testing data are stored only in your browser.
+      </p>
+    </section>
+  </main>
+
+  <script src="assets/header.js"></script>
+  <script>
+    renderHeader('home');
+  </script>
 </body>
 </html>
