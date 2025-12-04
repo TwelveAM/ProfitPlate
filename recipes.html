@@ -2,9 +2,10 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Recipes - ProfitPlate</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🥗</text></svg>">
     <link rel="stylesheet" href="assets/style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/shepherd.js@10.0.1/dist/css/shepherd.css"/>
 </head>
 <body>
 
@@ -20,68 +21,74 @@
 
 <div class="container">
     <div class="page-header">
-        <h1>Recipes</h1>
-        <button class="btn-primary" onclick="showRecipeForm()">+ New Recipe</button>
+        <h1>Recipes Manager</h1>
+        <button class="btn-primary" onclick="showRecipeForm()" id="tour-add-btn">
+            + New Recipe
+        </button>
     </div>
 
-    <div class="card" style="display: flex; gap: 1rem; align-items: center; padding: 1rem;">
-        <input type="text" id="recipe-search" placeholder="Search recipes..." style="margin-bottom: 0; flex: 1;">
+    <div class="card toolbar-card">
+        <input type="text" id="recipe-search" placeholder="Search recipes..." class="search-input">
+        
         <div class="toggle-wrapper">
             <input type="checkbox" id="show-archived-toggle">
-            <label for="show-archived-toggle" style="margin: 0; cursor: pointer;">Show Archived</label>
+            <label for="show-archived-toggle">Show Archived</label>
         </div>
+        
+        <button class="btn-secondary small" id="start-tour-btn">❓ Help / Tour</button>
     </div>
 
-    <div id="recipes-list">
+    <div id="recipes-list" class="grid-list">
         </div>
 </div>
 
-<div id="recipe-form-wrapper" class="hidden" 
-     style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 200; display: flex; justify-content: center; overflow-y: auto; padding: 2rem;">
-    
-    <div class="card" style="width: 100%; max-width: 800px; height: fit-content; border-top: 5px solid var(--accent);">
-        <div class="page-header">
+<div id="recipe-form-wrapper" class="modal-overlay hidden">
+    <div class="modal-content">
+        <div class="modal-header">
             <h2 id="recipe-form-title">Recipe</h2>
-            <button type="button" class="btn-secondary small" onclick="hideRecipeForm()">✕ Close</button>
+            <button type="button" class="close-btn" onclick="hideRecipeForm()">×</button>
         </div>
-        
+
         <form id="recipe-form">
             <input type="hidden" id="recipe-id">
 
             <div class="form-row">
                 <div class="form-group">
-                    <label>Recipe Name</label>
-                    <input type="text" id="recipe-name" required>
+                    <label for="recipe-name">Recipe Name</label>
+                    <input type="text" id="recipe-name" required placeholder="e.g., Lasagna">
                 </div>
                 <div class="form-group">
-                    <label>Portions (Yield)</label>
-                    <input type="number" id="recipe-portions" placeholder="e.g. 4" required>
+                    <label for="recipe-portions">Portions</label>
+                    <input type="number" id="recipe-portions" required placeholder="10">
                 </div>
                 <div class="form-group">
-                    <label>Selling Price (per portion)</label>
-                    <input type="number" id="recipe-price" step="0.01">
+                    <label for="recipe-price">Selling Price</label>
+                    <input type="number" id="recipe-price" step="0.01" placeholder="0.00">
                 </div>
             </div>
 
-            <hr style="margin: 1rem 0; border: 0; border-top: 1px solid var(--border);">
-            
+            <hr class="divider">
+
             <h3>Ingredients</h3>
-            <div id="ingredients-container">
-                </div>
-            
-            <button type="button" class="btn-secondary small" onclick="addIngredientRow()" style="margin-bottom: 1.5rem;">
+            <div id="ingredients-container"></div>
+
+            <button type="button" class="btn-secondary small" onclick="addIngredientRow()" style="margin-top: 10px;">
                 + Add Ingredient
             </button>
 
-            <div class="form-row" style="justify-content: flex-end; gap: 10px;">
-                <button type="button" class="btn-secondary" onclick="hideRecipeForm()">Cancel</button>
+            <div class="modal-actions">
+                <button type="button" class="btn-ghost" onclick="hideRecipeForm()">Cancel</button>
                 <button type="submit" class="btn-primary">Save Recipe</button>
             </div>
         </form>
     </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/shepherd.js@10.0.1/dist/js/shepherd.min.js"></script>
+
 <script src="assets/app.js"></script>
 <script src="assets/recipes.js"></script>
+<script src="assets/tour.js"></script>
+
 </body>
 </html>
