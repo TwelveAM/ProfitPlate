@@ -21,7 +21,6 @@ let settings = {
 // 2. STORAGE HELPERS
 // ===========================
 
-// Safe save to localStorage
 function safeSave(key, data) {
   try {
     const str = JSON.stringify(data);
@@ -32,7 +31,6 @@ function safeSave(key, data) {
   }
 }
 
-// Load data on startup
 function loadData() {
   try {
     const pStr = localStorage.getItem(KEYS.purchases);
@@ -50,46 +48,35 @@ function loadData() {
 // ===========================
 // 3. THE "BRAIN" (ppStore)
 // ===========================
-// This acts as the bridge between your data and the UI.
 
 const ppStore = {
-  // --- PURCHASES (Ingredients) ---
+  // --- PURCHASES ---
   getPurchases() {
-    return purchases.slice(); // Return a copy
+    return purchases.slice();
   },
 
   upsertPurchase(purchase) {
     const nowIso = new Date().toISOString();
-
-    // Check if updating existing or creating new
     const idx = purchases.findIndex((p) => p.id === purchase.id);
     const existing = idx !== -1 ? purchases[idx] : null;
     
-    // Generate ID if missing
     const id = purchase.id || (existing && existing.id) || "p_" + Date.now();
     const createdAt = (existing && existing.createdAt) || purchase.createdAt || nowIso;
 
-    // Handle price history
+    // Price History Logic
     const numericPrice = Number(String(purchase.pricePerUnit || "").replace(",", ".")) || 0;
-    let history = existing && Array.isArray(existing.priceHistory)
-        ? existing.priceHistory.slice()
-        : [];
-
-    // Get last recorded price to see if it changed
+    let history = existing && Array.isArray(existing.priceHistory) ? existing.priceHistory.slice() : [];
     let lastRecorded = history.length > 0 ? Number(history[history.length - 1].pricePerUnit) : null;
 
-    // Initialize history if empty but item exists
     if (!history.length && existing && existing.pricePerUnit > 0) {
       history.push({ date: existing.updatedAt || existing.createdAt || nowIso, pricePerUnit: Number(existing.pricePerUnit) || 0 });
       lastRecorded = history[history.length - 1].pricePerUnit;
     }
 
-    // Add new history point if price changed
     if (numericPrice > 0 && (lastRecorded === null || !Number.isFinite(lastRecorded) || numericPrice !== lastRecorded)) {
       history.push({ date: nowIso, pricePerUnit: numericPrice });
     }
 
-    // Limit history to last 10 entries
     if (history.length > 10) history = history.slice(history.length - 10);
 
     const merged = {
@@ -102,7 +89,6 @@ const ppStore = {
       priceHistory: history,
     };
 
-    // If a user edits a demo item, it becomes "real" (remove demo flag)
     if (merged.isDemo) delete merged.isDemo;
 
     if (idx === -1) {
@@ -111,13 +97,11 @@ const ppStore = {
       purchases[idx] = merged;
     }
     
-    // Save to storage
     safeSave(KEYS.purchases, purchases);
     return merged;
   },
 
   deletePurchase(id) {
-    // We recommend archiving instead of deleting, but here is the logic just in case
     purchases = purchases.filter((p) => p.id !== id);
     safeSave(KEYS.purchases, purchases);
   },
@@ -128,9 +112,7 @@ const ppStore = {
   },
 
   upsertRecipe(recipe) {
-    // If user edits a demo recipe, it becomes real
     if (recipe.isDemo) delete recipe.isDemo; 
-
     const idx = recipes.findIndex((r) => r.id === recipe.id);
     if (idx === -1) {
       recipes.push(recipe);
@@ -155,9 +137,7 @@ const ppStore = {
     safeSave(KEYS.settings, settings);
   },
 
-  // --- DATA MANAGEMENT (SAFE) ---
-
-  // 1. Clear ONLY demo data
+  // --- DATA MANAGEMENT ---
   removeDemoData() {
     purchases = purchases.filter(p => !p.isDemo);
     recipes = recipes.filter(r => !r.isDemo);
@@ -166,7 +146,6 @@ const ppStore = {
     location.reload();
   },
 
-  // 2. Nuclear option (Reset all)
   nukeUserData() {
     if(confirm("Are you SURE? This will delete all your recipes and ingredients.")) {
       purchases = [];
@@ -177,13 +156,13 @@ const ppStore = {
     }
   },
 
-  // 3. SAFE DEMO LOADER (For the Tour)
+  // --- SAFE DEMO LOADER ---
   addDemoDataSafe() {
-    // Define Demo Data
+    // Note the "subtype" field (Sub-category)
     const demoItems = [
       { id: "p_demo_oil", name: "Olive Oil (Demo)", category: "Spices & Condiments", subtype: "Oils", supplier: "Metro", unit: "L", pricePerUnit: 12.00, isDemo: true },
       { id: "p_demo_pasta", name: "Spaghetti No.5 (Demo)", category: "Dry Goods", subtype: "Pasta", supplier: "Metro", unit: "kg", pricePerUnit: 2.20, isDemo: true },
-      { id: "p_demo_pancetta", name: "Pancetta Cured (Demo)", category: "Meat & Fish", subtype: "Cured", supplier: "Butcher", unit: "kg", pricePerUnit: 18.50, isDemo: true },
+      { id: "p_demo_pancetta", name: "Pancetta Cured (Demo)", category: "Meat & Fish", subtype: "Cured Meat", supplier: "Butcher", unit: "kg", pricePerUnit: 18.50, isDemo: true },
       { id: "p_demo_eggs", name: "Eggs Large (Demo)", category: "Dairy & Eggs", subtype: "Eggs", supplier: "Farm", unit: "pcs", pricePerUnit: 0.40, isDemo: true },
       { id: "p_demo_parm", name: "Parmesan 24mo (Demo)", category: "Dairy & Eggs", subtype: "Cheese", supplier: "Import", unit: "kg", pricePerUnit: 22.00, isDemo: true },
     ];
@@ -205,7 +184,6 @@ const ppStore = {
       }
     ];
 
-    // Append ONLY if ID doesn't exist (prevent duplicates)
     let added = false;
     demoItems.forEach(d => {
       if (!purchases.find(p => p.id === d.id)) {
@@ -227,7 +205,6 @@ const ppStore = {
     if (added) {
       safeSave(KEYS.purchases, purchases);
       safeSave(KEYS.recipes, recipes);
-      // Redirect to recipes to show the result
       window.location.href = "recipes.html";
     } else {
       alert("Demo data is already loaded!");
@@ -235,8 +212,5 @@ const ppStore = {
   }
 };
 
-// Expose store globally
 window.ppStore = ppStore;
-
-// Init
 loadData();
